@@ -1,0 +1,26 @@
+{
+  "name": "reqrio",
+  "version": "0.3.0",
+  "description": "A lightweight, high concurrency HTTP request library",
+  "main": "index.js",
+  "keywords": [
+    "http",
+    "lightweight",
+    "tls fingerprint"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xllgl2017/reqrio.git"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "xllgl2017"
+  },
+  "dependencies": {
+    "ffi-napi": "^4.0.3",
+    "ref-napi": "^3.0.3"
+  }
+}

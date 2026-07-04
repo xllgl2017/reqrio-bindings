@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reqrio"
+version = "0.3.0"
+license = "Apache-2.0"
+requires-python = ">=3.9"
+description = "A lightweight, high concurrency HTTP request library"
+readme = "README.md"
+
+authors = [
+  { name="xllgl2017", email="xinlanxi2017@gmail.com" },
+]
+
+[tool.setuptools]
+packages = ["reqrio","reqrio.hooks"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+reqrio = ["*.dll", "**/*.dll","**/*.so"]
+
+[project.entry-points."pyinstaller40"]
+hook-dirs = "reqrio:_pyinstaller_hooks_dir"
+
+
+[project.urls]
+Homepage = "https://github.com/xllgl2017/reqrio/tree/main/reqrio"

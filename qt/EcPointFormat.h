@@ -1,0 +1,13 @@
+//
+// Created by XLX on 2026/5/16.
+//
+
+#ifndef REQRIO_QT_ECPOINTFORMAT_H
+#define REQRIO_QT_ECPOINTFORMAT_H
+
+enum EcPointFormat {
+    UNCOMPRESSED = 0,
+    ANSI_X962_PRIME = 1,
+    ANSI_X962_CHAR2 = 2
+};
+#endif //REQRIO_QT_ECPOINTFORMAT_H
