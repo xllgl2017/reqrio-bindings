@@ -30,11 +30,9 @@
 
 ```java
 import org.xllgl2017.ALPN;
-import org.xllgl2017.Body;
 import org.xllgl2017.Response;
 import org.xllgl2017.Session;
 import org.xllgl2017.Timeout;
-import org.xllgl2017.Url;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -42,7 +40,7 @@ public class Main {
         session.setVerify(true);
         session.setAutoRedirect(true);
 
-        session.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+        session.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
 
         Timeout timeout = new Timeout();
         timeout.setConnect(3000);

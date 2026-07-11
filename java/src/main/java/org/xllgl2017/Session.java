@@ -60,17 +60,21 @@ public class Session implements AutoCloseable {
     /// 设置请求头
     public void setHeaders(HashMap<String, String> headers) throws Exception {
         for (String name : headers.keySet()) {
-            this.addHeader(name, headers.get(name));
+            this.setHeader(name, headers.get(name));
         }
     }
 
     /// 添加请求头，若已存在则进行覆盖
-    public void addHeader(String name, String value) throws Exception {
-        this.addHeader(name, value, true);
+    public void setHeader(String name, String value) throws Exception {
+        this.setHeader(name, value, true);
     }
 
-    public void addHeader(String name, String value, boolean reversed) throws Exception {
-        util.check_err(REQRIO.ScReq_add_header(this.pointer(), name, value, reversed));
+    public void setHeader(String name, String value, boolean reversed) throws Exception {
+        if (name.equalsIgnoreCase("cookie")) {
+            this.setCookie(value);
+        } else {
+            util.check_err(REQRIO.ScReq_add_header(this.pointer(), name, value, reversed));
+        }
     }
 
     /// @param name :待删除的请求头名
@@ -83,7 +87,7 @@ public class Session implements AutoCloseable {
     public void setHeaders(Headers headers) throws Exception {
         HashMap<String, String> keys = headers.getKeys();
         for (String name : keys.keySet()) {
-            this.addHeader(name, keys.get(name));
+            this.setHeader(name, keys.get(name));
         }
         for (Cookie cookie : headers.getCookies()) {
             util.check_err(REQRIO.ScReq_add_cookie(this.pointer(), cookie.getName(), cookie.getValue()));
