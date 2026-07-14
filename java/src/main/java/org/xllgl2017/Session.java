@@ -66,7 +66,7 @@ public class Session implements AutoCloseable {
 
     /// 添加请求头，若已存在则进行覆盖
     public void setHeader(String name, String value) throws Exception {
-        this.setHeader(name, value, true);
+        this.setHeader(name, value, false);
     }
 
     public void setHeader(String name, String value, boolean reversed) throws Exception {

@@ -90,7 +90,7 @@ class Session:
         if err: raise Exception(msg)
         return
 
-    def add_header(self, name: str, value: str, _reversed=True):
+    def add_header(self, name: str, value: str, _reversed=False):
         err = self.dll.ScReq_add_header(self.hid, name.encode('utf-8'), value.encode('utf-8'), _reversed)
         err, msg = util.check_char_err(err)
         if err: raise Exception(msg)
