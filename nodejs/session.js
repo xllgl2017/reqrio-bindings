@@ -140,7 +140,7 @@ class Session {
      * @param {string} value
      * @param {boolean} reversed 为true时,值为空，改请求头不发送
      **/
-    add_header(name, value,reversed=true) {
+    add_header(name, value, reversed = false) {
         check_error(this.library, this.library.ScReq_add_header(this.req, name, value, reversed));
     }
 
