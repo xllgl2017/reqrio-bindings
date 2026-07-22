@@ -1,6 +1,6 @@
 {
   "name": "reqrio",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A lightweight, high concurrency HTTP request library",
   "main": "index.js",
   "keywords": [
