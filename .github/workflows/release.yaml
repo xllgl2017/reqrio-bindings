@@ -55,11 +55,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GIT_TOKEN }}
         run: |
-          RUN_ID=$(curl -s \
+          RESPONSE=$(curl -s \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/xllgl2017/reqrio/actions/workflows/release.yml/runs?status=success&per_page=1" \
-            | jq -r '.workflow_runs[0].id')
+            "https://api.github.com/repos/xllgl2017/reqrio/actions/workflows/release.yml/runs?status=success&per_page=1")
+
+          echo "$RESPONSE" | jq .
+        
+          RUN_ID=$(echo "$RESPONSE" | jq -r '.workflow_runs[0].id')
 
           echo "run_id=${RUN_ID}" >> $GITHUB_OUTPUT
       # go 需要 linux .so（native-linux）与 windows-gnu .dll（go-windows-gnu）
