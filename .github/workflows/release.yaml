@@ -99,21 +99,21 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # go
-          cp natives/libreqrio.so bindings/go/
-          cp natives-go/reqrio.dll bindings/go/
+          cp natives/libreqrio.so go/
+          cp natives-go/reqrio.dll go/
           #python
-          cp natives/reqrio.dll bindings/python/reqrio/
-          cp natives/libreqrio.so bindings/python/reqrio/
+          cp natives/reqrio.dll python/reqrio/
+          cp natives/libreqrio.so python/reqrio/
           # nodejs
-          cp natives/reqrio.dll bindings/nodejs/
-          cp natives/libreqrio.so bindings/nodejs/
+          cp natives/reqrio.dll nodejs/
+          cp natives/libreqrio.so nodejs/
           # java
-          cp natives/reqrio.dll bindings/java/src/main/resources/
-          cp natives/libreqrio.so bindings/java/src/main/resources/
+          cp natives/reqrio.dll java/src/main/resources/
+          cp natives/libreqrio.so java/src/main/resources/
           # qt
-          cp natives/reqrio.dll bindings/qt/
-          cp natives/reqrio.dll.lib bindings/qt/reqrio.lib
-          cp natives/libreqrio.so bindings/qt/
+          cp natives/reqrio.dll qt/
+          cp natives/reqrio.dll.lib qt/reqrio.lib
+          cp natives/libreqrio.so qt/
       - name: commit changes
         env:
           GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
@@ -157,20 +157,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Download native libs
-        uses: actions/download-artifact@v4
-        with:
-          pattern: native-*
-          path: natives
-          merge-multiple: true
-
-      - name: Place native libs into package
-        run: |
-          cp natives/libreqrio.so bindings/python/reqrio/
-          cp natives/reqrio.dll   bindings/python/reqrio/
-
       - name: Build wheel & sdist
-        working-directory: bindings/python
+        working-directory: python
         run: |
           python -m pip install --upgrade build
           python -m build
@@ -178,7 +166,7 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: bindings/python/dist
+          packages-dir: python/dist
           password: ${{ secrets.PYPI_API_TOKEN }}
 
   # ----------------------------------------------------------------------------
@@ -204,20 +192,8 @@ jobs:
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: Download native libs
-        uses: actions/download-artifact@v4
-        with:
-          pattern: native-*
-          path: natives
-          merge-multiple: true
-
-      - name: Place native libs into resources
-        run: |
-          cp natives/libreqrio.so bindings/java/src/main/resources/
-          cp natives/reqrio.dll   bindings/java/src/main/resources/
-
       - name: Deploy to Maven Central
-        working-directory: bindings/java
+        working-directory: java
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
@@ -241,20 +217,8 @@ jobs:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Download native libs
-        uses: actions/download-artifact@v4
-        with:
-          pattern: native-*
-          path: natives
-          merge-multiple: true
-
-      - name: Place native libs into package
-        run: |
-          cp natives/libreqrio.so bindings/nodejs/
-          cp natives/reqrio.dll   bindings/nodejs/
-
       - name: Publish to npm
-        working-directory: bindings/nodejs
+        working-directory: nodejs
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
