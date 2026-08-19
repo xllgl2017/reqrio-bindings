@@ -273,6 +273,18 @@ public class Session implements AutoCloseable {
         }
     }
 
+        /// 参考 send
+    public Response query(Url url, Body body) throws Exception {
+        return this.send(Method.QUERY, url, body);
+    }
+
+    /// 参考 send
+    public Response query(String url, Body body) throws Exception {
+        try (body) {
+            return this.query(new Url(url), body);
+        }
+    }
+
     @Override
     public void close() {
         if (this.req == null) return;

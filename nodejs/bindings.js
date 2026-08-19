@@ -18,7 +18,8 @@ const Method = {
     OPTIONS: 5,
     TRACE: 6,
     CONNECT: 7,
-    PATCH: 8
+    PATCH: 8,
+    QUERY: 9,
 }
 
 const CipherSuite = {

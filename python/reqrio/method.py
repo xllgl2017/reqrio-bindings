@@ -11,3 +11,4 @@ class Method(Enum):
     TRACE = 6
     CONNECT = 7
     PATCH = 8
+    QUERY = 9

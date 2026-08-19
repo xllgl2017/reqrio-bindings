@@ -273,6 +273,10 @@ class Session {
         return this.send(Method.PATCH, url, options);
     }
 
+    query(url,options) {
+        return this.send(Method.QUERY, url, options);
+    }
+
     close() {
         // registry.unregister(this);
         if (this.req == null) return

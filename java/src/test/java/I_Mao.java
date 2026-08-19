@@ -46,7 +46,7 @@ public class I_Mao {
         JsonArray er2 = new JsonArray();
         er2.add(0);
         finger.addExtension(VALUES[ThreadLocalRandom.current().nextInt(VALUES.length)], er2);
-        finger.addExtension(ExtensionType.Padding, new JsonPrimitive(192 + 19 - domain.length()));
+        finger.addExtension(ExtensionType.Padding, new JsonPrimitive(196 + 19 - domain.length()));
 
         int group = VALUES[ThreadLocalRandom.current().nextInt(VALUES.length)];
         finger.addSupportedGroup(group);
@@ -68,8 +68,8 @@ public class I_Mao {
         finger.addSupportedVersion(VALUES[ThreadLocalRandom.current().nextInt(VALUES.length)]);
         finger.addSupportedVersion(Version.TLS_1_3);
         finger.addSupportedVersion(Version.TLS_1_2);
-        finger.addSupportedVersion(Version.TLS_1_1);
-        finger.addSupportedVersion(Version.TLS_1_0);
+//        finger.addSupportedVersion(Version.TLS_1_1);
+//        finger.addSupportedVersion(Version.TLS_1_0);
 
         finger.addKeyShare(group);
         finger.addKeyShare(SupportGroup.X25519);
@@ -123,11 +123,12 @@ public class I_Mao {
 
     public static void main(String[] args) throws Exception {
         Session session = buildSession();
-        session.connect("https://220.167.102.112", SNI);
+        session.connect("https://h5.moutai519.com.cn", SNI);
         session.setKeyLog("../../2.log");
-        Url url = new Url("https://220.167.102.112/xhr/front/trade/priority/rushPurchase/hot/branch/one", SNI);
+        Url url = new Url("https://h5.moutai519.com.cn/xhr/front/trade/priority/rushPurchase/hot/branch/one", SNI);
         JsonObject data = new JsonObject();
-        data.add("actParam", new JsonPrimitive("salGYFt5S6bQg3QmZ92dY6bsH+8CAJ0R8kZwwurslmXbTh0epueTLDQriQRinhZlHxazFMfUEIr7IQzUxd3hjNAb2U/yYWciM2reBPdS+APR4IV9CE60Nb9n+Id++Pf4yYcdUEBJaTXQuMzNblj0M90JBJQbOG40L7GZCPdELGylgHK9C0F8BlSFNh80hSdRw2KmOJL2HAYyfuscHG0qTsHXECJ4+OHwBTcRt+dKDOhyl3LSAL5a8Eb3Ht1vLgleDKmr0SzyDEIVOJuSPW23F4Fmq7NPIOnPY8hL5XL3ewpBpgGWj53vu2SVi27sTRioopNhjW6J2SOQyUsHFj60EpCbMwh6++NkGum/ltUZ1OHpN7psICQQXb9FDuak/2ytffZiKbZcLWgiF+FuuB2ofXV77NfUhTTr7xO6S/J32rI="));
+        data.add("actParam", new JsonPrimitive("iPezxmLCzfvUGKCKcEMfOwjAdR1fl+/cZal5SWZktnOYtjMqUI9dPMOA84mX46pxT7M5+DWE3JiP4T0Ot2a3TCkldHRIef4vWsZx5dYoVYCXw8JU2y/9zdGM1usXoo5xQmwAlZWcfTtVb3g8B++gxK1s0iWVg02LzzIRdoYf44cGQKJctHMCi1wCuaolVDnDnofWDojVgj2rxURA0zXjnkCfwRUd0i2XV6e87S5EEH7bxKCTSal4NUEt6A4HsYZJ097wUEvvBM/yXob//9cakYn4FpRT0nsNg3VadSAgI8GXx3UV79XmT8NTli9hOuQHH6+Dk2jrYMdAZgZQH9C+6bO7kDP+apXkOBUSQirjh1reHX1BjLDVQPCNstGzu5j6U2yQyhwCNPenmPU7T8c07nYlgPueEN1mM+jH9oGyIRT1nHPDBoLCHBrT/5nP3CXHyE/umYx9HoWjXHDRGfgChquBgq68asSHHZnFL2yvouw="));
+        data.add("v", new JsonPrimitive("002"));
         Response response = session.post(url, new Body(data));
         System.out.println(response.statusCode());
         System.out.println(response.text());

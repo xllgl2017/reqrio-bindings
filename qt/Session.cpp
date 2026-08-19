@@ -147,6 +147,10 @@ Response Session::patch(Url *url, Body *body) const {
     return send(PATCH, url, body);
 }
 
+Response Session::patch(Url *url, Body *body) const {
+    return send(QUERY, url, body);
+}
+
 
 Session::~Session() {
     if (this->req == nullptr) return;

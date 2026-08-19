@@ -110,6 +110,8 @@ public:
     [[nodiscard]] Response trace(Url *, Body *) const;
 
     [[nodiscard]] Response patch(Url *, Body *) const;
+
+    [[nodiscard]] Response query(Url *, Body *) const;
 };
 
 

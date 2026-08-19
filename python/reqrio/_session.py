@@ -291,6 +291,10 @@ class Session:
               bytes: bytes = None, text: str = None, **kwargs) -> Response:
         return self.pre_send(Method.PATCH, url, params, data, json, bytes, text, **kwargs)
 
+    def query(self, url: str, params: dict = None, data: dict = None, json: dict = None,
+              bytes: bytes = None, text: str = None, **kwargs) -> Response:
+        return self.pre_send(Method.QUERY, url, params, data, json, bytes, text, **kwargs)
+
     def reconnect(self):
         err, msg = util.check_char_err(self.dll.ScReq_reconnect(self.hid))
         if err: raise Exception(msg)
