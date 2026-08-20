@@ -16,12 +16,6 @@ const ALPN = Object.freeze({
     HTTP20: "h2"
 })
 
-// const registry = new FinalizationRegistry(req => {
-//     console.log(3434);
-//     library.ScReq_drop(req);
-//     req = null;
-// })
-
 
 class Session {
     /**初始化Session
@@ -46,16 +40,12 @@ class Session {
     ) {
         this.library = binding_library();
         this.req = this.library.ScReq_new(ignore_hdr_sort);
-        console.log(111)
-
         if (alpn) check_error(this.library, this.library.ScReq_set_alpn(this.req, alpn));
         check_error(this.library, this.library.ScReq_set_verify(this.req, verify), this.close);
         check_error(this.library, this.library.ScReq_set_redirect(this.req, auto_redirect), this.close);
         if (key_log !== null) this.set_key_log(key_log, this.close)
         if (rand_tls && token !== null) this.use_random_tls(token)
         this.set_headers(headers)
-
-        // registry.register(this, this.req);
     }
 
     set_key_log(key_log, func = null) {
@@ -209,7 +199,7 @@ class Session {
      * @param {object} options 请求体
      */
     send(method, url_str, options = {}) {
-        const {data, json, files, bytes, ct, params, sni} = options;
+        const {data, json, files, bytes, ct, params, sni, stream} = options;
         const url = new Url(this.library, url_str, params, sni)
 
 
@@ -231,14 +221,15 @@ class Session {
             url.close();
             throw e;
         }
+        let stream1 = stream === null ? false : stream;
 
         // Send request
         const errPtr = ref_char_ptr();
-        const respPtr = this.library.ScReq_stream_io(this.req, method, url.ptr, body_ptr, errPtr);
+        const respPtr = this.library.ScReq_do_http(this.req, method, url.ptr, body_ptr, stream1, errPtr);
         url.ptr = null;
         body_ptr = null;
         check_error(this.library, errPtr.deref())
-        return new Response(this.library, respPtr);
+        return new Response(this.library, respPtr, this.req);
     }
 
     get(url, options) {
@@ -273,7 +264,7 @@ class Session {
         return this.send(Method.PATCH, url, options);
     }
 
-    query(url,options) {
+    query(url, options) {
         return this.send(Method.QUERY, url, options);
     }
 

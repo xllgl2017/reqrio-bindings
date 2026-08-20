@@ -71,7 +71,7 @@ public class Main {
 
     public static void post_json() throws Exception {
         Session session = new Session(ALPN.HTTP11);
-        session.connect("https://www.baidu.com","www.baidu.com");
+        session.connect("https://www.baidu.com", "www.baidu.com");
         session.setHeaders(getHeaders());
         JsonObject obj = new JsonObject();
         obj.add("field1", new JsonPrimitive(1));
@@ -118,7 +118,7 @@ public class Main {
         session.setHeaders(getHeaders());
         HttpFile file = new HttpFile();
         file.addFile("../../2.log");
-        Response resp = session.post("https://www.baidu.com", new Body(file));
+        Response resp = session.post("https://www.baidu.com", new Body());
         System.out.println("code: " + resp.statusCode());
         System.out.println("len: " + resp.bytes().length);
         session.close();
@@ -277,6 +277,21 @@ public class Main {
         session.close();
     }
 
+    public static void flow_reader() throws Exception {
+        Session session = new Session(ALPN.HTTP20);
+        session.setHeaders(getHeaders());
+        session.setHeader("sec-ch-ua", "\"Microsoft Edge\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"");
+        session.setHeader("sec-ch-mobile", "?0");
+        session.setHeader("sec-ch-ua-platform", "\"Linux\"");
+        session.setHeader("user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0");
+        Response resp = session.send(Method.GET, new Url("https://ms.bdimg.com/pacific/0/pic/-742236409_-1564646186.png?x=0&y=0&h=340&w=510&vh=340.00&vw=510.00&oh=340.00&ow=510.00"), new Body(), true);
+        System.out.println("code: " + resp.statusCode());
+        for (byte[] chunk : resp.chunks()) {
+            System.out.println(chunk.length);
+        }
+        session.close();
+    }
+
 
     public static void main(String[] args) throws Exception {
         get();
@@ -291,6 +306,7 @@ public class Main {
         ja4();
         random_tls();
         ua_tls();
+        flow_reader();
     }
 }
 

@@ -2,7 +2,7 @@ from ctypes import *
 
 from reqrio import util
 from reqrio.alpn import ALPN
-from reqrio.bindings import DLL, CALLBACK
+from reqrio.bindings import DLL
 from reqrio.method import Method
 from reqrio.response import Response
 
@@ -39,7 +39,6 @@ class Session:
         """
 
         self.dll = DLL
-        self.callback = CALLBACK
         # alpn
         self.hid = self.dll.ScReq_new(ignore_hdr_sort)
         err = self.dll.ScReq_set_alpn(self.hid, alpn.encode('utf-8'))
@@ -152,7 +151,8 @@ class Session:
             body: c_void_p,
             params: dict = None,
             auto_redirect: bool = True,
-            sni: str = None
+            sni: str = None,
+            stream: bool = False,
     ) -> Response:
         """
         :param method: 请求方法
@@ -161,6 +161,7 @@ class Session:
         :param params: 请求参数
         :param auto_redirect: 是否对重定向链接进行自动跳转，默认是
         :param sni: 域名，使用ip url时设置
+        :param stream: 流式请求
         :return:
         """
         try:
@@ -181,12 +182,12 @@ class Session:
                         self.dll.Url_add_param(url, name.encode('utf-8'), value.encode('utf-8')))
                     if err: raise Exception(msg)
             err = c_char_p()
-            resp = self.dll.ScReq_stream_io(self.hid, method.value, url, body, byref(err))
+            resp = self.dll.ScReq_do_http(self.hid, method.value, url, body, stream, byref(err))
             url = None
             body = None
             err, msg = util.check_char_err(err)
             if err: raise Exception(msg)
-            return Response(resp)
+            return Response(resp, self.hid)
         finally:
             if type(url) == int:
                 self.dll.Url_drop(url)
@@ -310,10 +311,10 @@ class Session:
         err, msg = util.check_char_err(self.dll.ScReq_close_stream(self.hid))
         if err: raise Exception(msg)
 
-    def open_stream(self, method: Method, url: str, params: dict = None, data: dict = None, json: dict = None,
-                    bs: bytes = None, content_type: str = None):
-        from reqrio.stream import Stream
-        return Stream(self, method, url, params, data, json, bs, content_type)
+    # def open_stream(self, method: Method, url: str, params: dict = None, data: dict = None, json: dict = None,
+    #                 bs: bytes = None, content_type: str = None):
+    #     from reqrio.stream import Stream
+    #     return Stream(self, method, url, params, data, json, bs, content_type)
 
     def close(self):
         """记得关闭资源，否则容易造成内存溢出"""

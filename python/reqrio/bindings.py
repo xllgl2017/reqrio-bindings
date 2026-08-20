@@ -1,6 +1,7 @@
 import os
 import sys
-from ctypes import cdll, CFUNCTYPE, c_void_p, c_int, c_char, c_uint32, c_char_p, c_bool, c_ubyte, c_size_t, c_uint16
+from ctypes import cdll, CFUNCTYPE, c_void_p, c_int, c_char, c_uint32, c_char_p, c_bool, c_ubyte, c_size_t, c_uint16, \
+    c_uint64
 
 from _ctypes import POINTER
 
@@ -78,6 +79,9 @@ DLL.Response_get_header.restype = c_void_p
 DLL.Response_cookies.argtypes = [c_void_p, POINTER(c_char_p)]
 DLL.Response_cookies.restype = c_void_p
 
+DLL.Response_sid.argtypes = [c_void_p, POINTER(c_char_p)]
+DLL.Response_sid.restype = c_uint64
+
 DLL.Response_drop.argtypes = [c_void_p]
 
 # ===========================>ScReq<===================================
@@ -122,10 +126,6 @@ DLL.ScReq_set_cookie.restype = c_void_p
 DLL.ScReq_add_cookie.argtypes = [c_void_p, c_char_p, c_char_p]
 DLL.ScReq_add_cookie.restype = c_void_p
 
-CALLBACK = CFUNCTYPE(None, POINTER(c_char), c_uint32)
-DLL.ScReq_set_callback.argtypes = [c_void_p, CALLBACK]
-DLL.ScReq_set_callback.restype = c_void_p
-
 DLL.ScReq_reconnect.argtypes = [c_void_p]
 DLL.ScReq_reconnect.restype = c_void_p
 
@@ -135,8 +135,11 @@ DLL.ScReq_connect.restype = c_void_p
 DLL.ScReq_close_stream.argtypes = [c_void_p]
 DLL.ScReq_close_stream.restype = c_void_p
 
-DLL.ScReq_stream_io.argtypes = [c_void_p, c_int, c_void_p, c_void_p, POINTER(c_char_p)]
-DLL.ScReq_stream_io.restype = c_void_p
+DLL.ScReq_do_http.argtypes = [c_void_p, c_int, c_void_p, c_void_p, c_bool, POINTER(c_char_p)]
+DLL.ScReq_do_http.restype = c_void_p
+
+DLL.ScReq_recv_stream.argtypes = [c_void_p, c_uint64, POINTER(c_size_t), POINTER(c_char_p)]
+DLL.ScReq_recv_stream.restype = c_void_p
 
 DLL.ScReq_drop.argtypes = [c_void_p]
 

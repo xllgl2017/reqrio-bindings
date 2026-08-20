@@ -83,7 +83,8 @@ public:
     /// @param method:请求的方法
     /// @param url:请求的Url
     /// @param body:请求的Body
-    [[nodiscard]] Response send(Method method, Url *url, Body *body) const;
+    /// @param stream: 流式请求
+    [[nodiscard]] Response send(Method method, Url *url, Body *body, bool stream = false) const;
 
     [[nodiscard]] Response get(Url *, Body *) const;
 

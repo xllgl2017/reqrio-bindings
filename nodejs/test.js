@@ -1,4 +1,4 @@
-const {ja4, post_form, post_json, get, client_hello, ja3, custom_fingerprint} = require("./example");
+const {ja4, post_form, post_json, get, client_hello, ja3, custom_fingerprint, flow_reader} = require("./example");
 
 async function test_ws() {
     try {
@@ -20,3 +20,4 @@ ja3();
 ja4();
 client_hello();
 custom_fingerprint()
+flow_reader()

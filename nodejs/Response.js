@@ -1,18 +1,11 @@
 const {library, ref, check_error, ref_char_ptr, read_c_str} = require("./bindings");
 
-//
-// const registry = new FinalizationRegistry(resp => {
-//     console.log(3434);
-//     library.Response_drop(resp);
-//     resp = null;
-// })
-
 
 class Response {
-    constructor(library, respPtr) {
+    constructor(library, respPtr, reqPtr) {
         this.library = library;
         this.ptr = respPtr;
-        // registry.register(this, this.ptr);
+        this.req = reqPtr;
     }
 
     status_code() {
@@ -69,6 +62,36 @@ class Response {
         if (this.ptr == null) return;
         this.library.Response_drop(this.ptr);
         this.ptr = null;
+    }
+
+    chunks() {
+        class StreamChunk {
+            constructor(sid, reqPtr, library) {
+                this.sid = sid;
+                this.reqPtr = reqPtr;
+                this.library = library;
+            }
+
+            * [Symbol.iterator]() {
+                while (true) {
+                    const errPtr = ref_char_ptr();
+                    const lenPtr = Buffer.alloc(8);
+                    const ptr = this.library.ScReq_recv_stream(this.reqPtr, this.sid, lenPtr, errPtr);
+                    check_error(this.library, errPtr.deref());
+                    if (ref.isNull(ptr)) {
+                        break
+                    } else {
+                        const len = Number(lenPtr.readBigUInt64LE(0));
+                        yield Buffer.from(ref.reinterpret(ptr, len))
+                    }
+                }
+            }
+        }
+
+        const errPtr = ref_char_ptr();
+        const sid = this.library.Response_sid(this.ptr, errPtr);
+        check_error(this.library, errPtr.deref());
+        return new StreamChunk(sid, this.req, this.library)
     }
 
 }

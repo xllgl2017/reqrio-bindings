@@ -172,11 +172,11 @@ function binding_library() {
         ScReq_set_timeout: [charPtr, [voidPtr, 'string']],
         ScReq_set_cookie: [charPtr, [voidPtr, 'string']],
         ScReq_add_cookie: [charPtr, [voidPtr, 'string', 'string']],
-        ScReq_stream_io: [voidPtr, [voidPtr, 'int', voidPtr, voidPtr, charPtrPtr]],
+        ScReq_do_http: [voidPtr, [voidPtr, 'int', voidPtr, voidPtr, 'bool', charPtrPtr]],
+        ScReq_recv_stream: [voidPtr, [voidPtr, 'uint64', voidPtr, charPtrPtr]],
         ScReq_reconnect: [charPtr, [voidPtr]],
         ScReq_connect: [charPtr, [voidPtr, 'string', "string"]],
         ScReq_close_stream: [charPtr, [voidPtr]],
-        ScReq_set_callback: [charPtr, [voidPtr, 'pointer']],
         ScReq_drop: ['void', [voidPtr]],
 
         // === Fingerprint ===
@@ -222,6 +222,7 @@ function binding_library() {
         Response_bytes: [uint8Ptr, [voidPtr, sizeTPtr, charPtrPtr]],
         Response_get_header: [charPtr, [voidPtr, 'string', charPtrPtr]],
         Response_cookies: [charPtr, [voidPtr, charPtrPtr]],
+        Response_sid: ['uint64', [voidPtr, charPtrPtr]],
         Response_drop: ['void', [voidPtr]],
 
         // === Url ===

@@ -62,7 +62,7 @@ function read_token() {
     const fs = require("fs");
     let token;
     try {
-        token = fs.readFileSync('../TOKEN', 'utf8')
+        token = fs.readFileSync('../../TOKEN', 'utf8')
     } catch (e) {
         token = "";
     }
@@ -71,7 +71,7 @@ function read_token() {
 
 
 function ja3() {
-    let session = new Session(ALPN.HTTP20);
+    let session = new Session(ALPN.HTTP20, {}, false);
     session.set_ja3(
         "771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-18-51-45-43-27-21,29-23-24,0",
         read_token()
@@ -82,7 +82,7 @@ function ja3() {
 }
 
 function ja4() {
-    let session = new Session(ALPN.HTTP20);
+    let session = new Session(ALPN.HTTP20, {}, false);
     session.set_ja4(
         "t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601",
         read_token()
@@ -195,6 +195,15 @@ function custom_fingerprint() {
     session.close();
 }
 
+function flow_reader() {
+    let session = new Session(ALPN.HTTP11)
+    let resp = session.get("https://www.baidu.com", {stream: true});
+    console.log(resp.status_code())
+    for (const chunk of resp.chunks()) {
+        console.log(chunk.toString());
+    }
+}
+
 module.exports = {
     get,
     post_form,
@@ -202,5 +211,6 @@ module.exports = {
     ja3,
     ja4,
     client_hello,
-    custom_fingerprint
+    custom_fingerprint,
+    flow_reader
 }

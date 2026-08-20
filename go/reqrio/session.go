@@ -23,7 +23,7 @@ extern char * ScReq_set_timeout(void *req, const char *timeout);
 extern char * ScReq_set_cookie(void *req, const char *cookie);
 extern char * ScReq_add_cookie(void *req, const char *name, const char *value);
 //callback
-extern void * ScReq_stream_io(void *req, int method, void *url, void * body, char **err);
+extern void * ScReq_do_http(void *req, int method, void *url, void * body, bool stream, char **err);
 extern char * ScReq_reconnect(void *req);
 extern char * ScReq_connect(void *req, const char *url, const char *sni);
 extern char * ScReq_close_stream(void *req);
@@ -74,6 +74,7 @@ type ConnParam struct {
 	Bytes       []byte
 	Files       []HttpFile
 	ContentType string
+	Stream      bool
 }
 
 // NewSession /*
@@ -279,14 +280,13 @@ func (session *Session) SendRequest(param ConnParam) (Response, error) {
 	}
 
 	var errPtr *C.char
-	ptr := C.ScReq_stream_io(session.req, C.int(param.Method), gUrl.ptr, bodyPtr, (**C.char)(unsafe.Pointer(&errPtr)))
+	ptr := C.ScReq_do_http(session.req, C.int(param.Method), gUrl.ptr, bodyPtr, C.bool(param.Stream), (**C.char)(unsafe.Pointer(&errPtr)))
 	if errPtr != nil {
 		errMsg := C.GoString(errPtr)
 		C.char_free(errPtr)
 		return Response{}, errors.New(errMsg)
 	}
-	resp := newResponse(ptr)
-	return resp, nil
+	return newResponse(ptr, session.req)
 }
 
 func (session *Session) Reconnect() error {

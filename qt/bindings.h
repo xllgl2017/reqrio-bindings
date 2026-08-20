@@ -46,6 +46,8 @@ namespace bindings {
 
     char *Response_cookies(const Response *response, char **err);
 
+    uint64_t Response_sid(const Response *response, char **err);
+
     void Response_drop(Response *response);
 
     ///=========================>[Body]<=====================
@@ -145,12 +147,9 @@ namespace bindings {
 
     char *ScReq_add_cookie(ScReq *req, const char *name, const char *value);
 
-    Response *ScReq_stream_io(ScReq *req, Method method, Url *url, Body *body, char **err);
+    Response *ScReq_do_http(ScReq *req, Method method, Url *url, Body *body, bool stream, char **err);
 
-
-    // typedef void (*Callback)(const char *data, uint32_t len);
-
-    // int ScReq_set_callback(ScReq *req, Callback callback);
+    const uint8_t *ScReq_recv_stream(ScReq *req, uint64_t sid, size_t *len, char **err);
 
     char *ScReq_reconnect(ScReq *req);
 

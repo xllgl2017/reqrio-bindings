@@ -12,7 +12,7 @@ const (
 	DELETE
 	OPTIONS
 	TRACE
-	PATCH,
+	PATCH
 	QUERY
 )
 
@@ -33,9 +33,9 @@ func ParseStringMethod(method string) (Method, error) {
 	case "TRACE":
 		return TRACE, nil
 	case "PATCH":
-        return PATCH,nil
-    case "QUERY":
-        return QUERY,nil
+		return PATCH, nil
+	case "QUERY":
+		return QUERY, nil
 	default:
 		return GET, errors.New("invalid method")
 	}

@@ -37,13 +37,13 @@ public interface ReqrioLibrary extends Library {
 
     Pointer ScReq_add_cookie(Pointer req, String name, String value);
 
-//    int ScReq_set_callback(Pointer req, ScReqCallback cb);
-
     Pointer ScReq_reconnect(Pointer req);
 
     Pointer ScReq_connect(Pointer req, String url, String sni);
 
-    Pointer ScReq_stream_io(Pointer req, int method, Pointer url, Pointer body, PointerByReference err);
+    Pointer ScReq_do_http(Pointer req, int method, Pointer url, Pointer body, boolean stream, PointerByReference err);
+
+    Pointer ScReq_recv_stream(Pointer req, int sid, LongByReference len, PointerByReference err);
 
     Pointer ScReq_close_stream(Pointer req);
 
@@ -90,6 +90,8 @@ public interface ReqrioLibrary extends Library {
     Pointer Response_cookies(Pointer resp, PointerByReference err);
 
     Pointer Response_header_keys(Pointer resp, PointerByReference err);
+
+    int Response_sid(Pointer resp, PointerByReference err);
 
     void Response_drop(Pointer resp);
 

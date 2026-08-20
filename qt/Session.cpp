@@ -81,13 +81,13 @@ void Session::close_stream() const {
     util::check_err(bindings::ScReq_close_stream(this->req));
 }
 
-Response Session::send(const Method method, Url *url, Body *body) const {
+Response Session::send(const Method method, Url *url, Body *body, bool stream) const {
     char *err = nullptr;
-    const auto resp_ptr = bindings::ScReq_stream_io(this->req, method, url->take(), body->take(), &err);
+    const auto resp_ptr = bindings::ScReq_do_http(this->req, method, url->take(), body->take(), stream, &err);
     delete url;
     delete body;
     util::check_err(err);
-    return Response(resp_ptr);
+    return Response(resp_ptr, this->req);
 }
 
 // void Session::setCallback(const bindings::Callback callback) const {
@@ -147,7 +147,7 @@ Response Session::patch(Url *url, Body *body) const {
     return send(PATCH, url, body);
 }
 
-Response Session::patch(Url *url, Body *body) const {
+Response Session::query(Url *url, Body *body) const {
     return send(QUERY, url, body);
 }
 

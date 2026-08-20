@@ -128,7 +128,7 @@ func postText() {
 
 func postFiles() {
 	session := reqrio.NewSession(false)
-	err := session.SetKeyLog("../2.log")
+	err := session.SetKeyLog("../../2.log")
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.POST,
 		Url:    "https://www.baidu.com",
@@ -136,16 +136,16 @@ func postFiles() {
 			"v": "1",
 			"b": "{'ddfd':34}",
 		},
-		Files: []reqrio.HttpFile{
-			reqrio.HttpFile{
-				Path:      "2.log",
-				FieldName: "file1",
-			},
-			reqrio.HttpFile{
-				Path:      "2.log",
-				FieldName: "file2",
-			},
-		},
+		// Files: []reqrio.HttpFile{
+		// 	reqrio.HttpFile{
+		// 		Path:      "../../2.log",
+		// 		FieldName: "file1",
+		// 	},
+		// 	reqrio.HttpFile{
+		// 		Path:      "2.log",
+		// 		FieldName: "file2",
+		// 	},
+		// },
 	})
 	if err != nil {
 		panic(err)
@@ -155,7 +155,7 @@ func postFiles() {
 }
 
 func readToken() string {
-	token, err := os.ReadFile("../TOKEN")
+	token, err := os.ReadFile("../../TOKEN")
 	if err != nil {
 		return ""
 	}
@@ -338,15 +338,39 @@ func customTls() {
 
 }
 
+func flow_reader() {
+	session := reqrio.NewSession(false)
+	err := session.SetHeaders(headers)
+	if err != nil {
+		panic(err)
+	}
+	resp, err := session.SendRequest(reqrio.ConnParam{
+		Method: reqrio.GET,
+		Url:    "https://www.baidu.com",
+		Stream: true,
+	})
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Delete()
+	for chunk := range resp.Chunks() {
+		println("chunk len: ", len(chunk))
+	}
+	if resp.Err() != nil {
+		panic(resp.Err())
+	}
+
+}
 func main() {
-	get()
-	postForm()
-	postJson()
-	postText()
-	postFiles()
-	clientHello()
-	ja3()
-	ja4()
-	randTls()
-	customTls()
+	// get()
+	// postForm()
+	// postJson()
+	// postText()
+	// postFiles()
+	// clientHello()
+	// ja3()
+	// ja4()
+	// randTls()
+	// customTls()
+	flow_reader()
 }

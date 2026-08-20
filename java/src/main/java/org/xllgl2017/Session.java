@@ -156,15 +156,20 @@ public class Session implements AutoCloseable {
     /// @param method : 请求方法
     /// @param url    :请求地址
     /// @param body   :请求体
-    public Response send(@NotNull Method method, @NotNull Url url, @NotNull Body body) throws Exception {
+    /// @param stream :流式请求
+    public Response send(@NotNull Method method, @NotNull Url url, @NotNull Body body, boolean stream) throws Exception {
         try (url; body) {
             PointerByReference err = new PointerByReference();
-            Pointer ptr = REQRIO.ScReq_stream_io(this.pointer(), method.getValue(), url.pointer(), body.pointer(), err);
+            Pointer ptr = REQRIO.ScReq_do_http(this.pointer(), method.getValue(), url.pointer(), body.pointer(), stream, err);
             url.setRaw(null);
             body.setRaw(null);
             util.check_err_pointer(err);
-            return new Response(ptr);
+            return new Response(ptr, this.req);
         }
+    }
+
+    public Response send(@NotNull Method method, @NotNull Url url, @NotNull Body body) throws Exception {
+        return send(method, url, body, false);
     }
 
     /// 参考 send
@@ -273,7 +278,7 @@ public class Session implements AutoCloseable {
         }
     }
 
-        /// 参考 send
+    /// 参考 send
     public Response query(Url url, Body body) throws Exception {
         return this.send(Method.QUERY, url, body);
     }
