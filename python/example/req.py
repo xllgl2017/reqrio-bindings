@@ -122,10 +122,4 @@ def flow_reader():
     resp = session.get("https://www.baidu.com", stream=True)
     print(resp.statue_code())
     for chunk in resp.chunks():
-        print(chunk)
-    resp = reqrio.get(
-        "https://ms.bdimg.com/pacific/0/pic/-742236409_-1564646186.png?x=0&y=0&h=340&w=510&vh=340.00&vw=510.00&oh=340.00&ow=510.00",
-        stream=True)
-    print(resp.statue_code())
-    for chunk in resp.chunks():
-        print(chunk)
+        print("chunk:",len(chunk))
