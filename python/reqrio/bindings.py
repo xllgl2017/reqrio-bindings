@@ -1,7 +1,6 @@
 import os
 import sys
-from ctypes import cdll, CFUNCTYPE, c_void_p, c_int, c_char, c_uint32, c_char_p, c_bool, c_ubyte, c_size_t, c_uint16, \
-    c_uint64
+from ctypes import cdll, c_void_p, c_int, c_char_p, c_bool, c_ubyte, c_size_t, c_uint16, c_uint64
 
 from _ctypes import POINTER
 
@@ -10,6 +9,8 @@ if sys.platform == 'win32':
     dll_path = os.path.join(base, 'reqrio.dll')
 elif sys.platform == 'linux':
     dll_path = os.path.join(base, 'libreqrio.so')
+elif sys.platform == 'darwin':
+    dll_path = os.path.join(base, 'libreqrio.dylib')
 else:
     raise Exception('unsupported platform')
 DLL = cdll.LoadLibrary(dll_path)

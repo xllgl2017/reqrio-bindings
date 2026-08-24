@@ -135,6 +135,8 @@ public interface ReqrioLibrary extends Library {
             String dll_name;
             if (os_name.contains("win"))
                 dll_name = "reqrio.dll";
+            else if (os_name.contains("mac"))
+                dll_name = "libreqrio.dylib";
             else if (os_name.contains("nux") || os_name.contains("nix"))
                 dll_name = "libreqrio.so";
             else throw new Exception("unsupported system");

@@ -153,6 +153,8 @@ function binding_library() {
         libname = "reqrio"
     } else if (process.platform === "linux") {
         libname = "libreqrio"
+    } else if (process.platform === "darwin") {
+        libname = "libreqrio"
     } else {
         throw "unsupported system platform"
     }
