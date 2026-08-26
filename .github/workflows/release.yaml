@@ -101,19 +101,24 @@ jobs:
           # go
           cp natives/libreqrio.so go/
           cp natives-go/reqrio.dll go/
+          cp natives-go/libreqrio.dylib go/
           #python
           cp natives/reqrio.dll python/reqrio/
           cp natives/libreqrio.so python/reqrio/
+          cp natives/libreqrio.dylib python/reqrio/
           # nodejs
           cp natives/reqrio.dll nodejs/
           cp natives/libreqrio.so nodejs/
+          cp natives/libreqrio.dylib nodejs/
           # java
           cp natives/reqrio.dll java/src/main/resources/
           cp natives/libreqrio.so java/src/main/resources/
+          cp natives/libreqrio.dylib java/src/main/resources/
           # qt
           cp natives/reqrio.dll qt/
           cp natives/reqrio.dll.lib qt/reqrio.lib
           cp natives/libreqrio.so qt/
+          cp natives/libreqrio.dylib qt/
       - name: commit changes
         env:
           GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
@@ -122,11 +127,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f \
-            go/libreqrio.so go/reqrio.dll \
-            python/reqrio/reqrio.dll python/reqrio/libreqrio.so \
-            nodejs/reqrio.dll nodejs/libreqrio.so \
-            java/src/main/resources/reqrio.dll java/src/main/resources/libreqrio.so \
-            qt/reqrio.dll qt/reqrio.lib qt/libreqrio.so \
+            go/libreqrio.so go/reqrio.dll go/libreqrio.dylib \
+            python/reqrio/reqrio.dll python/reqrio/libreqrio.so python/reqrio/libreqrio.dylib \
+            nodejs/reqrio.dll nodejs/libreqrio.so nodejs/libreqrio.dylib \
+            java/src/main/resources/reqrio.dll java/src/main/resources/libreqrio.so java/src/main/resources/libreqrio.dylib \
+            qt/reqrio.dll qt/reqrio.lib qt/libreqrio.so qt/libreqrio.dylib \
             python/pyproject.toml \
             python/setup.py \
             java/pom.xml \
