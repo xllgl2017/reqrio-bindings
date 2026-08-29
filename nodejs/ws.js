@@ -12,27 +12,13 @@ class Websocket {
         this.ws = null;
     }
 
-    add_header(name, value) {
-        let ret = library.ws_add_header(this.build, name, value)
-        if (ret === -1) throw new Error("add header error")
-    }
-
-    set_proxy(proxy) {
-        let ret = library.ws_set_proxy(this.build, proxy);
-        if (ret === -1) throw new Error("set proxy error")
-    }
-
-    set_uri(uri) {
-        let ret = library.ws_set_uri(this.build, uri)
-        if (ret === -1) throw new Error("set uri error")
-    }
-
     /**
      * Open WebSocket connection with a Url object pointer
-     * @param {Buffer} urlPtr - pointer to Url object
+     * @param {string} url - url
+     * @param {Object} hdr - header
      */
-    open(urlPtr) {
-        this.ws = library.ws_open(this.build, urlPtr)
+    open(url, hdr) {
+        this.ws = library.ws_open(url, JSON.stringify(hdr ? hdr : {}));
         if (!this.ws || this.ws.isNull()) throw new Error("connect error")
         registry.register(this, this.ws)
     }

@@ -235,11 +235,7 @@ function binding_library() {
         Url_drop: ['void', [voidPtr]],
 
         // === WebSocket ===
-        ws_build: [voidPtr, []],
-        ws_add_header: ['int', [voidPtr, charPtr, charPtr]],
-        ws_set_proxy: ['int', [voidPtr, charPtr]],
-        ws_set_uri: ['int', [voidPtr, charPtr]],
-        ws_open: [voidPtr, [voidPtr, voidPtr]],
+        ws_open: [voidPtr, [charPtr, charPtr]],
         ws_open_raw: [voidPtr, [charPtr, charPtr]],
         ws_read: [charPtr, [voidPtr]],
         ws_write: ['int', [voidPtr, 'int', 'bool', charPtr]],

@@ -39,22 +39,15 @@ class WebSocket:
         self.proxy = proxy
         self.ws = None
 
-    def open(self):
-        builder = DLL.ws_build()
-        if self.proxy is not None:
-            r = DLL.ws_set_proxy(builder, self.proxy.encode('utf-8'))
-            if r == -1: raise Exception("设置代理失败-" + self.proxy)
-        DLL.ws_set_url(builder, self.url.encode('utf-8'))
-        if self.headers is not None:
-            for k in self.headers.keys():
-                r = DLL.ws_add_header(builder, k.encode('utf-8'), str(self.headers[k]).encode('utf-8'))
-                if r == -1: raise Exception("添加请求头失败-" + k + ":" + self.headers[k])
-        if self.uri is not None:
-            print(self.uri)
-            r = DLL.ws_set_uri(builder, self.uri.encode('utf-8'))
-            if r == -1: raise Exception("设置uri失败" + self.uri)
-        self.ws = DLL.ws_open(builder)
-        if self.ws is None: raise Exception("connect fail!")
+    @staticmethod
+    def connect(url: str, header=None):
+        ws = WebSocket(url, header)
+        if ws.headers is None:
+            ws.headers = {}
+        hdr = json.dumps(header)
+        ws.ws = DLL.ws_open(ws.url.encode('utf-8'), hdr.encode('utf-8'))
+        if ws.ws is None: raise Exception("connect fail!")
+        return ws
 
     def open_raw(self, context: str):
         self.ws = DLL.ws_open_raw(self.url.encode('utf-8'), context.encode('utf-8'))

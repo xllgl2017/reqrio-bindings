@@ -106,18 +106,7 @@ public interface ReqrioLibrary extends Library {
 
     Pointer Fingerprint_custom(String custom, String token, PointerByReference err);
 
-
-    Pointer ws_build();
-
-    int ws_add_header(Pointer builder, String name, String value);
-
-    int ws_set_proxy(Pointer builder, String proxy);
-
-    int ws_set_url(Pointer builder, String url);
-
-    int ws_set_uri(Pointer builder, String uri);
-
-    Pointer ws_open(Pointer builder);
+    Pointer ws_open(String url, String header);
 
     Pointer ws_open_raw(String url, String raw);
 

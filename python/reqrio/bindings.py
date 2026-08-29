@@ -147,19 +147,7 @@ DLL.ScReq_drop.argtypes = [c_void_p]
 DLL.char_free.argtypes = [c_void_p]
 
 # websocket
-DLL.ws_build.argtypes = []
-DLL.ws_build.restype = c_void_p
-
-DLL.ws_add_header.argtypes = [c_void_p, c_char_p, c_char_p]
-DLL.ws_add_header.restype = c_int
-
-DLL.ws_set_proxy.argtypes = [c_void_p, c_char_p]
-DLL.ws_set_proxy.restype = c_int
-
-DLL.ws_set_uri.argtypes = [c_void_p, c_char_p]
-DLL.ws_set_uri.restype = c_int
-
-DLL.ws_open.argtypes = [c_void_p]
+DLL.ws_open.argtypes = [c_char_p, c_char_p]
 DLL.ws_open.restype = c_void_p
 
 DLL.ws_open_raw.argtypes = [c_char_p, c_char_p]
@@ -168,7 +156,7 @@ DLL.ws_open_raw.restype = c_void_p
 DLL.ws_read.argtypes = [c_void_p]
 DLL.ws_read.restype = c_void_p
 
-DLL.ws_write.argtypes = [c_void_p, c_int, c_bool, c_void_p]
+DLL.ws_write.argtypes = [c_void_p, c_int, c_void_p]
 DLL.ws_write.restype = c_int
 
 DLL.ws_close.argtypes = [c_void_p]
