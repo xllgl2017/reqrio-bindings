@@ -9,7 +9,7 @@ from reqrio.b64 import Base64, b64encode, b64decode
 from typing import Union
 from reqrio.rcode import url_encode, url_decode, hex_encode, hex_decode
 from reqrio._finger import Algorithm, CompressionMethod, Group, Version, EcPointFormat, ExtensionType, CipherSuite, \
-    H2Setting
+    H2Setting, PskMode
 
 
 # pyinstaller.exe -F --collect-binaries reqrio .\1.py

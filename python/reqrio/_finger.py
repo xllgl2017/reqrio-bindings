@@ -138,3 +138,7 @@ class H2Setting:
     MaxFrameSize = "MaxFrameSize"
     MaxHeaderListSize = "MaxHeaderListSize"
     Reserved = "Reserved"
+
+
+class PskMode(IntEnum):
+    PSK_DHE_KE = 0x1
