@@ -10,11 +10,6 @@ public class WebSocket {
         this.ws=INSTANCE.ws_open(url,header);
     }
 
-    public void open() throws Exception {
-        this.ws = INSTANCE.ws_open(this.builder);
-        if (this.ws == null) throw new Exception("connect fail");
-    }
-
     public void openRaw(String url, String raw) {
         this.ws = INSTANCE.ws_open_raw(url, raw);
     }
