@@ -1,8 +1,8 @@
 package main
 
 /*
-git tag reqrio-go/v0.3.0-rc3
-git push origin reqrio-go/v0.3.0-rc3
+git tag go/v0.4.0-alpha1
+git push origin go/v0.4.0-alpha1
 */
 import (
 	"encoding/hex"
@@ -35,13 +35,13 @@ func get() {
 	if err != nil {
 		panic(err)
 	}
-	err = session.Connect("https://www.baidu.com", "www.baidu.com")
+	err = session.Connect("https://www.so.com", "www.so.com")
 	if err != nil {
 		panic(err)
 	}
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.GET,
-		Url:    "https://www.baidu.com",
+		Url:    "https://www.so.com",
 	})
 	if err != nil {
 		panic(err)
@@ -60,7 +60,7 @@ func get() {
 	fmt.Println("body len: ", len(text))
 	resp, err = session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.GET,
-		Url:    "https://www.baidu.com",
+		Url:    "https://www.so.com",
 		Params: map[string]string{
 			"v": "1",
 			"b": "{'ddfd':34}",
@@ -78,7 +78,7 @@ func postForm() {
 	session := reqrio.NewSession(false)
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.POST,
-		Url:    "https://www.baidu.com",
+		Url:    "https://www.so.com",
 		Data: map[string]string{
 			"v": "1",
 			"b": "{'ddfd':34}",
@@ -95,7 +95,7 @@ func postJson() {
 	session := reqrio.NewSession(false)
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.POST,
-		Url:    "https://www.baidu.com",
+		Url:    "https://www.so.com",
 		Json: map[string]any{
 			"v": "1",
 			"b": map[string]any{
@@ -115,7 +115,7 @@ func postText() {
 	session := reqrio.NewSession(false)
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method:      reqrio.POST,
-		Url:         "https://www.baidu.com",
+		Url:         "https://www.so.com",
 		Bytes:       []byte("hello world, text"),
 		ContentType: "text/plain",
 	})
@@ -131,7 +131,7 @@ func postFiles() {
 	err := session.SetKeyLog("../../2.log")
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.POST,
-		Url:    "https://www.baidu.com",
+		Url:    "https://www.so.com",
 		Data: map[string]string{
 			"v": "1",
 			"b": "{'ddfd':34}",
@@ -180,7 +180,7 @@ func clientHello() {
 	}
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.GET,
-		Url:    "https://www.baidu.com",
+		Url:    "https://www.so.com",
 	})
 	if err != nil {
 		panic(err)
@@ -202,7 +202,7 @@ func ja3() {
 	}
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.GET,
-		Url:    "https://www.baidu.com",
+		Url:    "https://www.so.com",
 	})
 	if err != nil {
 		panic(err)
@@ -224,7 +224,7 @@ func ja4() {
 	}
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.GET,
-		Url:    "https://www.baidu.com",
+		Url:    "https://www.so.com",
 	})
 	if err != nil {
 		panic(err)
@@ -245,7 +245,7 @@ func randTls() {
 	}
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.GET,
-		Url:    "https://www.baidu.com",
+		Url:    "https://www.so.com",
 	})
 	if err != nil {
 		panic(err)
@@ -329,7 +329,7 @@ func customTls() {
 	}
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.GET,
-		Url:    "https://www.baidu.com",
+		Url:    "https://www.so.com",
 	})
 	if err != nil {
 		panic(err)
@@ -347,7 +347,7 @@ func flow_reader() {
 	}
 	resp, err := session.SendRequest(reqrio.ConnParam{
 		Method: reqrio.GET,
-		Url:    "https://www.baidu.com",
+		Url:    "https://www.so.com",
 		Stream: true,
 	})
 	if err != nil {
