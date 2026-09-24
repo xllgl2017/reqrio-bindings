@@ -12,4 +12,4 @@ module.exports = {
 }
 
 //npm login
-//npm publish
+//npm publish -tag alpha
