@@ -1,3 +1,5 @@
+import os
+
 import reqrio
 from example.req import headers
 from reqrio import *
@@ -6,7 +8,7 @@ try:
     with open("../../../TOKEN", 'r', encoding="utf-8") as f:
         TOKEN = f.read()
 except:
-    TOKEN = ""
+    TOKEN = os.environ.get("REQRIO_TOKEN", "")
 
 
 # ====================================>TLS Example<======================================
