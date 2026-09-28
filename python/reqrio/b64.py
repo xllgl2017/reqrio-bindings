@@ -1,9 +1,18 @@
 from _ctypes import addressof, byref
-from ctypes import c_ubyte, string_at, POINTER, c_size_t
+from ctypes import c_ubyte, string_at, POINTER, c_size_t, c_void_p
 
 from reqrio.bindings import DLL
 from reqrio import util
 from typing import Union
+
+DLL.Base64_new.argtypes = []
+DLL.Base64_new.restype = c_void_p
+
+DLL.Base64_encode.argtypes = [c_void_p, POINTER(c_ubyte), c_size_t]
+DLL.Base64_encode.restype = c_void_p
+
+DLL.Base64_decode.argtypes = [c_void_p, POINTER(c_ubyte), c_size_t, POINTER(POINTER(c_ubyte)), POINTER(c_size_t)]
+DLL.Base64_decode.restype = int
 
 
 class Base64:

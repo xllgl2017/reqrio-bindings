@@ -18,6 +18,7 @@
 #include "Session.h"
 #include "Version.h"
 #include "WebSocket.h"
+#include <QProcessEnvironment>
 
 static QString read_token() {
     QFile file("../../../TOKEN");
@@ -190,15 +191,15 @@ void custom_finger() {
     fingerprint->addExtensionALPN(
         ApplicationSetting,
         {
-            util::alpn_str(HTTP20),
-            util::alpn_str(HTTP11)
+            HTTP20,
+            HTTP11
         });
     fingerprint->addExtension(ServerName);
     fingerprint->addExtensionALPN(
         ApplicationLayerProtocolNegotiation,
         {
-            util::alpn_str(HTTP20),
-            util::alpn_str(HTTP11)
+            HTTP20,
+            HTTP11
         });
     fingerprint->addExtensionPadding(Padding, 12);
 
@@ -224,10 +225,14 @@ void flow_reader() {
     const auto *session = new Session(HTTP20);
     session->addHeader("User-Agent",
                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0");
-    const Response resp = session->send(GET, new Url("https://ms.bdimg.com/pacific/0/pic/-742236409_-1564646186.png?x=0&y=0&h=340&w=510&vh=340.00&vw=510.00&oh=340.00&ow=510.00"), new Body(), true);
+    Response resp = session->send(
+        GET, new Url(
+            "https://ms.bdimg.com/pacific/0/pic/-742236409_-1564646186.png?x=0&y=0&h=340&w=510&vh=340.00&vw=510.00&oh=340.00&ow=510.00"),
+        new Body(), true);
     qDebug() << resp.statusCode();
     QFile file("1.png");
     file.open(QIODevice::WriteOnly);
+
     for (const auto chunk: resp.chunks()) {
         file.write(chunk);
         qDebug() << chunk.length();

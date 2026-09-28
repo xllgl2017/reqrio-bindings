@@ -1,10 +1,66 @@
 from ctypes import *
 
+import reqrio
 from reqrio import util
 from reqrio.alpn import ALPN
 from reqrio.bindings import DLL
 from reqrio.method import Method
 from reqrio.response import Response
+
+# ===========================>ScReq<===================================
+
+# 初始化函数
+DLL.ScReq_new.argtypes = [c_bool]
+DLL.ScReq_new.restype = c_void_p
+
+DLL.ScReq_set_header_json.argtypes = [c_void_p, c_char_p]
+DLL.ScReq_set_header_json.restype = c_void_p
+
+DLL.ScReq_add_header.argtypes = [c_void_p, c_char_p, c_char_p, c_bool]
+DLL.ScReq_add_header.restype = c_void_p
+
+DLL.ScReq_remove_header.argtypes = [c_void_p, c_char_p]
+DLL.ScReq_remove_header.restype = c_void_p
+
+DLL.ScReq_set_alpn.argtypes = [c_void_p, c_char_p]
+DLL.ScReq_set_alpn.restype = c_void_p
+
+DLL.ScReq_set_verify.argtypes = [c_void_p, c_bool]
+DLL.ScReq_set_verify.restype = c_void_p
+
+DLL.ScReq_set_redirect.argtypes = [c_void_p, c_bool]
+DLL.ScReq_set_redirect.restype = c_void_p
+
+DLL.ScReq_set_key_log.argtypes = [c_void_p, c_char_p]
+DLL.ScReq_set_key_log.restype = c_void_p
+
+DLL.ScReq_set_fingerprint.argtypes = [c_void_p, c_void_p]
+DLL.ScReq_set_fingerprint.restype = c_void_p
+
+DLL.ScReq_set_proxy.argtypes = [c_void_p, c_char_p]
+DLL.ScReq_set_proxy.restype = c_void_p
+
+DLL.ScReq_set_timeout.argtypes = [c_void_p, c_char_p]
+DLL.ScReq_set_timeout.restype = c_void_p
+
+DLL.ScReq_set_cookie.argtypes = [c_void_p, c_char_p]
+DLL.ScReq_set_cookie.restype = c_void_p
+
+DLL.ScReq_add_cookie.argtypes = [c_void_p, c_char_p, c_char_p]
+DLL.ScReq_add_cookie.restype = c_void_p
+
+DLL.ScReq_reconnect.argtypes = [c_void_p]
+DLL.ScReq_reconnect.restype = c_void_p
+
+DLL.ScReq_connect.argtypes = [c_void_p, c_char_p, c_char_p]
+DLL.ScReq_connect.restype = c_void_p
+
+DLL.ScReq_close_stream.argtypes = [c_void_p]
+DLL.ScReq_close_stream.restype = c_void_p
+
+
+DLL.ScReq_do_http.argtypes = [c_void_p, c_int, c_void_p, c_void_p, c_bool, POINTER(c_char_p)]
+DLL.ScReq_do_http.restype = POINTER(reqrio.response.RespInner)
 
 
 class Session:
@@ -97,7 +153,6 @@ class Session:
     def remove_header(self, name: str):
         err, msg = util.check_char_err(self.dll.ScReq_remove_header(self.hid, name.encode('utf-8')))
         if err: raise Exception(msg);
-
     def _set_fingerprint(
             self,
             random: bool = None,
@@ -182,12 +237,12 @@ class Session:
                         self.dll.Url_add_param(url, name.encode('utf-8'), value.encode('utf-8')))
                     if err: raise Exception(msg)
             err = c_char_p()
-            resp = self.dll.ScReq_do_http(self.hid, method.value, url, body, stream, byref(err))
+            resp = self.dll.ScReq_do_http(self.hid, method, url, body, stream, byref(err))
             url = None
             body = None
             err, msg = util.check_char_err(err)
             if err: raise Exception(msg)
-            return Response(resp, self.hid)
+            return Response(resp, self.hid, stream=stream)
         finally:
             if type(url) == int:
                 self.dll.Url_drop(url)
@@ -310,11 +365,6 @@ class Session:
     def close_stream(self):
         err, msg = util.check_char_err(self.dll.ScReq_close_stream(self.hid))
         if err: raise Exception(msg)
-
-    # def open_stream(self, method: Method, url: str, params: dict = None, data: dict = None, json: dict = None,
-    #                 bs: bytes = None, content_type: str = None):
-    #     from reqrio.stream import Stream
-    #     return Stream(self, method, url, params, data, json, bs, content_type)
 
     def close(self):
         """记得关闭资源，否则容易造成内存溢出"""

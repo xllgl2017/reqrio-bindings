@@ -4,7 +4,6 @@
 
 #ifndef REQRIO_QT_UNTIL_H
 #define REQRIO_QT_UNTIL_H
-#include <QString>
 #include <stdexcept>
 #include <QMap>
 
@@ -34,6 +33,4 @@ namespace util {
             res.remove(res.lastIndexOf('&'));
         return res.toUtf8();
     }
-
-    QString alpn_str(ALPN alpn);
 }

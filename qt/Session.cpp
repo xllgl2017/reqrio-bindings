@@ -3,12 +3,11 @@
 //
 
 #include "Session.h"
-
 #include <QJsonDocument>
 
 
 Session::Session(const bool ignore_hdr_sort, QObject *parent) : QObject(parent) {
-    this->req = bindings::ScReq_new(ignore_hdr_sort);
+    this->req = ScReq_new(ignore_hdr_sort);
 }
 
 Session::Session(const ALPN alpn, const bool verify, const bool auto_redirect, const bool ignore_hdr_sort,
@@ -19,71 +18,70 @@ Session::Session(const ALPN alpn, const bool verify, const bool auto_redirect, c
 }
 
 void Session::setHeader(const QJsonDocument &header) const {
-    util::check_err(bindings::ScReq_set_header_json(this->req, header.toJson().data()));
+    util::check_err(ScReq_set_header_json(this->req, header.toJson().data()));
 }
 
 void Session::addHeader(const QString &name, const QString &value, const bool reversed) const {
-    util::check_err(bindings::ScReq_add_header(this->req, name.toUtf8(), value.toUtf8(), reversed));
+    util::check_err(ScReq_add_header(this->req, name.toUtf8(), value.toUtf8(), reversed));
 }
 
-void Session::setAlpn(const ALPN alpn) const {
-    const auto alpn_str = util::alpn_str(alpn);
-    util::check_err(bindings::ScReq_set_alpn(this->req, alpn_str.toUtf8()));
+void Session::setAlpn(const ALPN &alpn) const {
+    util::check_err(ScReq_set_alpn(this->req, alpn.toUtf8()));
 }
 
 void Session::setVerify(const bool verify) const {
-    util::check_err(bindings::ScReq_set_verify(this->req, verify));
+    util::check_err(ScReq_set_verify(this->req, verify));
 }
 
 void Session::setRedirect(const bool auto_redirect) const {
-    util::check_err(bindings::ScReq_set_redirect(this->req, auto_redirect));
+    util::check_err(ScReq_set_redirect(this->req, auto_redirect));
 }
 
 void Session::setKeyLog(const QString &key_log) const {
-    util::check_err(bindings::ScReq_set_key_log(this->req, key_log.toUtf8()));
+    util::check_err(ScReq_set_key_log(this->req, key_log.toUtf8()));
 }
 
 void Session::setProxy(const QString &proxy) const {
-    util::check_err(bindings::ScReq_set_proxy(this->req, proxy.toUtf8()));
+    util::check_err(ScReq_set_proxy(this->req, proxy.toUtf8()));
 }
 
 
 void Session::setTimeout(const Timeout &timeout) const {
     const auto json = QJsonDocument(timeout.toJson());
-    util::check_err(bindings::ScReq_set_timeout(this->req, json.toJson(QJsonDocument::Compact)));
+    util::check_err(ScReq_set_timeout(this->req, json.toJson(QJsonDocument::Compact)));
 }
 
 void Session::setCookie(const QString &cookie) const {
-    util::check_err(bindings::ScReq_set_cookie(this->req, cookie.toUtf8()));
+    util::check_err(ScReq_set_cookie(this->req, cookie.toUtf8()));
 }
 
 void Session::addCookie(const QString &name, const QString &value) const {
-    util::check_err(bindings::ScReq_add_cookie(this->req, name.toUtf8(), value.toUtf8()));
+    util::check_err(ScReq_add_cookie(this->req, name.toUtf8(), value.toUtf8()));
 }
 
 void Session::setFingerprint(Fingerprint *fingerprint) const {
-    util::check_err(bindings::ScReq_set_fingerprint(this->req, fingerprint->take()));
+    util::check_err(ScReq_set_fingerprint(this->req, fingerprint->take()));
     delete fingerprint;
 }
 
 void Session::reconnect() const {
-    util::check_err(bindings::ScReq_reconnect(this->req));
+    util::check_err(ScReq_reconnect(this->req));
 }
 
 void Session::connect(const QString &url, const QString &sni) const {
     if (sni.isEmpty())
-        util::check_err(bindings::ScReq_connect(this->req, url.toUtf8(), nullptr));
+        util::check_err(ScReq_connect(this->req, url.toUtf8(), nullptr));
     else
-        util::check_err(bindings::ScReq_connect(this->req, url.toUtf8(), sni.toUtf8()));
+        util::check_err(ScReq_connect(this->req, url.toUtf8(), sni.toUtf8()));
 }
 
 void Session::close_stream() const {
-    util::check_err(bindings::ScReq_close_stream(this->req));
+    util::check_err(ScReq_close_stream(this->req));
 }
 
 Response Session::send(const Method method, Url *url, Body *body, bool stream) const {
     char *err = nullptr;
-    const auto resp_ptr = bindings::ScReq_do_http(this->req, method, url->take(), body->take(), stream, &err);
+    const auto resp_ptr = ScReq_do_http(this->req, method, url->take(), body->take(), stream, &err);
     delete url;
     delete body;
     util::check_err(err);
@@ -154,6 +152,6 @@ Response Session::query(Url *url, Body *body) const {
 
 Session::~Session() {
     if (this->req == nullptr) return;
-    bindings::ScReq_drop(this->req);
+    ScReq_drop(this->req);
     this->req = nullptr;
 }

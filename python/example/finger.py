@@ -28,7 +28,9 @@ def ua_tls():
     hdr.update(fingerprint)
     session = Session(headers, alpn=ALPN.HTTP20, client_hello=client_hello, token=TOKEN)
     resp = session.get('https://www.baidu.com')
-    print('code: ', resp.statue_code())
+    print('code: ', resp.status)
+    print(resp.alpn.as_bytes())
+    print(resp.body.as_bytes())
     print('body: ', len(resp.bytes()))
 
     resp = reqrio.get('https://www.baidu.com', headers, client_hello=client_hello, token=TOKEN)

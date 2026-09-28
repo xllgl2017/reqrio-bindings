@@ -52,7 +52,7 @@ def send(
     resp = req.pre_send(method, url, params, data, json, bytes, text, files, content_type, auto_redirect=auto_redirect,
                         sni=sni, stream=stream)
     if stream:
-        resp.req_free = True
+        resp.__req_free__ = True
         req.hid = None
     else:
         req.close()

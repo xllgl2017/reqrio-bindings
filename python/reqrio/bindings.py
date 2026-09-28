@@ -1,7 +1,7 @@
 import os
 import sys
 from ctypes import cdll, c_void_p, c_int, c_char_p, c_bool, c_ubyte, c_size_t, c_uint16, c_uint64
-
+import reqrio
 from _ctypes import POINTER
 
 base = os.path.dirname(__file__)
@@ -66,78 +66,10 @@ DLL.HttpFile_drop.argtypes = [c_void_p]
 
 DLL.Body_drop.argtypes = [c_void_p]
 
-# ==========================>Response<=============================
 
-DLL.Response_status_code.argtypes = [c_void_p, POINTER(c_char_p)]
-DLL.Response_status_code.restype = c_uint16
 
-DLL.Response_bytes.argtypes = [c_void_p, POINTER(c_size_t), POINTER(c_char_p)]
-DLL.Response_bytes.restype = POINTER(c_ubyte)
 
-DLL.Response_get_header.argtypes = [c_void_p, c_char_p, POINTER(c_char_p)]
-DLL.Response_get_header.restype = c_void_p
 
-DLL.Response_cookies.argtypes = [c_void_p, POINTER(c_char_p)]
-DLL.Response_cookies.restype = c_void_p
-
-DLL.Response_sid.argtypes = [c_void_p, POINTER(c_char_p)]
-DLL.Response_sid.restype = c_uint64
-
-DLL.Response_drop.argtypes = [c_void_p]
-
-# ===========================>ScReq<===================================
-
-# 初始化函数
-DLL.ScReq_new.argtypes = [c_bool]
-DLL.ScReq_new.restype = c_void_p
-
-DLL.ScReq_set_header_json.argtypes = [c_void_p, c_char_p]
-DLL.ScReq_set_header_json.restype = c_void_p
-
-DLL.ScReq_add_header.argtypes = [c_void_p, c_char_p, c_char_p, c_bool]
-DLL.ScReq_add_header.restype = c_void_p
-
-DLL.ScReq_remove_header.argtypes = [c_void_p, c_char_p]
-DLL.ScReq_remove_header.restype = c_void_p
-
-DLL.ScReq_set_alpn.argtypes = [c_void_p, c_char_p]
-DLL.ScReq_set_alpn.restype = c_void_p
-
-DLL.ScReq_set_verify.argtypes = [c_void_p, c_bool]
-DLL.ScReq_set_verify.restype = c_void_p
-
-DLL.ScReq_set_redirect.argtypes = [c_void_p, c_bool]
-DLL.ScReq_set_redirect.restype = c_void_p
-
-DLL.ScReq_set_key_log.argtypes = [c_void_p, c_char_p]
-DLL.ScReq_set_key_log.restype = c_void_p
-
-DLL.ScReq_set_fingerprint.argtypes = [c_void_p, c_void_p]
-DLL.ScReq_set_fingerprint.restype = c_void_p
-
-DLL.ScReq_set_proxy.argtypes = [c_void_p, c_char_p]
-DLL.ScReq_set_proxy.restype = c_void_p
-
-DLL.ScReq_set_timeout.argtypes = [c_void_p, c_char_p]
-DLL.ScReq_set_timeout.restype = c_void_p
-
-DLL.ScReq_set_cookie.argtypes = [c_void_p, c_char_p]
-DLL.ScReq_set_cookie.restype = c_void_p
-
-DLL.ScReq_add_cookie.argtypes = [c_void_p, c_char_p, c_char_p]
-DLL.ScReq_add_cookie.restype = c_void_p
-
-DLL.ScReq_reconnect.argtypes = [c_void_p]
-DLL.ScReq_reconnect.restype = c_void_p
-
-DLL.ScReq_connect.argtypes = [c_void_p, c_char_p, c_char_p]
-DLL.ScReq_connect.restype = c_void_p
-
-DLL.ScReq_close_stream.argtypes = [c_void_p]
-DLL.ScReq_close_stream.restype = c_void_p
-
-DLL.ScReq_do_http.argtypes = [c_void_p, c_int, c_void_p, c_void_p, c_bool, POINTER(c_char_p)]
-DLL.ScReq_do_http.restype = c_void_p
 
 DLL.ScReq_recv_stream.argtypes = [c_void_p, c_uint64, POINTER(c_size_t), POINTER(c_char_p)]
 DLL.ScReq_recv_stream.restype = c_void_p
@@ -219,15 +151,6 @@ DLL.Hmac_finalize.argtypes = [c_void_p, POINTER(POINTER(c_ubyte)), POINTER(c_siz
 DLL.Hmac_finalize.restype = c_int
 
 DLL.Hmac_free.argtypes = [c_void_p]
-
-DLL.Base64_new.argtypes = []
-DLL.Base64_new.restype = c_void_p
-
-DLL.Base64_encode.argtypes = [c_void_p, POINTER(c_ubyte), c_size_t]
-DLL.Base64_encode.restype = c_void_p
-
-DLL.Base64_decode.argtypes = [c_void_p, POINTER(c_ubyte), c_size_t, POINTER(POINTER(c_ubyte)), POINTER(c_size_t)]
-DLL.Base64_decode.restype = int
 
 DLL.Base64_free.argtypes = [c_void_p]
 

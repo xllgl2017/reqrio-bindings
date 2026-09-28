@@ -5,12 +5,26 @@
 #ifndef REQRIO_QT_URL_H
 #define REQRIO_QT_URL_H
 #include <qobject.h>
-#include "bindings.h"
+
+extern "C" {
+///=========================>[Url]<=====================
+struct UrlInner;
+
+UrlInner *Url_new(const char *url, char **err);
+
+char *Url_add_param(UrlInner *url, const char *name, const char *value);
+
+char *Url_remove_param(UrlInner *url, const char *name);
+
+char *Url_set_sni(UrlInner *url, const char *sni);
+
+void Url_drop(UrlInner *url);
+}
 
 class Url : QObject {
     Q_OBJECT
 
-    bindings::Url *raw_ptr;
+    UrlInner *raw_ptr;
 
 public:
     explicit Url(const QString &url, QObject *parent = nullptr);
@@ -21,7 +35,7 @@ public:
 
     void removeParam(const QString &name) const;
 
-    bindings::Url *take();
+    UrlInner *take();
 
     ~Url() override;
 };

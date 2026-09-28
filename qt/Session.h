@@ -5,19 +5,66 @@
 #ifndef UNTITLED_REQRIO_H
 #define UNTITLED_REQRIO_H
 
-#include "Response.h"
 #include "Timeout.h"
 #include "bindings.h"
 #include "Body.h"
 #include "Fingerprint.h"
+#include "Response.h"
 #include "Url.h"
 
 using namespace std;
 
+extern "C" {
+///=========================>[ScReq]<=====================
+struct ScReq;
+
+ScReq *ScReq_new(bool ignore_hdr_sort);
+
+char *ScReq_set_header_json(ScReq *req, const char *header);
+
+char *ScReq_add_header(ScReq *req, const char *key, const char *value, bool reversed);
+
+char *ScReq_remove_header(ScReq *req, const char *key);
+
+char *ScReq_set_alpn(ScReq *req, const char *alpn);
+
+char *ScReq_set_verify(ScReq *req, bool verify);
+
+char *ScReq_set_redirect(ScReq *req, bool redirect);
+
+char *ScReq_set_key_log(ScReq *req, const char *key_log);
+
+char *ScReq_set_fingerprint(ScReq *req, FingerInner *fingerprint);
+
+char *ScReq_set_proxy(ScReq *req, const char *proxy);
+
+char *ScReq_set_timeout(ScReq *req, const char *timeout);
+
+char *ScReq_set_cookie(ScReq *req, const char *cookie);
+
+char *ScReq_add_cookie(ScReq *req, const char *name, const char *value);
+
+RespInner *ScReq_do_http(ScReq *req, Method method, UrlInner *url, bindings::Body *body, bool stream, char **err);
+
+char *ScReq_reconnect(ScReq *req);
+
+char *ScReq_connect(ScReq *req, const char *url, const char *sni);
+
+char *ScReq_close_stream(ScReq *req);
+
+void ScReq_drop(ScReq *req);
+}
+
+typedef QString ALPN;
+
+static ALPN HTTP11 = "http/1.1";
+static ALPN HTTP20 = "h2";
+static ALPN HTTP30 = "h3";
+
 
 class Session : QObject {
     Q_OBJECT
-    bindings::ScReq *req = nullptr;
+    ScReq *req = nullptr;
 
 public:
     explicit Session(bool ignore_hdr_sort = false, QObject *parent = nullptr);
@@ -44,7 +91,7 @@ public:
     void addHeader(const QString &name, const QString &value, bool reversed = false) const;
 
     /// 设置请求的版本
-    void setAlpn(ALPN alpn) const;
+    void setAlpn(const ALPN& alpn) const;
 
     /// 设置是否对服务器证书链进行验证
     void setVerify(bool verify) const;

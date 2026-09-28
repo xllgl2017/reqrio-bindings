@@ -31,11 +31,11 @@ def get():
     session.add_header("s", "l")
     session.connect('https://www.baidu.com')
     resp = session.get("https://www.baidu.com")
-    print('code: ', resp.statue_code())
+    print('code: ', resp.status)
     print('body: ', len(resp.bytes()))
     #
     resp = reqrio.get("https://www.baidu.com", headers)
-    print('code: ', resp.statue_code())
+    print('code: ', resp.statue)
     print('body: ', len(resp.bytes()))
 
 
@@ -47,12 +47,12 @@ def get_with_params():
         "b": {'fgfdg': 'dg'}
     }
     resp = session.get("https://www.baidu.com", params)
-    print('code: ', resp.statue_code())
+    print('code: ', resp.statue)
     print('body: ', len(resp.bytes()))
     session.reconnect()
     #
     resp = reqrio.get("https://www.baidu.com", headers, params=params)
-    print('code: ', resp.statue_code())
+    print('code: ', resp.statue)
     print('body: ', len(resp.bytes()))
 
 
@@ -64,11 +64,11 @@ def post_form():
         "b": {'fgfdg': 'dg'}
     }
     resp = session.post("https://www.baidu.com", data=data)
-    print('code: ', resp.statue_code())
+    print('code: ', resp.statue)
     print('body: ', len(resp.bytes()))
     #
     resp = reqrio.post("https://www.baidu.com", headers, data=data)
-    print('code: ', resp.statue_code())
+    print('code: ', resp.statue)
     print('body: ', len(resp.bytes()))
 
 
@@ -80,18 +80,18 @@ def post_json():
         "b": {'fgfdg': 'dg'}
     }
     resp = session.post("https://www.baidu.com", json=data)
-    print('code: ', resp.statue_code())
+    print('code: ', resp.statue)
     print('body: ', len(resp.bytes()))
     #
     resp = session.post("https://www.baidu.com", headers, json=data)
-    print('code: ', resp.statue_code())
+    print('code: ', resp.statue)
     print('body: ', len(resp.bytes()))
 
 
 def post_text():
     session = Session(headers)
     resp = session.post("https://www.baidu.com", text="test req body text")
-    print('code: ', resp.statue_code())
+    print('code: ', resp.statue)
     print('body: ', len(resp.bytes()))
 
 
@@ -113,13 +113,14 @@ def upload_file():
         "name": "test"
     }
     resp = session.post("https://www.baidu.com", data=data, files=files)
-    print('code: ', resp.statue_code())
+    print('code: ', resp.statue)
     print('body: ', len(resp.bytes()))
 
 
 def flow_reader():
     session = Session(headers)
     resp = session.get("https://www.baidu.com", stream=True)
-    print(resp.statue_code())
+    print(resp.statue)
     for chunk in resp.chunks():
         print("chunk:",len(chunk))
+    # resp 已释放,后面不能在读

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class Method(Enum):
+class Method(IntEnum):
     GET = 0
     POST = 1
     PUT = 2

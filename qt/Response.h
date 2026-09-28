@@ -7,16 +7,45 @@
 
 #include "bindings.h"
 #include "Cookie.h"
+#include "buffer.h"
+
+typedef struct ScReq ScReq;
+
+extern "C" {
+///=========================>[Response]<=====================
+struct RespInner {
+    uint64_t sid;
+    Method method;
+    uint16_t status;
+    Buf alpn;
+    Buffer body;
+};
+
+uint16_t Response_status_code(const RespInner *response, char **err);
+
+uint8_t *Response_bytes(RespInner *response, size_t *len, char **err);
+
+char *Response_get_header(const RespInner *response, const char *name, char **err);
+
+char *Response_cookies(const RespInner *response, char **err);
+
+uint64_t Response_sid(const RespInner *response, char **err);
+
+void Response_drop(RespInner *RespInner);
+
+const uint8_t *ScReq_recv_stream(ScReq *req, uint64_t sid, size_t *len, char **err);
+}
 
 
 class Response : QObject {
     Q_OBJECT
 
-    bindings::Response *raw_ptr;
-    bindings::ScReq *req_ptr;
+    RespInner *raw_ptr;
+    ScReq *req_ptr;
+    bool read_stream = false;
 
 public:
-    explicit Response(bindings::Response *ptr, bindings::ScReq *req, QObject *parent = nullptr);
+    explicit Response(RespInner *ptr, ScReq *req, QObject *parent = nullptr);
 
     ~Response() override;
 
@@ -42,13 +71,13 @@ public:
 
     private:
         uint64_t sid;
-        bindings::ScReq *req;
+        ScReq *req;
         const uint8_t *ptr = {};
         size_t size = 0;
         bool hasNext;
 
     public:
-        ChunkIterator(bindings::ScReq *req, uint64_t sid, bool hasNext);
+        ChunkIterator(ScReq *req, uint64_t sid, bool hasNext);
 
         QByteArray operator*() const;
 
@@ -60,25 +89,25 @@ public:
     };
 
     class ChunkRange {
-        bindings::ScReq *req_ptr;
+        ScReq *req_ptr;
         uint64_t sid;
 
     public:
-        ChunkRange(bindings::ScReq *req, uint64_t sid) {
+        ChunkRange(ScReq *req, uint64_t sid) {
             this->req_ptr = req;
             this->sid = sid;
         }
 
-        ChunkIterator begin() const {
-            return ChunkIterator(this->req_ptr, this->sid, true);
+        [[nodiscard]] ChunkIterator begin() const {
+            return {this->req_ptr, this->sid, true};
         }
 
-        ChunkIterator end() const {
-            return ChunkIterator(this->req_ptr, this->sid, false);
+        [[nodiscard]] ChunkIterator end() const {
+            return {this->req_ptr, this->sid, false};
         }
     };
 
-    ChunkRange chunks() const;
+    [[nodiscard]] ChunkRange chunks();
 };
 
 
