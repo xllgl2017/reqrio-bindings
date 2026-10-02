@@ -90,6 +90,14 @@ jobs:
           repository: xllgl2017/reqrio
           run-id: ${{ steps.reqrio-run.outputs.run_id }}
           github-token: ${{ secrets.GIT_TOKEN }}
+      - name: Download macos native lib
+        uses: actions/download-artifact@v4
+        with:
+          name: native-macos
+          path: natives
+          repository: xllgl2017/reqrio
+          run-id: ${{ steps.reqrio-run.outputs.run_id }}
+          github-token: ${{ secrets.GIT_TOKEN }}
 
       - name: copy natives libraries
         env:
@@ -101,7 +109,7 @@ jobs:
           # go
           cp natives/libreqrio.so go/
           cp natives-go/reqrio.dll go/
-          cp natives-go/libreqrio.dylib go/
+          cp natives/libreqrio.dylib go/
           #python
           cp natives/reqrio.dll python/reqrio/
           cp natives/libreqrio.so python/reqrio/
