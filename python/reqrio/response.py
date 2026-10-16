@@ -33,7 +33,6 @@ class RespInner(ctypes.Structure):
     body: Buffer
     _fields_ = [
         ("sid", ctypes.c_uint64),
-        ("method", ctypes.c_int),
         ("status", ctypes.c_uint16),
         ("alpn", Buf),
         ("body", Buffer)

@@ -15,7 +15,6 @@ extern "C" {
 ///=========================>[Response]<=====================
 struct RespInner {
     uint64_t sid;
-    Method method;
     uint16_t status;
     Buf alpn;
     Buffer body;
