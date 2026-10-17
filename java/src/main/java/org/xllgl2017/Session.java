@@ -164,7 +164,7 @@ public class Session implements AutoCloseable {
             url.setRaw(null);
             body.setRaw(null);
             util.check_err_pointer(err);
-            return new Response(ptr, this.req);
+            return new Response(ptr, this.req, stream);
         }
     }
 

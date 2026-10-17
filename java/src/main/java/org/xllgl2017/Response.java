@@ -22,7 +22,7 @@ public class Response {
     private final Pointer req;
 
 
-    public Response(Pointer raw, Pointer req) throws Exception {
+    public Response(Pointer raw, Pointer req, boolean stream) throws Exception {
         try {
             this.req = req;
             // status code
@@ -60,7 +60,7 @@ public class Response {
             this.sid = REQRIO.Response_sid(raw, err);
             util.check_err_pointer(err);
         } finally {
-            REQRIO.Response_drop(raw);
+            if (!stream) REQRIO.Response_drop(raw);
         }
     }
 
@@ -119,7 +119,7 @@ public class Response {
 
             @Override
             public byte[] next() {
-                if (!hashNext){
+                if (!hashNext) {
                     throw new NoSuchElementException();
                 }
                 return this.chunk;
