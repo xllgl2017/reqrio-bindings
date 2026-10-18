@@ -1,15 +1,15 @@
 package main
 
 /*
-git tag go/v0.4.0-alpha1
-git push origin go/v0.4.0-alpha1
+git tag go/v0.4.0-alpha5
+git push origin go/v0.4.0-alpha5
 */
 import (
 	"encoding/hex"
 	"fmt"
 	"os"
 
-	"github.com/xllgl2017/reqrio/reqrio-go/reqrio"
+	"github.com/xllgl2017/reqrio-bindings/go/reqrio"
 )
 
 var headers = map[string]string{
@@ -353,7 +353,7 @@ func flow_reader() {
 	if err != nil {
 		panic(err)
 	}
-	defer resp.Delete()
+	//defer resp.Delete()
 	for chunk := range resp.Chunks() {
 		println("chunk len: ", len(chunk))
 	}
