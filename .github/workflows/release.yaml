@@ -234,4 +234,4 @@ jobs:
         working-directory: nodejs
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public
+        run: npm stage publish --access public
