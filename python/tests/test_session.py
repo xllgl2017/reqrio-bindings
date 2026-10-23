@@ -20,5 +20,5 @@ from example.req import *
 #
 # # h3_req()
 # ja3()
-# builtin_finger()
-finger_idx()
+builtin_finger()
+# finger_idx()
