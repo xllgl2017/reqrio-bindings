@@ -58,6 +58,7 @@ import (
 type ALPN string
 
 const (
+    HTTP30 ALPN = "h3"
 	HTTP20 ALPN = "h2"
 	HTTP11 ALPN = "http/1.1"
 )

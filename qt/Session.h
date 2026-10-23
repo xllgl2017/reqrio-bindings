@@ -132,8 +132,6 @@ public:
 
     void close_stream() const;
 
-    // void setCallback(bindings::Callback callback) const;
-
     /// 发送HTTP请求
     /// @param method:请求的方法
     /// @param url:请求的Url
