@@ -6,7 +6,7 @@
 
 - Native HTTP/HTTPS request engine with low-copy semantics.
 - TLS support powered by BoringSSL.
-- Supports HTTP/1.0, HTTP/1.1, and HTTP/2.0 via `ALPN`.
+- Supports HTTP/1.0, HTTP/1.1, and HTTP/2.0 via `ALPN`; HTTP/3 and QUIC are available in the native core when the `quic` feature is enabled.
 - Custom request headers, cookies, timeout settings, and proxy support.
 - Supports form data, JSON, text, bytes, and multipart file uploads.
 - Includes native WebSocket support.

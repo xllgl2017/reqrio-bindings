@@ -5,7 +5,7 @@
 ## Features
 
 - Native HTTP/HTTPS client using BoringSSL via JNA.
-- Supports HTTP/1.1 and HTTP/2.0 via `ALPN`.
+- Supports HTTP/1.1 and HTTP/2.0 via `ALPN`; HTTP/3 and QUIC are available in the native library when the `quic` feature is enabled.
 - Custom headers, cookies, proxy support, and timeout control.
 - Supports JSON, form data, text, binary bodies, and multipart file upload.
 - Supports TLS fingerprinting through JA3, JA4, ClientHello, and custom fingerprint definitions.

@@ -3,7 +3,7 @@
 * Features: Low copy, high concurrency, low overhead
 
 * Supports TLS fingerprinting, which can be configured via hexadecimal, Ja3, or Ja4 TLS handshake settings (*
-  *subscription only**).
+  *subscription only**). HTTP/3 and QUIC are available in the native core when the `quic` feature is enabled.
 
 * Ensures **request header order** (see [Request Header Order Table](#request-header-order-table)), consistent with
   browsers.
