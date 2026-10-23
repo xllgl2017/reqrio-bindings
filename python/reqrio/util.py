@@ -42,7 +42,7 @@ def urlencoded_str(data: dict) -> str:
 
 def check_char_err(err: Union[ctypes.c_char_p, ctypes.c_void_p]):
     if err is None: return False, ""
-    if type(err) == ctypes.c_void_p:
+    if type(err) == ctypes.c_void_p or type(err) == int:
         error = ctypes.cast(err, ctypes.c_char_p).value.decode('utf-8')
         DLL.char_free(err)
         return True, error

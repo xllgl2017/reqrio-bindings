@@ -43,7 +43,7 @@ class Hasher:
 
     def __del__(self):
         if hasattr(self, "hasher") and self.hasher:
-            DLL.Hasher_free(self.hasher)
+            DLL.Hasher_drop(self.hasher)
             self.hasher = None
 
 

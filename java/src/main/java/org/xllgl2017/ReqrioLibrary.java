@@ -29,6 +29,10 @@ public interface ReqrioLibrary extends Library {
 
     Pointer ScReq_set_fingerprint(Pointer req, Pointer fingerprint);
 
+    Pointer ScReq_with_builtin(Pointer req, String name, String token);
+
+    Pointer ScReq_with_finger_idx(Pointer req, int idx, String auth);
+
     Pointer ScReq_set_proxy(Pointer req, String proxy);
 
     Pointer ScReq_set_timeout(Pointer req, String timeout);

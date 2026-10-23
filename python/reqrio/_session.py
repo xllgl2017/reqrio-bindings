@@ -37,6 +37,12 @@ DLL.ScReq_set_key_log.restype = c_void_p
 DLL.ScReq_set_fingerprint.argtypes = [c_void_p, c_void_p]
 DLL.ScReq_set_fingerprint.restype = c_void_p
 
+DLL.ScReq_with_builtin.argtypes = [c_void_p, c_char_p, c_char_p]
+DLL.ScReq_with_builtin.restype = c_void_p
+
+DLL.ScReq_with_finger_idx.argtypes = [c_void_p, c_size_t, c_char_p]
+DLL.ScReq_with_finger_idx.restype = c_void_p
+
 DLL.ScReq_set_proxy.argtypes = [c_void_p, c_char_p]
 DLL.ScReq_set_proxy.restype = c_void_p
 
@@ -58,7 +64,6 @@ DLL.ScReq_connect.restype = c_void_p
 DLL.ScReq_close_stream.argtypes = [c_void_p]
 DLL.ScReq_close_stream.restype = c_void_p
 
-
 DLL.ScReq_do_http.argtypes = [c_void_p, c_int, c_void_p, c_void_p, c_bool, POINTER(c_char_p)]
 DLL.ScReq_do_http.restype = POINTER(reqrio.response.RespInner)
 
@@ -77,7 +82,10 @@ class Session:
             random_tls: bool = False,
             custom_tls: dict = None,
             token: str = "",
-            ignore_hdr_sort: bool = False
+            ignore_hdr_sort: bool = False,
+            builtin_finger: str = None,
+            finger_idx: int = None,
+            auth: str = None
     ):
         """
         :param
@@ -102,6 +110,7 @@ class Session:
         if err: raise Exception(msg)
         # verify
         self._set_fingerprint(random_tls, ja3, ja4, client_hello, custom_tls, token)
+        self._set_finger_file(builtin_finger, auth, finger_idx, token)
         err, msg = util.check_char_err(self.dll.ScReq_set_verify(self.hid, verify))
         if err: raise Exception(msg)
         # proxy
@@ -153,6 +162,7 @@ class Session:
     def remove_header(self, name: str):
         err, msg = util.check_char_err(self.dll.ScReq_remove_header(self.hid, name.encode('utf-8')))
         if err: raise Exception(msg);
+
     def _set_fingerprint(
             self,
             random: bool = None,
@@ -188,8 +198,22 @@ class Session:
             if err: raise Exception(msg)
         else:
             return
-        err, msg = util.check_char_err(self.dll.ScReq_set_fingerprint(self.hid, fingerprint))
+        err = self.dll.ScReq_set_fingerprint(self.hid, fingerprint);
+        print(111, err, type(err))
+        err, msg = util.check_char_err(err)
         if err: raise Exception(msg)
+
+    def _set_finger_file(self, name: str = None, auth: str = None, idx: int = None, token: str = None):
+        if name is not None and token is not None:
+            err = DLL.ScReq_with_builtin(self.hid, name.encode("utf-8"), token.encode("utf-8"))
+            print(type(err))
+            err, msg = util.check_char_err(err)
+            if err: raise Exception(msg)
+            return
+        if auth is not None and auth is not None:
+            err = self.dll.ScReq_with_finger_idx(self.hid, idx, auth.encode("utf-8"))
+            err, msg = util.check_char_err(err)
+            if err: raise Exception(msg)
 
     def set_cookie(self, cookie: str):
         err, msg = util.check_char_err(self.dll.ScReq_set_cookie(self.hid, cookie.encode('utf-8')))

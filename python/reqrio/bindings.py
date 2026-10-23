@@ -139,7 +139,7 @@ DLL.Hasher_update.restype = c_int
 DLL.Hasher_finalize.argtypes = [c_void_p, POINTER(POINTER(c_ubyte)), POINTER(c_size_t)]
 DLL.Hasher_finalize.restype = c_int
 
-DLL.Hasher_free.argtypes = [c_void_p]
+DLL.Hasher_drop.argtypes = [c_void_p]
 
 DLL.Hmac_new.argtypes = [POINTER(c_ubyte), c_size_t, c_int]
 DLL.Hmac_new.restype = c_void_p

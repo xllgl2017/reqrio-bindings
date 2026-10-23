@@ -36,6 +36,10 @@ char *ScReq_set_key_log(ScReq *req, const char *key_log);
 
 char *ScReq_set_fingerprint(ScReq *req, FingerInner *fingerprint);
 
+char *ScReq_with_builtin(ScReq *req, const char *name, const char *token);
+
+char *ScReq_with_finger_idx(ScReq *req, size_t idx, const char *auth);
+
 char *ScReq_set_proxy(ScReq *req, const char *proxy);
 
 char *ScReq_set_timeout(ScReq *req, const char *timeout);
@@ -117,6 +121,10 @@ public:
     void addCookie(const QString &name, const QString &value) const;
 
     void setFingerprint(Fingerprint *fingerprint) const;
+
+    void setFingerBuiltin(const QString &name, const QString &token) const;
+
+    void setFingerIdx(size_t idx, const QString &auth) const;
 
     void connect(const QString &url, const QString &sni = "") const;
 

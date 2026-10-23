@@ -170,6 +170,8 @@ function binding_library() {
         ScReq_set_redirect: [charPtr, [voidPtr, 'bool']],
         ScReq_set_key_log: [charPtr, [voidPtr, 'string']],
         ScReq_set_fingerprint: [charPtr, [voidPtr, voidPtr]],
+        ScReq_with_builtin: [charPtr, [voidPtr, charPtr, charPtr]],
+        ScReq_with_finger_idx: [charPtr, [voidPtr, 'size_t', charPtr]],
         ScReq_set_proxy: [charPtr, [voidPtr, 'string']],
         ScReq_set_timeout: [charPtr, [voidPtr, 'string']],
         ScReq_set_cookie: [charPtr, [voidPtr, 'string']],

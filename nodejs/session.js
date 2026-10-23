@@ -64,6 +64,23 @@ class Session {
         fingerprint.ptr = null;
     }
 
+
+    /**使用内置指纹
+     * @param {string} name
+     * @param {string} token
+     **/
+    set_finger_built(name, token) {
+        check_error(this.library, this.library.ScReq_with_builtin(this.req, name, token))
+    }
+
+    /**使用指定指纹
+     * @param {int} idx
+     * @param {string} auth
+     **/
+    set_finger_idx(idx, auth) {
+        check_error(this.library, this.library.ScReq_with_finger_idx(this.req, idx, auth))
+    }
+
     /**使用随机指纹
      * @param {string} token 认证token
      **/

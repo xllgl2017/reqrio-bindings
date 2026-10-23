@@ -10,6 +10,12 @@ try:
 except:
     TOKEN = os.environ.get("REQRIO_TOKEN", "")
 
+try:
+    with open("../../../AUTH", 'r', encoding="utf-8") as f:
+        AUTH = f.read()
+except:
+    AUTH = os.environ.get("REQRIO_AUTH", "")
+
 
 # ====================================>TLS Example<======================================
 
@@ -151,6 +157,18 @@ def custom_finger():
     resp = session.get("https://www.baidu.com")
     print('code: ', resp.statue_code())
     print('body: ', len(resp.bytes()))
+
+
+def builtin_finger():
+    session = Session(builtin_finger="edge-148", token=TOKEN, key_log="../../../2.log")
+    resp = session.get("https://www.baidu.com")
+    print(resp.status, len(resp.text()))
+
+
+def finger_idx():
+    session = Session(finger_idx=0, auth=AUTH, key_log="../../../2.log")
+    resp = session.get("https://www.baidu.com")
+    print(resp.status, len(resp.text()))
 
 # def h3_req():
 #     ja4_str = "t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601"
