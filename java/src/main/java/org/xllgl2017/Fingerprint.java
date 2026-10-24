@@ -64,6 +64,31 @@ public class Fingerprint {
         return fingerprint;
     }
 
+    /// 使用某个内置指纹
+    /// @param name :指纹名称
+    /// @param token :认证token
+    /// @param sec_full :是否使用完整的sec请求头
+    public static Fingerprint fromBuiltin(String name, boolean sec_full, String token) throws Exception {
+        Fingerprint fingerprint = new Fingerprint();
+        PointerByReference err = new PointerByReference();
+        if (token == null) token = "";
+        fingerprint.raw = REQRIO.Fingerprint_from_builtin(name, sec_full, token, err);
+        util.check_err_pointer(err);
+        return fingerprint;
+    }
+
+    /// 使用某个指纹
+    /// @param idx :索引，超出上限自动重选，index%len。
+    /// @param auth : 指纹认证
+    /// @param sec_full: 是否使用完整的sec请求头
+    public static Fingerprint fromIdx(int idx, String auth, boolean sec_full) throws Exception {
+        Fingerprint fingerprint = new Fingerprint();
+        PointerByReference err = new PointerByReference();
+        fingerprint.raw = REQRIO.Fingerprint_from_idx(idx, auth, sec_full, err);
+        util.check_err_pointer(err);
+        return fingerprint;
+    }
+
     public Pointer getRaw() throws Exception {
         if (raw == null) throw new Exception("This Fingerprint had dropped");
         return raw;

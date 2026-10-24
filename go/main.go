@@ -362,16 +362,44 @@ func flow_reader() {
 	}
 
 }
+
+func finger_builtin() {
+	session := reqrio.NewSession(false)
+	defer session.Close()
+	finger, err := reqrio.FromBuiltin("edge-148", false, readToken())
+	if err != nil {
+		panic(err)
+	}
+	err1 := session.SetFingerprint(finger)
+	if err1 != nil {
+		panic(err1)
+	}
+	resp, err := session.SendRequest(reqrio.ConnParam{
+		Method: reqrio.GET,
+		Url:    "https://www.so.com",
+	})
+	if err != nil {
+		panic(err)
+	}
+	code, err2 := resp.StatusCode()
+	if err2 != nil {
+		panic(err2)
+	}
+	println("resp: ", code)
+
+}
+
 func main() {
-	get()
-	postForm()
-	postJson()
-	postText()
-	postFiles()
-	clientHello()
-	ja3()
-	ja4()
-	randTls()
-	customTls()
-	flow_reader()
+	//get()
+	//postForm()
+	//postJson()
+	//postText()
+	//postFiles()
+	//clientHello()
+	//ja3()
+	//ja4()
+	//randTls()
+	//customTls()
+	//flow_reader()
+	finger_builtin()
 }

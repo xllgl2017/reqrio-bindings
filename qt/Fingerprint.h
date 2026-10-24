@@ -9,51 +9,56 @@
 #include "QObject"
 #include "util.h"
 
-extern "C"{
-    ///=========================>[Fingerprint]<=====================
-    struct FingerInner;
+extern "C" {
+///=========================>[Fingerprint]<=====================
+struct FingerInner;
 
-    FingerInner *Fingerprint_from_ja3(const char *ja3, const char *token, char **err);
+FingerInner *Fingerprint_from_builtin(const char *name, bool sec_full, const char *token, char **err);
 
-    FingerInner *Fingerprint_from_ja4(const char *ja4, const char *token, char **err);
+FingerInner *Fingerprint_from_idx(size_t idx, const char *auth, bool sec_full, char **err);
 
-    FingerInner *Fingerprint_from_client_hello(const uint8_t *u8, size_t len, const char *token, char **err);
+FingerInner *Fingerprint_from_ja3(const char *ja3, const char *token, char **err);
 
-    FingerInner *Fingerprint_random(const char *token, char **err);
+FingerInner *Fingerprint_from_ja4(const char *ja4, const char *token, char **err);
 
-    FingerInner *Fingerprint_custom(const char *custom, const char *token, char **err);
+FingerInner *Fingerprint_from_client_hello(const uint8_t *u8, size_t len, const char *token, char **err);
 
-    FingerInner *Fingerprint_new(const char *token);
+FingerInner *Fingerprint_random(const char *token, char **err);
 
-    void Fingerprint_add_cipher_suite(FingerInner *fingerprint, uint16_t suite);
+FingerInner *Fingerprint_custom(const char *custom, const char *token, char **err);
 
-    void Fingerprint_add_ext(FingerInner *fingerprint, uint16_t ext_typ);
+FingerInner *Fingerprint_new(const char *token);
 
-    void Fingerprint_add_ext_alpn(FingerInner *fingerprint, uint16_t ext_typ, const char *alpn);
+void Fingerprint_add_cipher_suite(FingerInner *fingerprint, uint16_t suite);
 
-    void Fingerprint_add_ext_version(FingerInner *fingerprint, uint16_t ext_typ, uint16_t version);
+void Fingerprint_add_ext(FingerInner *fingerprint, uint16_t ext_typ);
 
-    void Fingerprint_add_ext_curve(FingerInner *fingerprint, uint16_t ext_typ, uint16_t curve);
+void Fingerprint_add_ext_alpn(FingerInner *fingerprint, uint16_t ext_typ, const char *alpn);
 
-    void Fingerprint_add_ext_compress(FingerInner *fingerprint, uint16_t ext_typ, uint16_t compress);
+void Fingerprint_add_ext_version(FingerInner *fingerprint, uint16_t ext_typ, uint16_t version);
 
-    void Fingerprint_add_ext_psk_mode(FingerInner *fingerprint, uint16_t ext_typ, uint8_t mode);
+void Fingerprint_add_ext_curve(FingerInner *fingerprint, uint16_t ext_typ, uint16_t curve);
 
-    void Fingerprint_add_ext_padding(FingerInner *fingerprint, uint16_t ext_typ, size_t padding);
+void Fingerprint_add_ext_compress(FingerInner *fingerprint, uint16_t ext_typ, uint16_t compress);
 
-    void Fingerprint_add_ext_bytes(FingerInner *fingerprint, uint16_t ext_typ, const uint8_t *bytes, size_t len);
+void Fingerprint_add_ext_psk_mode(FingerInner *fingerprint, uint16_t ext_typ, uint8_t mode);
 
-    void Fingerprint_add_ext_algorithm(FingerInner *fingerprint, uint16_t ext_typ, uint16_t algo);
+void Fingerprint_add_ext_padding(FingerInner *fingerprint, uint16_t ext_typ, size_t padding);
 
-    void Fingerprint_add_ext_ec_point(FingerInner *fingerprint, uint16_t ext_typ, uint8_t point);
+void Fingerprint_add_ext_bytes(FingerInner *fingerprint, uint16_t ext_typ, const uint8_t *bytes, size_t len);
 
-    void Fingerprint_add_h2_setting(FingerInner *fingerprint, uint16_t flag, uint32_t value);
+void Fingerprint_add_ext_algorithm(FingerInner *fingerprint, uint16_t ext_typ, uint16_t algo);
 
-    void Fingerprint_set_h2_window_size(FingerInner *fingerprint, uint32_t size);
+void Fingerprint_add_ext_ec_point(FingerInner *fingerprint, uint16_t ext_typ, uint8_t point);
 
-    void Fingerprint_set_h2_priority(FingerInner *fingerprint, bool priority, uint8_t weight);
+void Fingerprint_add_h2_setting(FingerInner *fingerprint, uint16_t flag, uint32_t value);
 
-    void Fingerprint_drop(FingerInner *fingerprint);}
+void Fingerprint_set_h2_window_size(FingerInner *fingerprint, uint32_t size);
+
+void Fingerprint_set_h2_priority(FingerInner *fingerprint, bool priority, uint8_t weight);
+
+void Fingerprint_drop(FingerInner *fingerprint);
+}
 
 
 class Fingerprint : QObject {
@@ -65,6 +70,7 @@ public:
     explicit Fingerprint(FingerInner *, QObject *parent = nullptr);
 
     explicit Fingerprint(const QString &token, QObject *parent = nullptr);
+
 
     ~Fingerprint() override;
 
@@ -97,6 +103,11 @@ public:
     void setH2WindowSize(uint32_t value) const;
 
     void setH2Priority(bool priority, uint8_t weight) const;
+
+    static Fingerprint *fromBuiltin(const QString &name, bool sec_full, const QString &token,
+                                    QObject *parent = nullptr);
+
+    static Fingerprint *fromIdx(size_t idx, bool sec_full, const QString &auth, QObject *parent = nullptr);
 
     static Fingerprint *fromJa3(const QString &ja3, const QString &token, QObject *parent = nullptr);
 

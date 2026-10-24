@@ -31,6 +31,12 @@ DLL.Fingerprint_random.restype = c_void_p
 DLL.Fingerprint_custom.argtypes = [c_char_p, c_char_p, POINTER(c_char_p)]
 DLL.Fingerprint_custom.restype = c_void_p
 
+DLL.Fingerprint_from_builtin.argtypes = [c_char_p, c_bool, c_char_p, POINTER(c_char_p)]
+DLL.Fingerprint_from_builtin.restype = c_void_p
+
+DLL.Fingerprint_from_idx.argtypes = [c_size_t, c_char_p, c_bool, POINTER(c_char_p)]
+DLL.Fingerprint_from_idx.restype = c_void_p
+
 # ===========================>Url<===================================
 DLL.Url_new.argtypes = [c_char_p, POINTER(c_char_p)]
 DLL.Url_new.restype = c_void_p
@@ -65,11 +71,6 @@ DLL.FileForm_new.restype = c_void_p
 DLL.HttpFile_drop.argtypes = [c_void_p]
 
 DLL.Body_drop.argtypes = [c_void_p]
-
-
-
-
-
 
 DLL.ScReq_recv_stream.argtypes = [c_void_p, c_uint64, POINTER(c_size_t), POINTER(c_char_p)]
 DLL.ScReq_recv_stream.restype = c_void_p

@@ -205,6 +205,14 @@ function flow_reader() {
     }
 }
 
+function finger_builtin(name) {
+    let session = new Session(ALPN.HTTP20)
+    session.set_finger_built(name, read_token(), false)
+    let resp = session.get("https://www.baidu.com");
+    console.log(resp.status_code())
+
+}
+
 module.exports = {
     get,
     post_form,
@@ -213,5 +221,6 @@ module.exports = {
     ja4,
     client_hello,
     custom_fingerprint,
-    flow_reader
+    flow_reader,
+    finger_builtin
 }

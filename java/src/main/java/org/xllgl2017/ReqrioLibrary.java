@@ -29,10 +29,6 @@ public interface ReqrioLibrary extends Library {
 
     Pointer ScReq_set_fingerprint(Pointer req, Pointer fingerprint);
 
-    Pointer ScReq_with_builtin(Pointer req, String name, String token);
-
-    Pointer ScReq_with_finger_idx(Pointer req, int idx, String auth);
-
     Pointer ScReq_set_proxy(Pointer req, String proxy);
 
     Pointer ScReq_set_timeout(Pointer req, String timeout);
@@ -100,6 +96,10 @@ public interface ReqrioLibrary extends Library {
     void Response_drop(Pointer resp);
 
     /// =========================>[CustomFingerprint]<=========================
+    Pointer Fingerprint_from_builtin(String name, boolean sec_full, String token, PointerByReference err);
+
+    Pointer Fingerprint_from_idx(int idx, String auth, boolean sec_full, PointerByReference err);
+
     Pointer Fingerprint_from_ja3(String ja3, String token, PointerByReference err);
 
     Pointer Fingerprint_from_ja4(String ja4, String token, PointerByReference err);

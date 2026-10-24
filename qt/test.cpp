@@ -240,6 +240,15 @@ void flow_reader() {
 }
 
 
+void finger_builtin() {
+    const auto *session = new Session(HTTP20);
+    const auto finger = Fingerprint::fromBuiltin("edge-148", false, read_token());
+    session->setFingerprint(finger);
+    Response response = session->get("https://www.baidu.com");
+    qDebug() << response.statusCode();
+}
+
+
 int main(int argc, char *argv[]) {
     get();
     post_form();
@@ -250,4 +259,5 @@ int main(int argc, char *argv[]) {
     rand_tls();
     custom_finger();
     flow_reader();
+    finger_builtin();
 }

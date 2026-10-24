@@ -14,7 +14,7 @@ import java.util.List;
 public class Main {
 
     static String loadToken() {
-        Path tokenFile = Path.of("../TOKEN");
+        Path tokenFile = Path.of("../../TOKEN");
 
         if (Files.isRegularFile(tokenFile)) {
             try {
@@ -309,6 +309,14 @@ public class Main {
         session.close();
     }
 
+    public static void builtin_finger() throws Exception {
+        Session session = new Session(ALPN.HTTP20);
+        session.setFingerprint(Fingerprint.fromBuiltin("edge-148", false, loadToken()));
+        Response resp = session.get("https://www.baidu.com");
+        System.out.println("code:" + resp.statusCode());
+        session.close();
+    }
+
 
     public static void main(String[] args) throws Exception {
         get();
@@ -324,6 +332,7 @@ public class Main {
         random_tls();
         ua_tls();
         flow_reader();
+        builtin_finger();
     }
 }
 

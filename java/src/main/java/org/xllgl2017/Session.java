@@ -99,20 +99,6 @@ public class Session implements AutoCloseable {
         fingerprint.drop();
     }
 
-    /// 使用某个内置指纹
-    /// @param name :指纹名称
-    /// @param token :认证token
-    public void setFingerBuiltin(String name, String token) throws Exception {
-        util.check_err(REQRIO.ScReq_with_builtin(this.pointer(), name, token));
-    }
-
-    /// 使用某个指纹
-    /// @param index :索引，超出上限自动重选，index%len。
-    /// @param auth : 指纹认证
-    public void setFingerIdx(int index, String auth) throws Exception {
-        util.check_err(REQRIO.ScReq_with_finger_idx(this.pointer(), index, auth));
-    }
-
     private void setALPN(ALPN alpn) throws Exception {
         util.check_err(REQRIO.ScReq_set_alpn(this.pointer(), alpn.getValue()));
     }

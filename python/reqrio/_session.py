@@ -37,12 +37,6 @@ DLL.ScReq_set_key_log.restype = c_void_p
 DLL.ScReq_set_fingerprint.argtypes = [c_void_p, c_void_p]
 DLL.ScReq_set_fingerprint.restype = c_void_p
 
-DLL.ScReq_with_builtin.argtypes = [c_void_p, c_char_p, c_char_p]
-DLL.ScReq_with_builtin.restype = c_void_p
-
-DLL.ScReq_with_finger_idx.argtypes = [c_void_p, c_size_t, c_char_p]
-DLL.ScReq_with_finger_idx.restype = c_void_p
-
 DLL.ScReq_set_proxy.argtypes = [c_void_p, c_char_p]
 DLL.ScReq_set_proxy.restype = c_void_p
 
@@ -85,7 +79,8 @@ class Session:
             ignore_hdr_sort: bool = False,
             builtin_finger: str = None,
             finger_idx: int = None,
-            auth: str = None
+            auth: str = None,
+            sec_full: bool = False
     ):
         """
         :param
@@ -100,6 +95,7 @@ class Session:
         :param custom_tls: 使用自定义指纹，具体参数参阅https://github.com/xllgl2017/reqrio
         :param token: 修改指纹时所有的认证token
         :param ignore_hdr_sort: 忽略内置请求头顺序
+        :param sec_full: 是否使用完整的sec请求头
         """
 
         self.dll = DLL
@@ -110,7 +106,7 @@ class Session:
         if err: raise Exception(msg)
         # verify
         self._set_fingerprint(random_tls, ja3, ja4, client_hello, custom_tls, token)
-        self._set_finger_file(builtin_finger, auth, finger_idx, token)
+        self._set_finger_file(sec_full, builtin_finger, auth, finger_idx, token)
         err, msg = util.check_char_err(self.dll.ScReq_set_verify(self.hid, verify))
         if err: raise Exception(msg)
         # proxy
@@ -198,22 +194,34 @@ class Session:
             if err: raise Exception(msg)
         else:
             return
-        err = self.dll.ScReq_set_fingerprint(self.hid, fingerprint);
+        err = self.dll.ScReq_set_fingerprint(self.hid, fingerprint)
         print(111, err, type(err))
         err, msg = util.check_char_err(err)
         if err: raise Exception(msg)
 
-    def _set_finger_file(self, name: str = None, auth: str = None, idx: int = None, token: str = None):
+    def _set_finger_file(self, sec_full: bool, name: str = None, auth: str = None, idx: int = None, token: str = None):
+        print(name)
         if name is not None and token is not None:
-            err = DLL.ScReq_with_builtin(self.hid, name.encode("utf-8"), token.encode("utf-8"))
-            print(type(err))
+            err = c_char_p()
+            fingerprint = DLL.Fingerprint_from_builtin(name.encode('utf-8'), sec_full, token.encode('utf-8'),
+                                                       byref(err))
+            print(fingerprint)
+            err, msg = util.check_char_err(err)
+            if err: raise Exception(msg)
+            err = self.dll.ScReq_set_fingerprint(self.hid, fingerprint)
             err, msg = util.check_char_err(err)
             if err: raise Exception(msg)
             return
         if auth is not None and auth is not None:
-            err = self.dll.ScReq_with_finger_idx(self.hid, idx, auth.encode("utf-8"))
+            print(idx, auth)
+            err = c_char_p()
+            fingerprint = DLL.Fingerprint_from_idx(idx, auth.encode('utf-8'), sec_full, byref(err))
             err, msg = util.check_char_err(err)
             if err: raise Exception(msg)
+            err = self.dll.ScReq_set_fingerprint(self.hid, fingerprint)
+            err, msg = util.check_char_err(err)
+            if err: raise Exception(msg)
+            return
 
     def set_cookie(self, cookie: str):
         err, msg = util.check_char_err(self.dll.ScReq_set_cookie(self.hid, cookie.encode('utf-8')))

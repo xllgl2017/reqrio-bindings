@@ -64,14 +64,6 @@ void Session::setFingerprint(Fingerprint *fingerprint) const {
     delete fingerprint;
 }
 
-void Session::setFingerBuiltin(const QString &name, const QString &token) const {
-    util::check_err(ScReq_with_builtin(this->req, name.toUtf8(), token.toUtf8()));
-}
-
-void Session::setFingerIdx(size_t idx, const QString &auth) const {
-    util::check_err(ScReq_with_finger_idx(this->req, idx, auth.toUtf8()));
-}
-
 void Session::reconnect() const {
     util::check_err(ScReq_reconnect(this->req));
 }

@@ -10,6 +10,8 @@ package reqrio
 #cgo LDFLAGS: -L${SRCDIR}/../ -lreqrio
 //-----------------[Fingerprint API]-----------------
 extern void *Fingerprint_new(const char *token);
+extern void *Fingerprint_from_builtin(const char *name, bool sec_full, const char *token, char **err);
+extern void *Fingerprint_from_idx(size_t idx, const char *auth, bool sec_full, char **err);
 extern void Fingerprint_add_cipher_suite(void *finger, uint16_t suite);
 extern void Fingerprint_add_ext(void *finger, uint16_t ext_typ);
 extern void Fingerprint_add_ext_alpn(void *finger, uint16_t ext_typ, const char *alpn);
@@ -145,6 +147,34 @@ func FromJa4(ja4 string, token string) (Fingerprint, error) {
 	defer C.free(unsafe.Pointer(cToken))
 	var errPtr *C.char
 	fingerprint.rawPtr = C.Fingerprint_from_ja4(cJa4, cToken, (**C.char)(unsafe.Pointer(&errPtr)))
+	if errPtr != nil {
+		defer C.char_free(errPtr)
+		return fingerprint, errors.New(C.GoString(errPtr))
+	}
+	return fingerprint, nil
+}
+
+func FromBuiltin(name string, secFull bool, token string) (Fingerprint, error) {
+	var fingerprint Fingerprint
+	cName := C.CString(name)
+	defer C.free(unsafe.Pointer(cName))
+	var errPtr *C.char
+	cToken := C.CString(token)
+	defer C.free(unsafe.Pointer(cToken))
+	fingerprint.rawPtr = C.Fingerprint_from_builtin(cName, C.bool(secFull), cToken, (**C.char)(unsafe.Pointer(&errPtr)))
+	if errPtr != nil {
+		defer C.char_free(errPtr)
+		return fingerprint, errors.New(C.GoString(errPtr))
+	}
+	return fingerprint, nil
+}
+
+func FromIdx(idx int, secFull bool, auth string) (Fingerprint, error) {
+	var fingerprint Fingerprint
+	cAuth := C.CString(auth)
+	defer C.free(unsafe.Pointer(cAuth))
+	var errPtr *C.char
+	fingerprint.rawPtr = C.Fingerprint_from_idx(C.size_t(idx), cAuth, C.bool(secFull), (**C.char)(unsafe.Pointer(&errPtr)))
 	if errPtr != nil {
 		defer C.char_free(errPtr)
 		return fingerprint, errors.New(C.GoString(errPtr))

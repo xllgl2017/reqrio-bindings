@@ -1,7 +1,6 @@
 const {
     binding_library,
     Method,
-    ref,
     make_ScReq_callback,
     check_error, ref_char_ptr
 } = require("./bindings");
@@ -67,19 +66,27 @@ class Session {
 
 
     /**使用内置指纹
-     * @param {string} name
-     * @param {string} token
+     * @param {string} name :指纹名称
+     * @param {string} token :认证token
+     * @param {boolean} sec_full :是否使用完整的sec请求头
      **/
-    set_finger_built(name, token) {
-        check_error(this.library, this.library.ScReq_with_builtin(this.req, name, token))
+    set_finger_built(name, token, sec_full) {
+        const errPtr = ref_char_ptr();
+        let fingerprint = this.library.Fingerprint_from_builtin(name, sec_full, token, errPtr)
+        check_error(this.library, errPtr.deref())
+        check_error(this.library, this.library.ScReq_set_fingerprint(this.req, fingerprint));
     }
 
     /**使用指定指纹
-     * @param {int} idx
-     * @param {string} auth
+     * @param {int} idx :指纹索引
+     * @param {string} auth :授权码
+     * @param {boolean} sec_full :是否使用完整的sec请求头
      **/
-    set_finger_idx(idx, auth) {
-        check_error(this.library, this.library.ScReq_with_finger_idx(this.req, idx, auth))
+    set_finger_idx(idx, auth, sec_full) {
+        const errPtr = ref_char_ptr();
+        let fingerprint = this.library.Fingerprint_from_idx(idx, auth, sec_full, errPtr)
+        check_error(this.library, errPtr.deref())
+        check_error(this.library, this.library.ScReq_set_fingerprint(this.req, fingerprint));
     }
 
     /**使用随机指纹

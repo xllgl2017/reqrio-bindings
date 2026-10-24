@@ -18,8 +18,6 @@ extern char * ScReq_set_verify(void *req, bool verify);
 extern char * ScReq_set_redirect(void *req, bool redirect);
 extern char * ScReq_set_key_log(void *req, const char *key_log);
 extern char * ScReq_set_fingerprint(void *req, void * fingerprint);
-extern char * ScReq_with_builtin(void *req, const char *name, const char *token);
-extern char * ScReq_with_finger_idx(void *req, size_t idx, const char *auth);
 extern char * ScReq_set_proxy(void *req, const char *alpn);
 extern char * ScReq_set_timeout(void *req, const char *timeout);
 extern char * ScReq_set_cookie(void *req, const char *cookie);
@@ -58,7 +56,7 @@ import (
 type ALPN string
 
 const (
-    HTTP30 ALPN = "h3"
+	HTTP30 ALPN = "h3"
 	HTTP20 ALPN = "h2"
 	HTTP11 ALPN = "http/1.1"
 )
@@ -156,31 +154,6 @@ func (session *Session) SetKeyLog(keyLog string) error {
 
 func (session *Session) SetFingerprint(fingerprint Fingerprint) error {
 	err := C.ScReq_set_fingerprint(session.req, fingerprint.rawPtr)
-	if err != nil {
-		defer C.char_free(err)
-		return errors.New(C.GoString(err))
-	}
-	return nil
-}
-
-func (session *Session) SetFingerBuiltin(name string, token string) error {
-	cName := C.CString(name)
-	defer C.free(unsafe.Pointer(cName))
-	cToken := C.CString(token)
-	defer C.free(unsafe.Pointer(cToken))
-	err := C.ScReq_set_finger_builtin(session.req, cName, cToken)
-	if err != nil {
-		defer C.char_free(err)
-		return errors.New(C.GoString(err))
-	}
-	return nil
-}
-
-func (session *Session) SetFingerIdx(idx int, auth string) error {
-	cIdx := C.size_t(idx)
-	cAuth := C.CString(auth)
-	defer C.free(unsafe.Pointer(cAuth))
-	err := C.ScReq_set_finger_idx(session.req, cIdx, cAuth)
 	if err != nil {
 		defer C.char_free(err)
 		return errors.New(C.GoString(err))

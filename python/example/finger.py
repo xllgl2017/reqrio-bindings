@@ -168,6 +168,7 @@ def builtin_finger():
 def finger_idx():
     session = Session(finger_idx=0, auth=AUTH, key_log="../../../2.log")
     resp = session.get("https://www.baidu.com")
+    print(resp.text())
     print(resp.status, len(resp.text()))
 
 # def h3_req():

@@ -170,8 +170,8 @@ function binding_library() {
         ScReq_set_redirect: [charPtr, [voidPtr, 'bool']],
         ScReq_set_key_log: [charPtr, [voidPtr, 'string']],
         ScReq_set_fingerprint: [charPtr, [voidPtr, voidPtr]],
-        ScReq_with_builtin: [charPtr, [voidPtr, charPtr, charPtr]],
-        ScReq_with_finger_idx: [charPtr, [voidPtr, 'size_t', charPtr]],
+        // ScReq_with_builtin: [charPtr, [voidPtr, charPtr, charPtr]],
+        // ScReq_with_finger_idx: [charPtr, [voidPtr, 'size_t', charPtr]],
         ScReq_set_proxy: [charPtr, [voidPtr, 'string']],
         ScReq_set_timeout: [charPtr, [voidPtr, 'string']],
         ScReq_set_cookie: [charPtr, [voidPtr, 'string']],
@@ -186,6 +186,8 @@ function binding_library() {
         // === Fingerprint ===
         // === Fingerprint ===
         Fingerprint_new: [voidPtr, ['string']],
+        Fingerprint_from_builtin: [voidPtr, ['string', 'bool', 'string', charPtrPtr]],
+        Fingerprint_from_idx: [voidPtr, ['size_t', 'string', 'bool', charPtrPtr]],
         Fingerprint_add_cipher_suite: ['void', [voidPtr, 'uint16']],
         Fingerprint_add_ext: ['void', [voidPtr, 'uint16']],
         Fingerprint_add_ext_alpn: ['void', [voidPtr, 'uint16', 'string']],
