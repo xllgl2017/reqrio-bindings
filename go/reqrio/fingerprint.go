@@ -9,7 +9,7 @@ package reqrio
 
 #cgo LDFLAGS: -L${SRCDIR}/../ -lreqrio
 //-----------------[Fingerprint API]-----------------
-extern void *Fingerprint_new(const char *token);
+extern void *Fingerprint_new(uint16_t rv, uint16_t mv, const char *token);
 extern void *Fingerprint_from_builtin(const char *name, bool sec_full, const char *token, char **err);
 extern void *Fingerprint_from_idx(size_t idx, const char *auth, bool sec_full, char **err);
 extern void Fingerprint_add_cipher_suite(void *finger, uint16_t suite);
@@ -43,11 +43,11 @@ type Fingerprint struct {
 	rawPtr unsafe.Pointer
 }
 
-func NewFingerprint(token string) Fingerprint {
+func NewFingerprint(rv Version, mv Version, token string) Fingerprint {
 	var fingerprint Fingerprint
 	cToken := C.CString(token)
 	defer C.free(unsafe.Pointer(cToken))
-	fingerprint.rawPtr = C.Fingerprint_new(cToken)
+	fingerprint.rawPtr = C.Fingerprint_new(C.uint16_t(rv), C.uint16_t(mv), cToken)
 	return fingerprint
 }
 

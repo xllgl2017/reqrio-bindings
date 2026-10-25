@@ -20,6 +20,7 @@ extern char * ScReq_set_key_log(void *req, const char *key_log);
 extern char * ScReq_set_fingerprint(void *req, void * fingerprint);
 extern char * ScReq_set_proxy(void *req, const char *alpn);
 extern char * ScReq_set_timeout(void *req, const char *timeout);
+extern char * ScReq_set_version(void *req, uint16_t ver);
 extern char * ScReq_set_cookie(void *req, const char *cookie);
 extern char * ScReq_add_cookie(void *req, const char *name, const char *value);
 //callback
@@ -172,10 +173,21 @@ func (session *Session) SetProxy(proxy string) error {
 	return nil
 }
 
+// SetTimeout /设置超时
 func (session *Session) SetTimeout(timeout string) error {
 	cTimeout := C.CString(timeout)
 	defer C.free(unsafe.Pointer(cTimeout))
 	err := C.ScReq_set_timeout(session.req, cTimeout)
+	if err != nil {
+		defer C.char_free(err)
+		return errors.New(C.GoString(err))
+	}
+	return nil
+}
+
+// SetVersion /设置TLS握手版本
+func (session *Session) SetVersion(ver Version) error {
+	err := C.ScReq_set_version(session.req, C.uint16_t(ver))
 	if err != nil {
 		defer C.char_free(err)
 		return errors.New(C.GoString(err))

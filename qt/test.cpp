@@ -138,19 +138,9 @@ void rand_tls() {
     qDebug() << resp.statusCode();
 }
 
-struct Finger {
-    QList<int> suites;
-    QList<int> compress_methods;
-    QJsonObject extensions;
-    QJsonObject settings;
-    int window_size;
-    int weight;
-    bool priority;
-};
-
 void custom_finger() {
     printf("================>[CUSTOM TLS]<==================\n");
-    const auto fingerprint = new Fingerprint(read_token());
+    const auto fingerprint = new Fingerprint(TLS_1_0, TLS_1_0, read_token());
     fingerprint->addCipherSuites({
         TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
         TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
@@ -249,15 +239,29 @@ void finger_builtin() {
 }
 
 
+void tlcp() {
+    auto *finger = new Fingerprint(TLCP, TLCP, read_token());
+    finger->addCipherSuite(ECC_SM4_CBC_SM3);
+    finger->addExtension(0xfafa);
+    finger->addExtension(ServerName);
+    finger->addExtension(0x8a8a, QByteArray{1, '\x00'});
+    auto *session = new Session(HTTP20);
+    session->setFingerprint(finger);
+    Response resp = session->get("https://test.gmssl.cn");
+    qDebug() << resp.statusCode();
+}
+
+
 int main(int argc, char *argv[]) {
-    get();
-    post_form();
-    post_json();
-    client_hello_finger();
-    ja3();
-    ja4();
-    rand_tls();
-    custom_finger();
-    flow_reader();
-    finger_builtin();
+    // get();
+    // post_form();
+    // post_json();
+    // client_hello_finger();
+    // ja3();
+    // ja4();
+    // rand_tls();
+    // custom_finger();
+    // flow_reader();
+    // finger_builtin();
+    tlcp();
 }

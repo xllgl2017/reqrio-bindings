@@ -255,7 +255,7 @@ func randTls() {
 }
 
 func customTls() {
-	fingerprint := reqrio.NewFingerprint(readToken())
+	fingerprint := reqrio.NewFingerprint(reqrio.TLS_1_0, reqrio.TLS_1_2, readToken())
 	fingerprint.AddCipherSuites([]reqrio.CipherSuite{
 		reqrio.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 		reqrio.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
@@ -389,17 +389,40 @@ func finger_builtin() {
 
 }
 
+func tlcp() {
+	fingerprint := reqrio.NewFingerprint(reqrio.TLS_1_0, reqrio.TLS_1_2, readToken())
+	fingerprint.AddCipherSuites([]reqrio.CipherSuite{reqrio.ECC_SM4_CBC_SM3})
+	fingerprint.AddExtensionDefault(0xdada)
+	fingerprint.AddExtensionDefault(reqrio.ServerName)
+	fingerprint.AddExtBytes(0x8a8a, []byte{0})
+	session := reqrio.NewSession(false)
+	err := session.SetFingerprint(fingerprint)
+	if err != nil {
+		panic(err)
+	}
+	resp, err := session.SendRequest(reqrio.ConnParam{
+		Method: reqrio.GET,
+		Url:    "https://test.gmssl.cn",
+	})
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Delete()
+	fmt.Println(resp.StatusCode())
+}
+
 func main() {
-	//get()
-	//postForm()
-	//postJson()
-	//postText()
-	//postFiles()
-	//clientHello()
-	//ja3()
-	//ja4()
-	//randTls()
-	//customTls()
-	//flow_reader()
+	get()
+	postForm()
+	postJson()
+	postText()
+	postFiles()
+	clientHello()
+	ja3()
+	ja4()
+	randTls()
+	customTls()
+	flow_reader()
 	finger_builtin()
+	tlcp()
 }

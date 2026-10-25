@@ -33,6 +33,8 @@ public interface ReqrioLibrary extends Library {
 
     Pointer ScReq_set_timeout(Pointer req, String timeout);
 
+    Pointer ScReq_set_version(Pointer req, int ver);
+
     Pointer ScReq_set_cookie(Pointer req, String cookie);
 
     Pointer ScReq_add_cookie(Pointer req, String name, String value);

@@ -44,6 +44,7 @@ const (
 	TLS_CHACHA20_POLY1305_SHA256 = 0x1303
 
 	TLS_EMPTY_RENEGOTIATION_INFO_SCSV = 0x00ff
+	ECC_SM4_CBC_SM3                   = 0xe013
 )
 
 type ExtensionType int
@@ -75,7 +76,8 @@ const (
 type Version int
 
 const (
-	TLS_1_0 Version = 0x301
+	TLCP    Version = 0x101
+	TLS_1_0         = 0x301
 	TLS_1_1         = 0x302
 	TLS_1_2         = 0x303
 	TLS_1_3         = 0x304

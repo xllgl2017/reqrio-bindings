@@ -1,9 +1,18 @@
 const ref = require("ref-napi");
+const {Version} = require('./bindings')
 
 class Fingerprint {
-    constructor(library, token) {
+
+    /**
+     * @param {Version} rv :record version
+     * @param {Version} mv : message version
+     * @param {string} token :auth token
+     * @param library :
+     */
+
+    constructor(rv, mv, token, library) {
         this.library = library;
-        this.ptr = this.library.Fingerprint_new(token);
+        this.ptr = this.library.Fingerprint_new(rv, mv, token);
     }
 
     add_cipher_suite(suite) {

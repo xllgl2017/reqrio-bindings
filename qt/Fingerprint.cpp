@@ -11,18 +11,18 @@ Fingerprint::Fingerprint(FingerInner *raw, QObject *parent) : QObject(parent) {
     this->raw_ptr = raw;
 }
 
-Fingerprint::Fingerprint(const QString &token, QObject *parent) : QObject(parent) {
-    this->raw_ptr = Fingerprint_new(token.toUtf8());
+Fingerprint::Fingerprint(const Version rv, const Version mv, const QString &token, QObject *parent) : QObject(parent) {
+    this->raw_ptr = Fingerprint_new(rv, mv, token.toUtf8());
 }
 
-Fingerprint *Fingerprint::fromBuiltin(const QString &name, bool sec_full, const QString &token, QObject *parent) {
+Fingerprint *Fingerprint::fromBuiltin(const QString &name, const bool sec_full, const QString &token, QObject *parent) {
     char *err = nullptr;
     const auto raw = Fingerprint_from_builtin(name.toUtf8(), sec_full, token.toUtf8(), &err);
     util::check_err(err);
     return new Fingerprint(raw, parent);
 }
 
-Fingerprint *Fingerprint::fromIdx(size_t idx, bool sec_full, const QString &auth, QObject *parent) {
+Fingerprint *Fingerprint::fromIdx(const size_t idx, const bool sec_full, const QString &auth, QObject *parent) {
     char *err = nullptr;
     const auto raw = Fingerprint_from_idx(idx, auth.toUtf8(), sec_full, &err);
     util::check_err(err);

@@ -59,6 +59,7 @@ const CipherSuite = {
     TLS_CHACHA20_POLY1305_SHA256: 0x1303,
 
     TLS_EMPTY_RENEGOTIATION_INFO_SCSV: 0x00ff,
+    ECC_SM4_CBC_SM3: 0xe013,
 }
 
 const ExtensionType = {
@@ -132,6 +133,7 @@ const Algorithm = {
 }
 
 const Version = {
+    TLCP: 0x101,
     TLS_1_0: 0x301,
     TLS_1_1: 0x302,
     TLS_1_2: 0x303,
@@ -170,9 +172,8 @@ function binding_library() {
         ScReq_set_redirect: [charPtr, [voidPtr, 'bool']],
         ScReq_set_key_log: [charPtr, [voidPtr, 'string']],
         ScReq_set_fingerprint: [charPtr, [voidPtr, voidPtr]],
-        // ScReq_with_builtin: [charPtr, [voidPtr, charPtr, charPtr]],
-        // ScReq_with_finger_idx: [charPtr, [voidPtr, 'size_t', charPtr]],
         ScReq_set_proxy: [charPtr, [voidPtr, 'string']],
+        ScReq_set_version: [charPtr, [voidPtr, 'uint16']],
         ScReq_set_timeout: [charPtr, [voidPtr, 'string']],
         ScReq_set_cookie: [charPtr, [voidPtr, 'string']],
         ScReq_add_cookie: [charPtr, [voidPtr, 'string', 'string']],
@@ -184,8 +185,7 @@ function binding_library() {
         ScReq_drop: ['void', [voidPtr]],
 
         // === Fingerprint ===
-        // === Fingerprint ===
-        Fingerprint_new: [voidPtr, ['string']],
+        Fingerprint_new: [voidPtr, ['uint16', 'uint16', 'string']],
         Fingerprint_from_builtin: [voidPtr, ['string', 'bool', 'string', charPtrPtr]],
         Fingerprint_from_idx: [voidPtr, ['size_t', 'string', 'bool', charPtrPtr]],
         Fingerprint_add_cipher_suite: ['void', [voidPtr, 'uint16']],

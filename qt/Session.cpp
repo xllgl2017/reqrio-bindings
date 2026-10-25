@@ -10,7 +10,7 @@ Session::Session(const bool ignore_hdr_sort, QObject *parent) : QObject(parent) 
     this->req = ScReq_new(ignore_hdr_sort);
 }
 
-Session::Session(const ALPN alpn, const bool verify, const bool auto_redirect, const bool ignore_hdr_sort,
+Session::Session(const ALPN &alpn, const bool verify, const bool auto_redirect, const bool ignore_hdr_sort,
                  QObject *parent) : Session(ignore_hdr_sort, parent) {
     this->setAlpn(alpn);
     this->setVerify(verify);
@@ -27,6 +27,10 @@ void Session::addHeader(const QString &name, const QString &value, const bool re
 
 void Session::setAlpn(const ALPN &alpn) const {
     util::check_err(ScReq_set_alpn(this->req, alpn.toUtf8()));
+}
+
+void Session::setVersion(const Version version) const {
+    util::check_err(ScReq_set_version(this->req, version));
 }
 
 void Session::setVerify(const bool verify) const {
@@ -79,7 +83,7 @@ void Session::close_stream() const {
     util::check_err(ScReq_close_stream(this->req));
 }
 
-Response Session::send(const Method method, Url *url, Body *body, bool stream) const {
+Response Session::send(const Method method, Url *url, Body *body, const bool stream) const {
     char *err = nullptr;
     const auto resp_ptr = ScReq_do_http(this->req, method, url->take(), body->take(), stream, &err);
     delete url;
@@ -87,11 +91,6 @@ Response Session::send(const Method method, Url *url, Body *body, bool stream) c
     util::check_err(err);
     return Response(resp_ptr, this->req);
 }
-
-// void Session::setCallback(const bindings::Callback callback) const {
-//     bindings::ScReq_set_callback(this->req, callback);
-// }
-
 
 Response Session::get(Url *url, Body *body) const {
     return send(GET, url, body);

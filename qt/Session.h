@@ -36,6 +36,8 @@ char *ScReq_set_key_log(ScReq *req, const char *key_log);
 
 char *ScReq_set_fingerprint(ScReq *req, FingerInner *fingerprint);
 
+char *ScReq_set_version(ScReq *req, Version version);
+
 char *ScReq_set_proxy(ScReq *req, const char *proxy);
 
 char *ScReq_set_timeout(ScReq *req, const char *timeout);
@@ -77,7 +79,7 @@ public:
     ///@param auto_redirect :是否对重定向连接进行自动跳转
     ///@param parent
     ///@param ignore_hdr_sort: 忽略内置的请求头排序
-    explicit Session(ALPN alpn, bool verify = true, bool auto_redirect = true, bool ignore_hdr_sort = false,
+    explicit Session(const ALPN &alpn, bool verify = true, bool auto_redirect = true, bool ignore_hdr_sort = false,
                      QObject *parent = nullptr);
 
     /// 设置请求头
@@ -91,7 +93,7 @@ public:
     void addHeader(const QString &name, const QString &value, bool reversed = false) const;
 
     /// 设置请求的版本
-    void setAlpn(const ALPN& alpn) const;
+    void setAlpn(const ALPN &alpn) const;
 
     /// 设置是否对服务器证书链进行验证
     void setVerify(bool verify) const;
@@ -102,6 +104,10 @@ public:
     ///设置TLS密钥导出的位置，优先于环境变量SSLKEYLOGFILE
     ///@param key_log:导出路径
     void setKeyLog(const QString &key_log) const;
+
+    ///设置TLS握手版本
+    ///@param version:TLS 版本
+    void setVersion(Version version) const;
 
     /// 设置代理，示例:
     ///

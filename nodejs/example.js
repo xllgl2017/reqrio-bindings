@@ -120,13 +120,14 @@ function client_hello() {
     })
     let resp = session.get("https://www.baidu.com");
     console.log("client hello Status:", resp.status_code());
+    resp.close();
     session.close();
 
 }
 
 function custom_fingerprint() {
     let session = new Session(ALPN.HTTP20);
-    let fingerprint = new Fingerprint(session.library, read_token());
+    let fingerprint = new Fingerprint(Version.TLS_1_0, Version.TLS_1_2, read_token(), session.library);
     fingerprint.add_cipher_suite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
     fingerprint.add_cipher_suite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384);
     fingerprint.add_cipher_suite(CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256);
@@ -193,6 +194,7 @@ function custom_fingerprint() {
     session.set_fingerprint(fingerprint);
     let resp = session.get("https://www.baidu.com");
     console.log("Custom FP Status:", resp.status_code());
+    resp.close();
     session.close();
 }
 
@@ -203,6 +205,8 @@ function flow_reader() {
     for (const chunk of resp.chunks()) {
         console.log(chunk.toString());
     }
+    resp.close();
+    session.close();
 }
 
 function finger_builtin(name) {
@@ -211,6 +215,19 @@ function finger_builtin(name) {
     let resp = session.get("https://www.baidu.com");
     console.log(resp.status_code())
 
+}
+
+function tlcp() {
+    let session = new Session(ALPN.HTTP20, {}, false);
+    let finger = new Fingerprint(Version.TLCP, Version.TLCP, read_token(), session.library);
+    finger.add_cipher_suite(CipherSuite.ECC_SM4_CBC_SM3)
+    finger.add_extension(0xdada);
+    finger.add_extension(ExtensionType.ServerName);
+    finger.add_extension_bytes(0x8a8a, [0])
+    let resp = session.get("https://test.gmssl.cn")
+    console.log(resp.status_code());
+    resp.close();
+    session.close();
 }
 
 module.exports = {
@@ -222,5 +239,6 @@ module.exports = {
     client_hello,
     custom_fingerprint,
     flow_reader,
-    finger_builtin
+    finger_builtin,
+    tlcp,
 }

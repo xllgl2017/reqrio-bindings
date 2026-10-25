@@ -1,6 +1,7 @@
 package org.xllgl2017;
 
 public enum Version {
+    TLCP(0x101),
     TLS_1_0(0x301),
     TLS_1_1(0x302),
     TLS_1_2(0x303),

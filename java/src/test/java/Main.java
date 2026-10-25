@@ -317,6 +317,23 @@ public class Main {
         session.close();
     }
 
+    public static void tlcp() throws Exception {
+        Session session = new Session(ALPN.HTTP20);
+        CustomFingerprint fingerprint = new CustomFingerprint();
+        fingerprint.setRecordVersion(Version.TLCP);
+        fingerprint.setMessageVersion(Version.TLCP);
+        fingerprint.addSuite(CipherSuite.ECC_SM4_CBC_SM3);
+        fingerprint.addExtension(0xdada);
+        fingerprint.addExtension(ExtensionType.ServerName);
+        JsonArray v1 = new JsonArray();
+        v1.add(0);
+        fingerprint.addExtension(0x8a8a, v1);
+        session.setFingerprint(Fingerprint.fromCustom(fingerprint, loadToken()));
+        Response resp = session.get("https://test.gmssl.cn");
+        System.out.println(resp.statusCode());
+        session.close();
+    }
+
 
     public static void main(String[] args) throws Exception {
         get();
@@ -333,6 +350,7 @@ public class Main {
         ua_tls();
         flow_reader();
         builtin_finger();
+        tlcp();
     }
 }
 

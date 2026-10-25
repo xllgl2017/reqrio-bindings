@@ -8,6 +8,7 @@
 #include "bindings.h"
 #include "QObject"
 #include "util.h"
+#include "Version.h"
 
 extern "C" {
 ///=========================>[Fingerprint]<=====================
@@ -27,7 +28,7 @@ FingerInner *Fingerprint_random(const char *token, char **err);
 
 FingerInner *Fingerprint_custom(const char *custom, const char *token, char **err);
 
-FingerInner *Fingerprint_new(const char *token);
+FingerInner *Fingerprint_new(Version rv, Version mv, const char *token);
 
 void Fingerprint_add_cipher_suite(FingerInner *fingerprint, uint16_t suite);
 
@@ -69,7 +70,7 @@ class Fingerprint : QObject {
 public:
     explicit Fingerprint(FingerInner *, QObject *parent = nullptr);
 
-    explicit Fingerprint(const QString &token, QObject *parent = nullptr);
+    explicit Fingerprint(Version rv, Version mv, const QString &token, QObject *parent = nullptr);
 
 
     ~Fingerprint() override;

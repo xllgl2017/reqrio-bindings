@@ -103,6 +103,13 @@ public class Session implements AutoCloseable {
         util.check_err(REQRIO.ScReq_set_alpn(this.pointer(), alpn.getValue()));
     }
 
+    /// 设置TLS握手的版本:
+    ///
+    /// @param ver: 版本
+    public void setVersion(Version ver) throws Exception {
+        util.check_err(REQRIO.ScReq_set_version(this.pointer(), ver.value));
+    }
+
 
     /// 设置代理，需要在初始化时设置；后期修改需要调reconnect
     ///

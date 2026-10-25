@@ -5,6 +5,8 @@ import com.google.gson.*;
 import java.util.*;
 
 public class CustomFingerprint {
+    int record_version;
+    int message_version;
     List<Integer> suites = new ArrayList<>();
     Map<String, JsonElement> extensions = new LinkedHashMap<>();
     HashMap<String, JsonElement> settings = new HashMap<>();
@@ -214,6 +216,15 @@ public class CustomFingerprint {
     public void setPriority(boolean priority, int weight) {
         this.priority = priority;
         this.weight = weight;
+    }
+
+
+    public void setRecordVersion(Version ver) {
+        this.record_version = ver.value;
+    }
+
+    public void setMessageVersion(Version ver) {
+        this.message_version = ver.value;
     }
 }
 

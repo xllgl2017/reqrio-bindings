@@ -181,6 +181,14 @@ class Session {
         check_error(this.library, this.library.ScReq_set_timeout(this.req, timeout_str))
     }
 
+    /**
+     * 设置TLS握手版本
+     * @param {Version} ver
+     * */
+    set_version(ver) {
+
+    }
+
     /**设置Cookie
      * @param {string} cookie 例如：name1=a; name2=fdg
      **/
@@ -219,7 +227,7 @@ class Session {
     }
 
     /** 发送一个请求
-     * @param {number} method  请求方法
+     * @param {Method} method  请求方法
      * @param {string} url_str 请求地址
      * @param {object} options 请求体
      */
