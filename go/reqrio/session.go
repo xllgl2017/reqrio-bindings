@@ -173,7 +173,7 @@ func (session *Session) SetProxy(proxy string) error {
 	return nil
 }
 
-// SetTimeout /设置超时
+// SetTimeout sets the request timeout configuration.
 func (session *Session) SetTimeout(timeout string) error {
 	cTimeout := C.CString(timeout)
 	defer C.free(unsafe.Pointer(cTimeout))
@@ -185,7 +185,7 @@ func (session *Session) SetTimeout(timeout string) error {
 	return nil
 }
 
-// SetVersion /设置TLS握手版本
+// SetVersion sets the TLS handshake version.
 func (session *Session) SetVersion(ver Version) error {
 	err := C.ScReq_set_version(session.req, C.uint16_t(ver))
 	if err != nil {

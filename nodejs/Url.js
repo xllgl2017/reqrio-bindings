@@ -2,7 +2,7 @@ const {library, check_error, ref_char_ptr} = require('./bindings')
 
 class Url {
 
-    /**初始化Url
+    /**Initialize a URL wrapper.
      * @param library
      * @param {string} base_url
      * @param {object|null} params
@@ -23,7 +23,7 @@ class Url {
         }
     }
 
-    /**添加一个查询参数
+    /**Add a query parameter.
      * @param {string} name
      * @param {string} value
      **/
@@ -32,7 +32,7 @@ class Url {
         check_error(this.library, err, this.close);
     }
 
-    /**移除一个查询参数
+    /**Remove a query parameter.
      * @param {string} name
      **/
     remove_param(name) {
@@ -40,7 +40,7 @@ class Url {
         check_error(err, this.close);
     }
 
-    /**为该url设置SNI，在使用ip地址URL时使用
+    /**Set the SNI for this URL; useful when the URL points to an IP address.
      * @param {string} sni
      **/
     set_sni(sni) {

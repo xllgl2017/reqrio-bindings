@@ -107,15 +107,15 @@ function client_hello() {
     session.set_finger_by_client_hello(Uint8Array.from(client_hello), read_token());
     session.set_timeout({
         connect: 2000,
-        //读取超时，单次
+        // read timeout for a single attempt
         read: 1000,
-        //写出超时，单次
+        // write timeout for a single attempt
         write: 1000,
-        //处理超时，总超时
+        // overall handling timeout
         handle: 1000,
-        //连接尝试次数
+        // connection retry count
         connect_times: 1,
-        //处理次数
+        // handling retry count
         handle_times: 1,
     })
     let resp = session.get("https://www.baidu.com");

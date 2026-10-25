@@ -73,43 +73,43 @@ public:
 
     ~Session() override;
 
-    /// 构造session
-    ///@param alpn :HTTP协议版本。在使用指纹时，指纹中的ALPN会把这个参数覆盖
-    ///@param verify :是否对服务器证书链进行验证
-    ///@param auto_redirect :是否对重定向连接进行自动跳转
+    /// Construct a session.
+    ///@param alpn: HTTP protocol version. When a TLS fingerprint is used, the ALPN in the fingerprint overrides this parameter.
+    ///@param verify: whether to validate the server certificate chain
+    ///@param auto_redirect: whether to follow redirect responses automatically
     ///@param parent
-    ///@param ignore_hdr_sort: 忽略内置的请求头排序
+    ///@param ignore_hdr_sort: ignore the built-in request header ordering
     explicit Session(const ALPN &alpn, bool verify = true, bool auto_redirect = true, bool ignore_hdr_sort = false,
                      QObject *parent = nullptr);
 
-    /// 设置请求头
-    ///@param header :请求头，JSON格式。
+    /// Set request headers.
+    ///@param header: request headers in JSON format.
     void setHeader(const QJsonDocument &header) const;
 
-    /// 添加一个请求头，已存在的请求头将会被覆盖
-    ///@param name:参数名
-    ///@param value:值，应为未编码
-    ///@param reversed: 为true时，值为空会发送，false时值为空不发送
+    /// Add a request header. If the header already exists, it will be overwritten.
+    ///@param name: parameter name
+    ///@param value: header value; should be unencoded
+    ///@param reversed: if true, the header is sent even when the value is empty; if false, it is omitted when empty
     void addHeader(const QString &name, const QString &value, bool reversed = false) const;
 
-    /// 设置请求的版本
+    /// Set the request protocol version.
     void setAlpn(const ALPN &alpn) const;
 
-    /// 设置是否对服务器证书链进行验证
+    /// Set whether to validate the server certificate chain.
     void setVerify(bool verify) const;
 
-    ///设置对重定向连接是否进制自动跳转
+    /// Set whether redirects should be followed automatically.
     void setRedirect(bool auto_redirect) const;
 
-    ///设置TLS密钥导出的位置，优先于环境变量SSLKEYLOGFILE
-    ///@param key_log:导出路径
+    /// Set the TLS key export path, taking precedence over the SSLKEYLOGFILE environment variable.
+    ///@param key_log: export path
     void setKeyLog(const QString &key_log) const;
 
-    ///设置TLS握手版本
-    ///@param version:TLS 版本
+    /// Set the TLS handshake version.
+    ///@param version: TLS version
     void setVersion(Version version) const;
 
-    /// 设置代理，示例:
+    /// Set the proxy. Example:
     ///
     /// http://127.0.0.1:1025
     ///
@@ -130,11 +130,11 @@ public:
 
     void close_stream() const;
 
-    /// 发送HTTP请求
-    /// @param method:请求的方法
-    /// @param url:请求的Url
-    /// @param body:请求的Body
-    /// @param stream: 流式请求
+    /// Send an HTTP request.
+    /// @param method: HTTP method
+    /// @param url: request URL
+    /// @param body: request body
+    /// @param stream: whether to use a streaming request
     [[nodiscard]] Response send(Method method, Url *url, Body *body, bool stream = false) const;
 
     [[nodiscard]] Response get(Url *, Body *) const;

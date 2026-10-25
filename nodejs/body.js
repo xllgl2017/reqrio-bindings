@@ -1,7 +1,7 @@
 const {check_error, ref_char_ptr} = require('./bindings');
 
 class Body {
-    /**添加一个查询参数
+    /**Create a request body from raw bytes.
      * @param library
      * @param {Uint8Array} data
      * @param {string} content_type
@@ -19,10 +19,10 @@ class Body {
         return Body.new(library, data, 'text/plain')
     }
 
-    /**创建form请求体
+    /**Create a form-encoded request body.
      * @param library
      * @param {object} form
-     * @param {string} ct 类型
+     * @param {string} ct content type
      **/
     static new_form(library, form, ct = "application/x-www-form-urlencoded") {
         let keys = Object.keys(form);
@@ -39,10 +39,10 @@ class Body {
         return Body.new(library, new TextEncoder().encode(res), ct)
     }
 
-    /**创建json请求体
+    /**Create a JSON request body.
      * @param library
      * @param {object} json
-     * @param {string} ct 类型
+     * @param {string} ct content type
      **/
     static new_json(library, json, ct = 'application/json') {
         const data = new TextEncoder().encode(JSON.stringify(json));
@@ -53,10 +53,10 @@ class Body {
         return library.Body_none();
     }
 
-    /**创建multi form请求体
+    /**Create a multipart form request body.
      * @param library
-     * @param {array} files 文件
-     * @param {object} data
+     * @param {array} files file descriptors
+     * @param {object} data additional form fields
      **/
     static new_files(library, files, data = null) {
         const http_file = library.HttpFile_new();

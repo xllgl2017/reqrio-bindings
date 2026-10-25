@@ -18,15 +18,15 @@ const ALPN = Object.freeze({
 
 
 class Session {
-    /**初始化Session
-     * @param {ALPN} alpn 设置请求的版本，实际使用需和服务器协商。设置了指纹将失效
+    /**Initialize a session.
+     * @param {ALPN} alpn negotiated protocol version for the request; this is overridden when a custom fingerprint is set.
      * @param {object} headers
-     * @param {boolean} verify 是否对服务器的证书链进行验证
-     * @param {boolean} auto_redirect 是否对重定向链接进行自动跳转
-     * @param {string|null} key_log 导出tls密钥
-     * @param {boolean} rand_tls
-     * @param {string|null} token 认证token
-     * @param {boolean} ignore_hdr_sort 忽略内置请求头顺序
+     * @param {boolean} verify whether to validate the server certificate chain
+     * @param {boolean} auto_redirect whether to automatically follow redirect links
+     * @param {string|null} key_log path to export TLS keys
+     * @param {boolean} rand_tls use a random TLS fingerprint
+     * @param {string|null} token authentication token
+     * @param {boolean} ignore_hdr_sort ignore the built-in request header ordering
      **/
     constructor(
         alpn,
@@ -56,7 +56,7 @@ class Session {
         check_error(this.library, this.library.ScReq_set_fingerprint(this.req, finger))
     }
 
-    /**使用随机指纹
+    /**Set a custom TLS fingerprint.
      * @param {Fingerprint} fingerprint
      **/
     set_fingerprint(fingerprint) {
@@ -65,10 +65,10 @@ class Session {
     }
 
 
-    /**使用内置指纹
-     * @param {string} name :指纹名称
-     * @param {string} token :认证token
-     * @param {boolean} sec_full :是否使用完整的sec请求头
+    /**Use a built-in TLS fingerprint.
+     * @param {string} name fingerprint name
+     * @param {string} token authentication token
+     * @param {boolean} sec_full whether to use the full sec-* header set
      **/
     set_finger_built(name, token, sec_full) {
         const errPtr = ref_char_ptr();
@@ -77,10 +77,10 @@ class Session {
         check_error(this.library, this.library.ScReq_set_fingerprint(this.req, fingerprint));
     }
 
-    /**使用指定指纹
-     * @param {int} idx :指纹索引
-     * @param {string} auth :授权码
-     * @param {boolean} sec_full :是否使用完整的sec请求头
+    /**Use a preconfigured fingerprint by index.
+     * @param {int} idx fingerprint index
+     * @param {string} auth authorization token
+     * @param {boolean} sec_full whether to use the full sec-* header set
      **/
     set_finger_idx(idx, auth, sec_full) {
         const errPtr = ref_char_ptr();
@@ -89,16 +89,16 @@ class Session {
         check_error(this.library, this.library.ScReq_set_fingerprint(this.req, fingerprint));
     }
 
-    /**使用随机指纹
-     * @param {string} token 认证token
+    /**Use a random TLS fingerprint.
+     * @param {string} token authentication token
      **/
     use_random_tls(token) {
         check_error(this.library, this.library.Fingerprint_random(this.req, token))
     }
 
-    /**使用ja3设置指纹
-     * @param {string} ja3
-     * @param {string} token 认证token
+    /**Set a JA3 fingerprint.
+     * @param {string} ja3 JA3 fingerprint string
+     * @param {string} token authentication token
      **/
     set_ja3(ja3, token) {
         const errPtr = ref_char_ptr();
@@ -107,9 +107,9 @@ class Session {
         this._set_fingerprint(finger)
     }
 
-    /**使用ja4设置指纹
-     * @param {string} ja4
-     * @param {string} token 认证token
+    /**Set a JA4 fingerprint.
+     * @param {string} ja4 JA4 fingerprint string
+     * @param {string} token authentication token
      **/
     set_ja4(ja4, token) {
         const errPtr = ref_char_ptr();
@@ -118,9 +118,9 @@ class Session {
         this._set_fingerprint(finger)
     }
 
-    /**使用client hello设置指纹
-     * @param {Uint8Array} client_hello
-     * @param {string} token 认证token
+    /**Set a fingerprint from a raw ClientHello payload.
+     * @param {Uint8Array} client_hello raw ClientHello bytes
+     * @param {string} token authentication token
      **/
     set_finger_by_client_hello(client_hello, token) {
         const errPtr = ref_char_ptr();
@@ -130,9 +130,9 @@ class Session {
     }
 
 
-    /**使用自定义指纹
-     * @param {object} custom
-     * @param {string} token 认证token
+    /**Set a custom fingerprint generated from an object payload.
+     * @param {object} custom custom fingerprint config
+     * @param {string} token authentication token
      **/
     set_finger_by_custom(custom, token) {
         const errPtr = ref_char_ptr();
@@ -142,7 +142,7 @@ class Session {
     }
 
 
-    /**设置请求头
+    /**Set all request headers in a single call.
      * @param {object} header
      **/
     set_headers(header) {
@@ -150,30 +150,30 @@ class Session {
         check_error(this.library, this.library.ScReq_set_header_json(this.req, header_str));
     }
 
-    /**添加一个请求头
+    /**Add a request header.
      * @param {string} name
      * @param {string} value
-     * @param {boolean} reversed 为true时,值为空，改请求头不发送
+     * @param {boolean} reversed when true, the value is left empty and the header is not sent
      **/
     add_header(name, value, reversed = false) {
         check_error(this.library, this.library.ScReq_add_header(this.req, name, value, reversed));
     }
 
-    /**移除一个请求头
+    /**Remove a request header.
      * @param {string} name
      **/
     remove_header(name) {
         check_error(this.library, library.ScReq_remove_header(this.req, name))
     }
 
-    /**设置代理
-     * @param {string} proxy 例如：http://127.0.0.1:8080,socks5://127.0.0.1:8080
+    /**Set an HTTP or SOCKS proxy.
+     * @param {string} proxy example: http://127.0.0.1:8080 or socks5://127.0.0.1:8080
      **/
     set_proxy(proxy) {
         check_error(this.library, this.library.ScReq_set_proxy(this.req, proxy))
     }
 
-    /**设置请求超时
+    /**Set timeout values for connection, read, write, and overall handling.
      * @param {object} timeout
      **/
     set_timeout(timeout) {
@@ -182,21 +182,21 @@ class Session {
     }
 
     /**
-     * 设置TLS握手版本
+     * Set the TLS handshake version.
      * @param {Version} ver
      * */
     set_version(ver) {
 
     }
 
-    /**设置Cookie
-     * @param {string} cookie 例如：name1=a; name2=fdg
+    /**Set a Cookie header.
+     * @param {string} cookie example: name1=a; name2=fdg
      **/
     set_cookie(cookie) {
         check_error(this.library, this.library.ScReq_set_cookie(this.req, cookie))
     }
 
-    /**添加一个Cookie
+    /**Add a single cookie.
      * @param {string} name
      * @param {string} value
      **/
@@ -208,7 +208,7 @@ class Session {
         check_error(this.library, this.library.ScReq_reconnect(this.req));
     }
 
-    /**连接到某个url，不会发包
+    /**Connect to a URL without sending an HTTP request.
      * @param {string} url
      * @param {string|null} sni
      **/
@@ -226,10 +226,10 @@ class Session {
         check_error(this.library, this.library.ScReq_set_callback(this.req, callback))
     }
 
-    /** 发送一个请求
-     * @param {Method} method  请求方法
-     * @param {string} url_str 请求地址
-     * @param {object} options 请求体
+    /**Send a request.
+     * @param {Method} method HTTP method
+     * @param {string} url_str request URL
+     * @param {object} options request body and transport options
      */
     send(method, url_str, options = {}) {
         const {data, json, files, bytes, ct, params, sni, stream} = options;

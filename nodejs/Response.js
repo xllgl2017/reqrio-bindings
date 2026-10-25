@@ -15,7 +15,7 @@ class Response {
         return status_code
     }
 
-    /**获取响应头
+    /**Get a response header by name.
      * @param {string} name
      **/
     get_header(name) {

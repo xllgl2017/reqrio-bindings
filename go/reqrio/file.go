@@ -38,7 +38,7 @@ type HttpFile struct {
 
 func buildFileBody(files []HttpFile, data map[string]string) (unsafe.Pointer, error) {
 	if len(files) == 0 {
-		return nil, errors.New("无文件")
+		return nil, errors.New("no files")
 	}
 	filePtr := C.HttpFile_new()
 	for _, file := range files {
