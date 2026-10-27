@@ -316,10 +316,11 @@ func customTls() {
 		reqrio.HTTP20,
 		reqrio.HTTP11,
 	})
-	fingerprint.AddH2Setting(reqrio.HeaderTableSize, 65536)
-	fingerprint.AddH2Setting(reqrio.EnablePush, 0)
-	fingerprint.AddH2Setting(reqrio.InitialWindowSize, 6291456)
-	fingerprint.AddH2Setting(reqrio.MaxHeaderListSize, 242144)
+	fingerprint.CleanH2()
+	fingerprint.AddH2Setting(reqrio.H2SettingHeaderTableSize, 65536)
+	fingerprint.AddH2Setting(reqrio.H2SettingEnablePush, 0)
+	fingerprint.AddH2Setting(reqrio.H2SettingInitialWindowSize, 6291456)
+	fingerprint.AddH2Setting(reqrio.H2SettingMaxHeaderListSize, 242144)
 	fingerprint.SetH2WindowSize(2147418112)
 	fingerprint.SetH2Priority(true, 147)
 	session := reqrio.NewSession(false)

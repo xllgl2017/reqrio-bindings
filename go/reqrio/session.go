@@ -195,6 +195,7 @@ func (session *Session) SetVersion(ver Version) error {
 	return nil
 }
 
+// SetCookie 设置请求的Cookie；将清空现有cookie，并设置传入
 func (session *Session) SetCookie(cookie string) error {
 	cCookie := C.CString(cookie)
 	defer C.free(unsafe.Pointer(cCookie))
@@ -206,6 +207,7 @@ func (session *Session) SetCookie(cookie string) error {
 	return nil
 }
 
+// AddCookie 添加一条Cookie
 func (session *Session) AddCookie(name string, value string) error {
 	cName, cValue := C.CString(name), C.CString(value)
 	defer C.free(unsafe.Pointer(cName))

@@ -29,7 +29,7 @@
 ## Quick Start
 
 ```java
-import org.xllgl2017.ALPN;
+import org.xllgl2017.tls.ALPN;
 import org.xllgl2017.Response;
 import org.xllgl2017.Session;
 import org.xllgl2017.Timeout;
@@ -153,12 +153,14 @@ session.close();
 
 ```java
 import org.xllgl2017.Fingerprint;
-import org.xllgl2017.ALPN;
+import org.xllgl2017.tls.ALPN;
 import org.xllgl2017.Session;
 
 Session session = new Session(ALPN.HTTP20);
 Fingerprint fingerprint = Fingerprint.fromJa3("771,4865-...", token);
-session.setFingerprint(fingerprint);
+session.
+
+setFingerprint(fingerprint);
 ```
 
 Supported fingerprint creation methods:

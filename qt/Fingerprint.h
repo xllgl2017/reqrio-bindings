@@ -8,7 +8,7 @@
 #include "bindings.h"
 #include "QObject"
 #include "util.h"
-#include "Version.h"
+#include "tls/Version.h"
 
 extern "C" {
 ///=========================>[Fingerprint]<=====================
@@ -52,11 +52,21 @@ void Fingerprint_add_ext_algorithm(FingerInner *fingerprint, uint16_t ext_typ, u
 
 void Fingerprint_add_ext_ec_point(FingerInner *fingerprint, uint16_t ext_typ, uint8_t point);
 
+void Fingerprint_clear_h2_frame(FingerInner *fingerprint);
+
 void Fingerprint_add_h2_setting(FingerInner *fingerprint, uint16_t flag, uint32_t value);
 
 void Fingerprint_set_h2_window_size(FingerInner *fingerprint, uint32_t size);
 
 void Fingerprint_set_h2_priority(FingerInner *fingerprint, bool priority, uint8_t weight);
+
+void Fingerprint_add_h2_frame(FingerInner *fingerprint, uint8_t typ, const uint8_t *data, size_t data_len);
+
+void Fingerprint_clean_h3_frame(FingerInner *fingerprint);
+
+void Fingerprint_add_h3_setting(FingerInner *fingerprint, uint64_t flag, uint64_t value);
+
+void Fingerprint_add_h3_frame(FingerInner *fingerprint, uint64_t typ, const uint8_t *data, size_t data_len);
 
 void Fingerprint_drop(FingerInner *fingerprint);
 }
@@ -99,11 +109,19 @@ public:
 
     void addExtensionPadding(uint16_t typ, size_t padding) const;
 
+    void clearH2Frame() const;
+
     void addH2Setting(uint16_t flag, uint32_t value) const;
 
     void setH2WindowSize(uint32_t value) const;
 
     void setH2Priority(bool priority, uint8_t weight) const;
+
+    void clearH3Frame() const;
+
+    void addH3Setting(uint64_t flag, uint64_t value) const;
+
+    void addH3Frame(uint64_t typ, QByteArray data) const;
 
     static Fingerprint *fromBuiltin(const QString &name, bool sec_full, const QString &token,
                                     QObject *parent = nullptr);

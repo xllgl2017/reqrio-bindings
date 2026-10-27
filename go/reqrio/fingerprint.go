@@ -23,9 +23,14 @@ extern void Fingerprint_add_ext_padding(void *finger, uint16_t ext_typ, size_t p
 extern void Fingerprint_add_ext_bytes(void *finger, uint16_t ext_typ, uint8_t *bytes, size_t len);
 extern void Fingerprint_add_ext_algorithm(void *finger, uint16_t ext_typ, uint16_t algorithm);
 extern void Fingerprint_add_ext_ec_point(void *finger, uint16_t ext_typ, uint8_t ec_point);
+extern void Fingerprint_clear_h2_frame(void *finger);
 extern void Fingerprint_add_h2_setting(void *finger, uint16_t flag, uint32_t value);
 extern void Fingerprint_set_h2_window_size(void *finger, uint32_t size);
 extern void Fingerprint_set_h2_priority(void *finger, bool priority, uint8_t weight);
+extern void Fingerprint_add_h2_frame(void *finger, uint8_t typ, const uint8_t *data, size_t data_len);
+extern void Fingerprint_clean_h3_frame(void *finger);
+extern void Fingerprint_add_h3_setting(void *finger, uint64_t flag, uint64_t value);
+extern void Fingerprint_add_h3_frame(void *finger, uint64_t typ, const uint8_t *data, size_t data_len);
 extern void *Fingerprint_from_ja3(const char *ja3, const char *token, char **err);
 extern void *Fingerprint_from_ja4(const char *ja4, const char *token, char **err);
 extern void *Fingerprint_from_client_hello(uint8_t *client_hello, size_t len, const char *token, char **err);
@@ -112,8 +117,21 @@ func (fingerprint *Fingerprint) AddExtEcPoint(typ ExtensionType, points []EcPoin
 	}
 }
 
-func (fingerprint *Fingerprint) AddH2Setting(setting H2Setting, value uint32) {
+func (fingerprint *Fingerprint) CleanH2() {
+	C.Fingerprint_clear_h2_frame(fingerprint.rawPtr)
+}
+
+func (fingerprint *Fingerprint) CleanH3() {
+	C.Fingerprint_clean_h3_frame(fingerprint.rawPtr)
+}
+
+func (fingerprint *Fingerprint) AddH2Setting(setting H2SettingType, value uint32) {
 	C.Fingerprint_add_h2_setting(fingerprint.rawPtr, C.uint16_t(setting), C.uint32_t(value))
+}
+
+func (fingerprint *Fingerprint) AddH2Frame(typ H2FrameType, payload []byte) {
+	dataPtr := (*C.uint8_t)(unsafe.Pointer(&payload[0]))
+	C.Fingerprint_add_h2_frame(fingerprint.rawPtr, C.uint8_t(typ), dataPtr, C.size_t(len(payload)))
 }
 
 func (fingerprint *Fingerprint) SetH2WindowSize(size uint32) {
@@ -122,6 +140,16 @@ func (fingerprint *Fingerprint) SetH2WindowSize(size uint32) {
 
 func (fingerprint *Fingerprint) SetH2Priority(priority bool, weight uint8) {
 	C.Fingerprint_set_h2_priority(fingerprint.rawPtr, C.bool(priority), C.uint8_t(weight))
+}
+
+func (fingerprint *Fingerprint) AddH3Setting(setting H3SettingType, value uint64) {
+	C.Fingerprint_add_h3_setting(fingerprint.rawPtr, C.uint64_t(setting), C.uint64_t(value))
+}
+
+func (fingerprint *Fingerprint) AddH3Frame(typ H3FrameType, payload []byte) {
+	dataPtr := (*C.uint8_t)(unsafe.Pointer(&payload[0]))
+	C.Fingerprint_add_h3_frame(fingerprint.rawPtr, C.uint64_t(typ), dataPtr, C.size_t(len(payload)))
+
 }
 
 func FromJa3(ja3 string, token string) (Fingerprint, error) {

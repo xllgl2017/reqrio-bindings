@@ -1,13 +1,13 @@
 const {
     binding_library,
-    Method,
-    make_ScReq_callback,
-    check_error, ref_char_ptr
+    check_error,
+    ref_char_ptr
 } = require("./bindings");
 const {Response} = require("./Response")
 const {Body} = require('./body')
 const {Url} = require('./Url')
 const {Fingerprint} = require("./fingerprint")
+const {Method} = require("./http/method")
 
 const ALPN = Object.freeze({
     HTTP10: "http/1.0",
@@ -24,8 +24,6 @@ class Session {
      * @param {boolean} verify whether to validate the server certificate chain
      * @param {boolean} auto_redirect whether to automatically follow redirect links
      * @param {string|null} key_log path to export TLS keys
-     * @param {boolean} rand_tls use a random TLS fingerprint
-     * @param {string|null} token authentication token
      * @param {boolean} ignore_hdr_sort ignore the built-in request header ordering
      **/
     constructor(
@@ -34,8 +32,6 @@ class Session {
         verify = true,
         auto_redirect = true,
         key_log = null,
-        rand_tls = false,
-        token = null,
         ignore_hdr_sort = false,
     ) {
         this.library = binding_library();
@@ -44,16 +40,11 @@ class Session {
         check_error(this.library, this.library.ScReq_set_verify(this.req, verify), this.close);
         check_error(this.library, this.library.ScReq_set_redirect(this.req, auto_redirect), this.close);
         if (key_log !== null) this.set_key_log(key_log, this.close)
-        if (rand_tls && token !== null) this.use_random_tls(token)
         this.set_headers(headers)
     }
 
     set_key_log(key_log, func = null) {
         check_error(this.library, this.library.ScReq_set_key_log(this.req, key_log), func)
-    }
-
-    _set_fingerprint(finger) {
-        check_error(this.library, this.library.ScReq_set_fingerprint(this.req, finger))
     }
 
     /**Set a custom TLS fingerprint.
@@ -63,84 +54,6 @@ class Session {
         check_error(this.library, this.library.ScReq_set_fingerprint(this.req, fingerprint.ptr));
         fingerprint.ptr = null;
     }
-
-
-    /**Use a built-in TLS fingerprint.
-     * @param {string} name fingerprint name
-     * @param {string} token authentication token
-     * @param {boolean} sec_full whether to use the full sec-* header set
-     **/
-    set_finger_built(name, token, sec_full) {
-        const errPtr = ref_char_ptr();
-        let fingerprint = this.library.Fingerprint_from_builtin(name, sec_full, token, errPtr)
-        check_error(this.library, errPtr.deref())
-        check_error(this.library, this.library.ScReq_set_fingerprint(this.req, fingerprint));
-    }
-
-    /**Use a preconfigured fingerprint by index.
-     * @param {int} idx fingerprint index
-     * @param {string} auth authorization token
-     * @param {boolean} sec_full whether to use the full sec-* header set
-     **/
-    set_finger_idx(idx, auth, sec_full) {
-        const errPtr = ref_char_ptr();
-        let fingerprint = this.library.Fingerprint_from_idx(idx, auth, sec_full, errPtr)
-        check_error(this.library, errPtr.deref())
-        check_error(this.library, this.library.ScReq_set_fingerprint(this.req, fingerprint));
-    }
-
-    /**Use a random TLS fingerprint.
-     * @param {string} token authentication token
-     **/
-    use_random_tls(token) {
-        check_error(this.library, this.library.Fingerprint_random(this.req, token))
-    }
-
-    /**Set a JA3 fingerprint.
-     * @param {string} ja3 JA3 fingerprint string
-     * @param {string} token authentication token
-     **/
-    set_ja3(ja3, token) {
-        const errPtr = ref_char_ptr();
-        const finger = this.library.Fingerprint_from_ja3(ja3, token, errPtr);
-        check_error(this.library, errPtr.deref());
-        this._set_fingerprint(finger)
-    }
-
-    /**Set a JA4 fingerprint.
-     * @param {string} ja4 JA4 fingerprint string
-     * @param {string} token authentication token
-     **/
-    set_ja4(ja4, token) {
-        const errPtr = ref_char_ptr();
-        const finger = this.library.Fingerprint_from_ja4(ja4, token, errPtr);
-        check_error(this.library, errPtr.deref());
-        this._set_fingerprint(finger)
-    }
-
-    /**Set a fingerprint from a raw ClientHello payload.
-     * @param {Uint8Array} client_hello raw ClientHello bytes
-     * @param {string} token authentication token
-     **/
-    set_finger_by_client_hello(client_hello, token) {
-        const errPtr = ref_char_ptr();
-        const finger = this.library.Fingerprint_from_client_hello(client_hello, client_hello.length, token, errPtr);
-        check_error(this.library, errPtr.deref());
-        this._set_fingerprint(finger)
-    }
-
-
-    /**Set a custom fingerprint generated from an object payload.
-     * @param {object} custom custom fingerprint config
-     * @param {string} token authentication token
-     **/
-    set_finger_by_custom(custom, token) {
-        const errPtr = ref_char_ptr();
-        const finger = this.library.Fingerprint_custom(JSON.stringify(custom), token, errPtr);
-        check_error(this.library, errPtr.deref());
-        this._set_fingerprint(finger)
-    }
-
 
     /**Set all request headers in a single call.
      * @param {object} header
@@ -163,7 +76,7 @@ class Session {
      * @param {string} name
      **/
     remove_header(name) {
-        check_error(this.library, library.ScReq_remove_header(this.req, name))
+        check_error(this.library, this.library.ScReq_remove_header(this.req, name))
     }
 
     /**Set an HTTP or SOCKS proxy.
@@ -186,7 +99,7 @@ class Session {
      * @param {Version} ver
      * */
     set_version(ver) {
-
+        check_error(this.library, this.library.ScReq_set_version(this.req, ver))
     }
 
     /**Set a Cookie header.
@@ -219,11 +132,6 @@ class Session {
 
     close_stream() {
         check_error(this.library, this.library.ScReq_close_stream(this.req))
-    }
-
-    set_callback(func) {
-        let callback = make_ScReq_callback(func);
-        check_error(this.library, this.library.ScReq_set_callback(this.req, callback))
     }
 
     /**Send a request.

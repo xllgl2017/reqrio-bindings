@@ -127,6 +127,10 @@ void Fingerprint::addExtensionPadding(const uint16_t typ, const size_t padding) 
     Fingerprint_add_ext_padding(this->raw_ptr, typ, padding);
 }
 
+void Fingerprint::clearH2Frame() const {
+    Fingerprint_clear_h2_frame(this->raw_ptr);
+}
+
 void Fingerprint::addH2Setting(const uint16_t flag, const uint32_t value) const {
     Fingerprint_add_h2_setting(this->raw_ptr, flag, value);
 }
@@ -137,6 +141,18 @@ void Fingerprint::setH2WindowSize(const uint32_t value) const {
 
 void Fingerprint::setH2Priority(const bool priority, const uint8_t weight) const {
     Fingerprint_set_h2_priority(this->raw_ptr, priority, weight);
+}
+
+void Fingerprint::clearH3Frame() const {
+    Fingerprint_clean_h3_frame(this->raw_ptr);
+}
+
+void Fingerprint::addH3Setting(const uint64_t flag, const uint64_t value) const {
+    Fingerprint_add_h3_setting(this->raw_ptr, flag, value);
+}
+
+void Fingerprint::addH3Frame(const uint64_t typ, QByteArray data) const {
+    Fingerprint_add_h3_frame(this->raw_ptr, typ, reinterpret_cast<uint8_t *>(data.data()), data.length());
 }
 
 

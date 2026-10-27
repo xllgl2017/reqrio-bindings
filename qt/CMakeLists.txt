@@ -25,15 +25,7 @@ add_library(reqrio-qt STATIC bindings.h
         Body.cpp
         Body.h
         Fingerprint.cpp
-        Fingerprint.h
-        CipherSuite.h
-        Algorithm.h
-        CompressionMethod.h
-        Group.h
-        Version.h
-        EcPointFormat.h
-        ExtensionType.h
-        H2SettingType.h)
+)
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(reqrio-qt PUBLIC Qt${QT_VERSION_MAJOR}::Core reqrio)

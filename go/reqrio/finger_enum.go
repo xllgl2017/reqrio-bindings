@@ -151,13 +151,46 @@ const (
 	ANSI_X962_CHAR2               = 2
 )
 
-type H2Setting int
+type H2SettingType uint16
 
 const (
-	HeaderTableSize      H2Setting = 0x1
-	EnablePush                     = 0x2
-	MaxConcurrentStreams           = 0x3
-	InitialWindowSize              = 0x4
-	MaxFrameSize                   = 0x5
-	MaxHeaderListSize              = 0x6
+	H2SettingHeaderTableSize      H2SettingType = 0x1
+	H2SettingEnablePush                         = 0x2
+	H2SettingMaxConcurrentStreams               = 0x3
+	H2SettingInitialWindowSize                  = 0x4
+	H2SettingMaxFrameSize                       = 0x5
+	H2SettingMaxHeaderListSize                  = 0x6
+)
+
+type H2FrameType uint8
+
+const (
+	H2FrameData         H2FrameType = 0x00
+	H2FrameHeaders                  = 0x01
+	H2FramePriority                 = 0x02
+	H2FrameRstStream                = 0x03
+	H2FrameSettings                 = 0x04
+	H2FramePushPromise              = 0x05
+	H2FramePing                     = 0x06
+	H2FrameGoaway                   = 0x07
+	H2FrameWindowUpdate             = 0x08
+	H2FrameContinuation             = 0x09
+)
+
+type H3SettingType uint64
+
+const (
+	H3SettingMaxTableCapacity    H3SettingType = 0x01
+	H3SettingMaxFieldSectionSize               = 0x06
+	H3SettingBlockedStreams                    = 0x07
+	H3SettingEnableDatagram                    = 0x33
+)
+
+type H3FrameType uint64
+
+const (
+	H3FrameData           H3FrameType = 0x0
+	H3FrameHeader                     = 0x1
+	H3FrameSetting                    = 0x4
+	H3FramePriorityUpdate             = 0xf0700
 )

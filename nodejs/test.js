@@ -23,13 +23,13 @@ async function test_ws() {
 }
 
 
-// get();
-// post_form();
-// post_json();
-// ja3();
-// ja4();
-// client_hello();
-// custom_fingerprint()
-// flow_reader()
+get();
+post_form();
+post_json();
+ja3();
+ja4();
+client_hello();
+custom_fingerprint()
+flow_reader()
 // finger_builtin("edge-148")
 tlcp();
