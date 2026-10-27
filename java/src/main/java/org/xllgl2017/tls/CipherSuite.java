@@ -1,4 +1,4 @@
-package org.xllgl2017;
+package org.xllgl2017.tls;
 
 public enum CipherSuite {
     /// ecdhe-ecdhe
@@ -45,7 +45,7 @@ public enum CipherSuite {
 
     ECC_SM4_CBC_SM3(0xe013);
 
-    final int value;
+    public final int value;
 
     CipherSuite(int value) {
         this.value = value;

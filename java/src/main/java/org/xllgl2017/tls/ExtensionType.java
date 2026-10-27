@@ -1,4 +1,4 @@
-package org.xllgl2017;
+package org.xllgl2017.tls;
 
 public enum ExtensionType {
     ServerName(0x0),
@@ -23,7 +23,7 @@ public enum ExtensionType {
     PreSharedKey(0x29),
     ApplicationSettingOld(0x4469);
 
-    final int value;
+    public final int value;
 
     ExtensionType(int value) {
         this.value = value;

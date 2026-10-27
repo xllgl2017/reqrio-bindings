@@ -1,4 +1,4 @@
-package org.xllgl2017;
+package org.xllgl2017.tls;
 
 public enum CompressionMethod {
     NULL(0),
@@ -7,7 +7,7 @@ public enum CompressionMethod {
     GZIP(0xFFFF),
     ZSTD(0xFFFE);
 
-    final int value;
+    public final int value;
 
     CompressionMethod(int value) {
         this.value = value;

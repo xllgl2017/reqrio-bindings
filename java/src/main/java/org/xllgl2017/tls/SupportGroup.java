@@ -1,4 +1,4 @@
-package org.xllgl2017;
+package org.xllgl2017.tls;
 
 public enum SupportGroup {
     X25519(0x1d),
@@ -13,9 +13,10 @@ public enum SupportGroup {
     FFDHE6144(0x0103),
     FFDHE8192(0x0104);
 
-    final int value;
+    public final int value;
 
     SupportGroup(int value) {
         this.value = value;
     }
 }
+

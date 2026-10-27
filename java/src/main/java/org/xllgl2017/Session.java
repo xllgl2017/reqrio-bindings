@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 import org.jetbrains.annotations.NotNull;
+import org.xllgl2017.tls.ALPN;
+import org.xllgl2017.tls.Version;
 
 import java.util.HashMap;
 

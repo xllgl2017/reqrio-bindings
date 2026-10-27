@@ -97,7 +97,9 @@ public interface ReqrioLibrary extends Library {
 
     void Response_drop(Pointer resp);
 
-    /// =========================>[CustomFingerprint]<=========================
+    /// =======================>[Fingerprint]<=======================
+    Pointer Fingerprint_new(int rv, int mv, String token);
+
     Pointer Fingerprint_from_builtin(String name, boolean sec_full, String token, PointerByReference err);
 
     Pointer Fingerprint_from_idx(int idx, String auth, boolean sec_full, PointerByReference err);
@@ -110,8 +112,49 @@ public interface ReqrioLibrary extends Library {
 
     Pointer Fingerprint_random(String token, PointerByReference err);
 
-    Pointer Fingerprint_custom(String custom, String token, PointerByReference err);
+    void Fingerprint_add_cipher_suite(Pointer finger, int suite);
 
+    void Fingerprint_add_ext(Pointer finger, int typ);
+
+    void Fingerprint_add_ext_alpn(Pointer finger, int typ, String alpn);
+
+    void Fingerprint_add_ext_version(Pointer finger, int typ, int ver);
+
+    void Fingerprint_add_ext_curve(Pointer finger, int typ, int curve);
+
+    void Fingerprint_add_ext_compress(Pointer finger, int typ, int method);
+
+    void Fingerprint_add_ext_psk_mode(Pointer finger, int typ, int mode);
+
+    void Fingerprint_add_ext_padding(Pointer finger, int typ, int padding);
+
+    void Fingerprint_add_ext_bytes(Pointer finger, int typ, byte[] bs, int len);
+
+    void Fingerprint_add_ext_algorithm(Pointer finger, int typ, int algo);
+
+    void Fingerprint_add_ext_ec_point(Pointer finger, int typ, int point);
+
+    void Fingerprint_clear_h2_frame(Pointer finger);
+
+    void Fingerprint_add_h2_setting(Pointer finger, int flag, int value);
+
+    void Fingerprint_add_h2_frame(Pointer finger, int typ, byte[] data, int data_len);
+
+    void Fingerprint_clean_h3_frame(Pointer finger);
+
+    void Fingerprint_add_h3_setting(Pointer finger, int flag, int value);
+
+    void Fingerprint_add_h3_frame(Pointer finger, int typ, byte[] data, int data_len);
+
+    void Fingerprint_set_h2_window_size(Pointer finger, int size);
+
+    void Fingerprint_set_h2_priority(Pointer finger, boolean priority, int weight);
+
+    void Fingerprint_drop(Pointer finger);
+
+
+
+    /// =======================>[WebSocket]<=======================
     Pointer ws_open(String url, String header);
 
     Pointer ws_open_raw(String url, String raw);

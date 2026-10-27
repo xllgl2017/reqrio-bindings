@@ -1,4 +1,4 @@
-package org.xllgl2017;
+package org.xllgl2017.tls;
 
 public enum Version {
     TLCP(0x101),
@@ -7,7 +7,7 @@ public enum Version {
     TLS_1_2(0x303),
     TLS_1_3(0x304);
 
-    final int value;
+    public final int value;
 
     Version(int value) {
         this.value = value;

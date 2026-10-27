@@ -1,8 +1,8 @@
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.apache.commons.codec.binary.Hex;
 import org.xllgl2017.*;
+import org.xllgl2017.tls.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -164,80 +164,81 @@ public class Main {
         session.close();
     }
 
-    static CustomFingerprint getFinger() {
-        CustomFingerprint finger = new CustomFingerprint();
+    static Fingerprint buildFinger() {
+        Fingerprint fingerprint = new Fingerprint(Version.TLS_1_0, Version.TLS_1_2, loadToken());
 
-        finger.addSuite(0x4a4a);
-        finger.addSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
-        finger.addSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384);
-        finger.addSuite(CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256);
-        finger.addSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA);
-        finger.addSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA);
-        finger.addSuite(CipherSuite.TLS_AES_128_GCM_SHA256);
-        finger.addSuite(CipherSuite.TLS_AES_256_GCM_SHA384);
-        finger.addSuite(CipherSuite.TLS_CHACHA20_POLY1305_SHA256);
+        fingerprint.addSuite(0x4a4a);
+        fingerprint.addSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
+        fingerprint.addSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384);
+        fingerprint.addSuite(CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256);
+        fingerprint.addSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA);
+        fingerprint.addSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA);
+        fingerprint.addSuite(CipherSuite.TLS_AES_128_GCM_SHA256);
+        fingerprint.addSuite(CipherSuite.TLS_AES_256_GCM_SHA384);
+        fingerprint.addSuite(CipherSuite.TLS_CHACHA20_POLY1305_SHA256);
 
-        finger.addExtension(ExtensionType.StatusRequest);
-        finger.addExtension(ExtensionType.SupportedGroup);
-        finger.addExtension(ExtensionType.EcPointFormats);
-        finger.addExtension(ExtensionType.SignatureAlgorithms);
-        finger.addExtension(ExtensionType.SignedCertificateTimestamp);
-        finger.addExtension(ExtensionType.ExtendMasterSecret);
-        finger.addExtension(ExtensionType.CompressionCertificate);
-        finger.addExtension(ExtensionType.SessionTicket);
-        finger.addExtension(ExtensionType.SupportedVersions);
-        finger.addExtension(ExtensionType.PskKeyExchangeMode);
-        finger.addExtension(ExtensionType.KeyShare);
-        finger.addExtension(ExtensionType.ApplicationSetting);
-        finger.addExtension(ExtensionType.ServerName);
-        finger.addExtension(ExtensionType.ApplicationLayerProtocolNegotiation);
-        JsonArray v1 = new JsonArray();
-        v1.add(0);
-        finger.addExtension(0xeaea, v1);
+        fingerprint.addExtension(0x0a0a);
+        fingerprint.addExtension(ExtensionType.StatusRequest);
+        //SupportedGroup
+        fingerprint.addSupportedGroup(SupportGroup.X25519);
+        fingerprint.addSupportedGroup(SupportGroup.Secp256r1);
+        fingerprint.addSupportedGroup(SupportGroup.Secp384r1);
+        fingerprint.addSupportedGroup(SupportGroup.Secp521r1);
+        //EcPointFormat
+        fingerprint.addEcPointFormat(EcPointFormat.UNCOMPRESSED);
+        //SignatureAlgorithm
+        fingerprint.addAlgorithm(Algorithm.RSA_PKCS1_SHA1);
+        fingerprint.addAlgorithm(Algorithm.RSA_PKCS1_SHA256);
+        fingerprint.addAlgorithm(Algorithm.RSA_PKCS1_SHA384);
+        fingerprint.addAlgorithm(Algorithm.RSA_PKCS1_SHA512);
+        fingerprint.addAlgorithm(Algorithm.ECDSA_SECP256R1_SHA256);
+        fingerprint.addAlgorithm(Algorithm.ECDSA_SECP384R1_SHA384);
+        fingerprint.addAlgorithm(Algorithm.ECDSA_SECP521R1_SHA512);
+        fingerprint.addAlgorithm(Algorithm.RSA_PSS_PSS_SHA256);
+        fingerprint.addAlgorithm(Algorithm.RSA_PSS_PSS_SHA384);
+        fingerprint.addAlgorithm(Algorithm.RSA_PSS_PSS_SHA512);
+        fingerprint.addAlgorithm(Algorithm.RSA_PSS_RSAE_SHA256);
+        fingerprint.addAlgorithm(Algorithm.RSA_PSS_RSAE_SHA384);
+        fingerprint.addAlgorithm(Algorithm.RSA_PSS_RSAE_SHA512);
+        //SignedCertificateTimestamp
+        fingerprint.addExtension(ExtensionType.SignedCertificateTimestamp);
+        //ExtendMasterSecret
+        fingerprint.addExtension(ExtensionType.ExtendMasterSecret);
+        //CompressionCertificate
+        fingerprint.addCompressionCertificate(CompressionMethod.NULL);
+        //SessionTicket
+        fingerprint.addExtension(ExtensionType.SessionTicket);
+        //SupportedVersions
+        fingerprint.addSupportedVersion(Version.TLS_1_3);
+        fingerprint.addSupportedVersion(Version.TLS_1_2);
+        //PskKeyExchangeMode
+        fingerprint.addPskMode(PskMode.PSK_DHE_KE);
+        //KeyShare
+        fingerprint.addKeyShare(0xdada);
+        fingerprint.addKeyShare(SupportGroup.X25519);
+        //ApplicationSetting
+        fingerprint.addApplicationSetting(ALPN.HTTP20);
+        fingerprint.addExtension(ExtensionType.ServerName);
+        //ApplicationLayerProtocolNegotiation
+        fingerprint.addApplicationLayerProtocolNegotiation(ALPN.HTTP20);
+        fingerprint.addApplicationLayerProtocolNegotiation(ALPN.HTTP11);
+        fingerprint.addExtension(0xeaea, new byte[]{0});
 
-        finger.addSupportedGroup(SupportGroup.X25519);
-        finger.addSupportedGroup(SupportGroup.Secp256r1);
-        finger.addSupportedGroup(SupportGroup.Secp384r1);
-        finger.addSupportedGroup(SupportGroup.Secp521r1);
 
-        finger.addAlgorithm(Algorithm.RSA_PKCS1_SHA1);
-        finger.addAlgorithm(Algorithm.RSA_PKCS1_SHA256);
-        finger.addAlgorithm(Algorithm.RSA_PKCS1_SHA384);
-        finger.addAlgorithm(Algorithm.RSA_PKCS1_SHA512);
-        finger.addAlgorithm(Algorithm.ECDSA_SECP256R1_SHA256);
-        finger.addAlgorithm(Algorithm.ECDSA_SECP384R1_SHA384);
-        finger.addAlgorithm(Algorithm.ECDSA_SECP521R1_SHA512);
-        finger.addAlgorithm(Algorithm.RSA_PSS_PSS_SHA256);
-        finger.addAlgorithm(Algorithm.RSA_PSS_PSS_SHA384);
-        finger.addAlgorithm(Algorithm.RSA_PSS_PSS_SHA512);
-        finger.addAlgorithm(Algorithm.RSA_PSS_RSAE_SHA256);
-        finger.addAlgorithm(Algorithm.RSA_PSS_RSAE_SHA384);
-        finger.addAlgorithm(Algorithm.RSA_PSS_RSAE_SHA512);
+        fingerprint.clearH2Frames();
+        fingerprint.addH2Setting(H2SettingType.HeaderTableSize, 65536);
+        fingerprint.addH2Setting(H2SettingType.EnablePush, 0);
+        fingerprint.addH2Setting(H2SettingType.InitialWindowSize, 6291456);
+        fingerprint.addH2Setting(H2SettingType.MaxHeaderListSize, 242144);
 
-        finger.addSupportedVersion(Version.TLS_1_3);
-        finger.addSupportedVersion(Version.TLS_1_2);
-
-        finger.addEcPointFormat(EcPointFormat.UNCOMPRESSED);
-
-        finger.addCompressionCertificate(CompressionMethod.NULL);
-
-        finger.addKeyShare(0xdada);
-        finger.addKeyShare(SupportGroup.X25519);
-
-
-        finger.addSetting(H2SettingType.HeaderTableSize, 65536);
-        finger.addSetting(H2SettingType.EnablePush, 0);
-        finger.addSetting(H2SettingType.InitialWindowSize, 6291456);
-        finger.addSetting(H2SettingType.MaxHeaderListSize, 242144);
-
-        finger.setWindowSize(2147418112);
-        finger.setPriority(true, 147);
-        return finger;
+        fingerprint.setH2WindowSize(2147418112);
+        fingerprint.setH2Priority(true, 147);
+        return fingerprint;
     }
 
     public static void custom_finger() throws Exception {
         Session session = new Session(ALPN.HTTP20);
-        session.setFingerprint(Fingerprint.fromCustom(getFinger(), loadToken()));
+        session.setFingerprint(buildFinger());
         session.setHeaders(getHeaders());
         Response resp = session.get("https://www.baidu.com");
         System.out.println("code: " + resp.statusCode());
@@ -319,16 +320,12 @@ public class Main {
 
     public static void tlcp() throws Exception {
         Session session = new Session(ALPN.HTTP20);
-        CustomFingerprint fingerprint = new CustomFingerprint();
-        fingerprint.setRecordVersion(Version.TLCP);
-        fingerprint.setMessageVersion(Version.TLCP);
+        Fingerprint fingerprint = new Fingerprint(Version.TLCP, Version.TLCP, loadToken());
         fingerprint.addSuite(CipherSuite.ECC_SM4_CBC_SM3);
         fingerprint.addExtension(0xdada);
         fingerprint.addExtension(ExtensionType.ServerName);
-        JsonArray v1 = new JsonArray();
-        v1.add(0);
-        fingerprint.addExtension(0x8a8a, v1);
-        session.setFingerprint(Fingerprint.fromCustom(fingerprint, loadToken()));
+        fingerprint.addExtension(0x8a8a, new byte[]{0});
+        session.setFingerprint(fingerprint);
         Response resp = session.get("https://test.gmssl.cn");
         System.out.println(resp.statusCode());
         session.close();

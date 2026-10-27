@@ -1,4 +1,4 @@
-package org.xllgl2017;
+package org.xllgl2017.tls;
 
 public enum Algorithm {
     RSA_PKCS1_SHA1(0x0201),
@@ -25,7 +25,7 @@ public enum Algorithm {
     SHA384_DSA(0x0502),
     SHA512_DSA(0x0602);
 
-    final int value;
+    public final int value;
 
     Algorithm(int value) {
         this.value = value;
