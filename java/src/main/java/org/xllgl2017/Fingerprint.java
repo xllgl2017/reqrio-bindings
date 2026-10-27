@@ -170,6 +170,10 @@ public class Fingerprint {
         REQRIO.Fingerprint_add_ext_psk_mode(this.raw, ExtensionType.PskKeyExchangeMode.value, mode);
     }
 
+    public void addPadding(int size) {
+        REQRIO.Fingerprint_add_ext_padding(this.raw, ExtensionType.Padding.value, size);
+    }
+
     public void addExtension(ExtensionType typ) {
         this.addExtension(typ.value);
     }
