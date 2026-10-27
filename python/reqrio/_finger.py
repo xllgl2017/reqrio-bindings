@@ -1,144 +1,240 @@
-from enum import IntEnum
+from _ctypes import byref
+from ctypes import c_char_p, POINTER, c_void_p, c_ubyte, c_size_t, c_bool, c_uint16, c_uint8, c_uint32, c_uint64
+from reqrio.tls import CipherSuite, SignatureAlgorithm, CompressionMethod, NamedCurve, Version, EcPointFormat, \
+    ExtensionType, PskMode
+
+from reqrio.bindings import DLL
+from reqrio import util
+from typing import Union
+
+# ==========================>Fingerprint<=============================
+DLL.Fingerprint_new.argtypes = [c_uint16, c_uint16, c_char_p]
+DLL.Fingerprint_new.restype = c_void_p
+
+DLL.Fingerprint_from_builtin.argtypes = [c_char_p, c_bool, c_char_p, POINTER(c_char_p)]
+DLL.Fingerprint_from_builtin.restype = c_void_p
+
+DLL.Fingerprint_from_idx.argtypes = [c_size_t, c_char_p, c_bool, POINTER(c_char_p)]
+DLL.Fingerprint_from_idx.restype = c_void_p
+
+DLL.Fingerprint_add_cipher_suite.argtypes = [c_void_p, c_uint16]
+DLL.Fingerprint_add_ext.argtypes = [c_void_p, c_uint16]
+DLL.Fingerprint_add_ext_alpn.argtypes = [c_void_p, c_uint16, c_char_p]
+DLL.Fingerprint_add_ext_version.argtypes = [c_void_p, c_uint16, c_uint16]
+DLL.Fingerprint_add_ext_curve.argtypes = [c_void_p, c_uint16, c_uint16]
+DLL.Fingerprint_add_ext_compress.argtypes = [c_void_p, c_uint16, c_uint16]
+DLL.Fingerprint_add_ext_psk_mode.argtypes = [c_void_p, c_uint16, c_uint8]
+DLL.Fingerprint_add_ext_padding.argtypes = [c_void_p, c_uint16, c_size_t]
+DLL.Fingerprint_add_ext_bytes.argtypes = [c_void_p, c_uint16, POINTER(c_ubyte), c_size_t]
+DLL.Fingerprint_add_ext_algorithm.argtypes = [c_void_p, c_uint16, c_uint16]
+DLL.Fingerprint_add_ext_ec_point.argtypes = [c_void_p, c_uint16, c_uint8]
+DLL.Fingerprint_clear_h2_frame.argtypes = [c_void_p]
+DLL.Fingerprint_add_h2_setting.argtypes = [c_void_p, c_uint16, c_uint32]
+DLL.Fingerprint_add_h2_frame.argtypes = [c_void_p, c_uint8, POINTER(c_ubyte), c_size_t]
+DLL.Fingerprint_set_h2_window_size.argtypes = [c_void_p, c_uint32]
+DLL.Fingerprint_set_h2_priority.argtypes = [c_void_p, c_bool, c_uint8]
+DLL.Fingerprint_clean_h3_frame.argtypes = [c_void_p]
+DLL.Fingerprint_add_h3_setting.argtypes = [c_void_p, c_uint64, c_uint64]
+DLL.Fingerprint_add_h3_frame.argtypes = [c_void_p, c_uint64, POINTER(c_ubyte), c_size_t]
+
+DLL.Fingerprint_from_ja3.argtypes = [c_char_p, c_char_p, POINTER(c_char_p)]
+DLL.Fingerprint_from_ja3.restype = c_void_p
+
+DLL.Fingerprint_from_ja4.argtypes = [c_char_p, c_char_p, POINTER(c_char_p)]
+DLL.Fingerprint_from_ja4.restype = c_void_p
+
+DLL.Fingerprint_from_client_hello.argtypes = [POINTER(c_ubyte), c_size_t, c_char_p, POINTER(c_char_p)]
+DLL.Fingerprint_from_client_hello.restype = c_void_p
+
+DLL.Fingerprint_random.argtypes = [c_char_p, POINTER(c_char_p)]
+DLL.Fingerprint_random.restype = c_void_p
+
+DLL.Fingerprint_custom.argtypes = [c_char_p, c_char_p, POINTER(c_char_p)]
+DLL.Fingerprint_custom.restype = c_void_p
+
+DLL.Fingerprint_drop.argtypes = [c_void_p]
 
 
-class Algorithm(IntEnum):
-    RSA_PKCS1_SHA1 = 0x0201,
-    RSA_PKCS1_SHA256 = 0x0401,
-    RSA_PKCS1_SHA384 = 0x0501,
-    RSA_PKCS1_SHA512 = 0x0601,
-    RSA_PSS_RSAE_SHA256 = 0x0804,
-    RSA_PSS_RSAE_SHA384 = 0x0805,
-    RSA_PSS_RSAE_SHA512 = 0x0806,
-    RSA_PSS_PSS_SHA256 = 0x0807,
-    RSA_PSS_PSS_SHA384 = 0x0808,
-    RSA_PSS_PSS_SHA512 = 0x0809,
-    ED25519 = 0x080A,
-    ED448 = 0x080B,
-    ECDSA_SHA1 = 0x0203,
-    ECDSA_SECP256R1_SHA256 = 0x0403,
-    ECDSA_SECP384R1_SHA384 = 0x0503,
-    ECDSA_SECP521R1_SHA512 = 0x0603,
-    SHA1_DSA = 0x0202,
-    SHA224_RSA = 0x0301,
-    SHA224_DSA = 0x0302,
-    SHA224_ECDSA = 0x0303,
-    SHA256_DSA = 0x0402,
-    SHA384_DSA = 0x0502,
-    SHA512_DSA = 0x0602,
+class Fingerprint:
 
+    def __init__(self, ptr):
+        self._raw = ptr
 
-class CompressionMethod(IntEnum):
-    NULL = 0,
-    DEFLATE = 1,
-    BROTLI = 2,
-    GZIP = 0xFFFF,
-    ZSTD = 0xFFFE
+    @staticmethod
+    def from_ja3(ja3: str, token: str):
+        err = c_char_p()
+        ptr = DLL.Fingerprint_from_ja3(ja3.encode('utf-8'), token.encode('utf-8'), byref(err))
+        err, msg = util.check_char_err(err)
+        if err: raise Exception(msg)
+        return Fingerprint(ptr)
 
+    @staticmethod
+    def from_ja4(ja4: str, token: str):
+        err = c_char_p()
+        ptr = DLL.Fingerprint_from_ja4(ja4.encode('utf-8'), token.encode('utf-8'), byref(err))
+        err, msg = util.check_char_err(err)
+        if err: raise Exception(msg)
+        return Fingerprint(ptr)
 
-class Group(IntEnum):
-    X25519 = 0x1d,
-    X448 = 0x1e,
-    X25519MLKEM768 = 0x11ec,
-    Secp256r1 = 0x0017,
-    Secp384r1 = 0x0018,
-    Secp521r1 = 0x0019,
-    FFDHE2048 = 0x0100,
-    FFDHE3072 = 0x0101,
-    FFDHE4096 = 0x0102,
-    FFDHE6144 = 0x0103,
-    FFDHE8192 = 0x0104,
+    @staticmethod
+    def from_client_hello(client_hello: bytes, token: str):
+        err = c_char_p()
+        dl, data = util.bytes_to_u8(client_hello)
+        ptr = DLL.Fingerprint_from_client_hello(data, dl, token.encode('utf-8'), byref(err))
+        err, msg = util.check_char_err(err)
+        if err: raise Exception(msg)
+        return Fingerprint(ptr)
 
+    @staticmethod
+    def from_random(token: str):
+        err = c_char_p()
+        ptr = DLL.Fingerprint_random(token.encode('utf-8'), byref(err))
+        err, msg = util.check_char_err(err)
+        if err: raise Exception(msg)
+        return Fingerprint(ptr)
 
-class Version(IntEnum):
-    TLS_1_0 = 0x301,
-    TLS_1_1 = 0x302,
-    TLS_1_2 = 0x303,
-    TLS_1_3 = 0x304
+    @staticmethod
+    def from_custom(custom: dict, token: str):
+        import json
+        err = c_char_p()
+        custom = json.dumps(custom)
+        print(custom)
+        ptr = DLL.Fingerprint_custom(custom.encode('utf-8'), token.encode('utf-8'), byref(err))
+        err, msg = util.check_char_err(err)
+        if err: raise Exception(msg)
+        return Fingerprint(ptr)
 
+    @staticmethod
+    def from_builtin(name: str, token: str, sec_full=False):
+        err = c_char_p()
+        name = name.encode('utf-8')
+        token = token.encode('utf-8')
+        ptr = DLL.Fingerprint_from_builtin(name, sec_full, token, byref(err))
+        err, msg = util.check_char_err(err)
+        if err: raise Exception(msg)
+        return Fingerprint(ptr)
 
-class EcPointFormat(IntEnum):
-    UNCOMPRESSED = 0,
-    ANSI_X962_PRIME = 1,
-    ANSI_X962_CHAR2 = 2
+    @staticmethod
+    def from_idx(idx: int, auth: str, sec_full=False):
+        err = c_char_p()
+        ptr = DLL.Fingerprint_from_idx(idx, auth.encode('utf-8'), sec_full, byref(err))
+        err, msg = util.check_char_err(err)
+        if err: raise Exception(msg)
+        return Fingerprint(ptr)
 
+    @staticmethod
+    def new_custom(rv: Version, mv: Version, token: str):
+        ptr = DLL.Fingerprint_new(rv.value, mv.value, token.encode('utf-8'))
+        return Fingerprint(ptr)
 
-class ExtensionType:
-    ServerName = 0x0
-    StatusRequest = 0x5
-    SupportedGroup = 0xa
-    EcPointFormats = 0xb
-    SignatureAlgorithms = 0xd
-    ApplicationLayerProtocolNegotiation = 0x10
-    SignedCertificateTimestamp = 0x12
-    Padding = 0x15
-    EncryptTheMac = 0x16
-    ExtendMasterSecret = 0x17
-    SessionTicket = 0x23
-    CompressionCertificate = 0x1b
-    SupportedVersions = 0x2b
-    PskKeyExchangeMode = 0x2d
-    PostHandshakeAuth = 0x31
-    KeyShare = 0x33
-    RenegotiationInfo = 0xff01
-    EncryptedClientHello = 0xfe0d
-    ApplicationSetting = 0x44cd
-    PreSharedKey = 0x29
-    ApplicationSettingOld = 0x4469
+    def add_cipher_suite(self, suite: Union[CipherSuite, int]):
+        if type(suite) == CipherSuite:
+            DLL.Fingerprint_add_cipher_suite(self._raw, c_uint16(suite.value))
+        else:
+            DLL.Fingerprint_add_cipher_suite(self._raw, c_uint16(suite))
 
+    def add_extension(self, typ: Union[ExtensionType, int], data: bytes = None):
+        if data is None:
+            if type(typ) == ExtensionType:
+                DLL.Fingerprint_add_ext(self._raw, c_uint16(typ.value))
+            else:
+                DLL.Fingerprint_add_ext(self._raw, c_uint16(typ))
+        else:
+            bl, u8 = util.bytes_to_u8(data)
+            if type(typ) == ExtensionType:
+                DLL.Fingerprint_add_ext_bytes(self._raw, typ.value, u8, bl)
+            else:
+                DLL.Fingerprint_add_ext_bytes(self._raw, typ, u8, bl)
 
-class CipherSuite(IntEnum):
-    # ecdhe-ecdhe
-    TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 = 0xc02b,
-    TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 = 0xc02c,
-    TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256 = 0xc023,
-    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 = 0xc024,
-    TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA = 0xc009,
-    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA = 0xc00a,
-    TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 = 0xcca9,
+    def add_application_layer_protocol_negotiation(self, alpn: str):
+        typ = ExtensionType.ApplicationLayerProtocolNegotiation
+        DLL.Fingerprint_add_ext_alpn(self._raw, typ, alpn.encode('utf-8'))
 
-    # ecdhe-rsa
-    TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 = 0xc02f,
-    TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 = 0xc030,
-    TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256 = 0xc027,
-    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384 = 0xc028,
-    TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA = 0xc013,
-    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA = 0xc014,
-    TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 = 0xcca8,
+    def add_application_settings(self, alpn: str):
+        typ = ExtensionType.ApplicationSetting
+        DLL.Fingerprint_add_ext_alpn(self._raw, typ, alpn.encode('utf-8'))
 
-    # dhe-rsa
-    TLS_DHE_RSA_WITH_AES_128_GCM_SHA256 = 0x009e,
-    TLS_DHE_RSA_WITH_AES_256_GCM_SHA384 = 0x009f,
-    TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 = 0x0067,
-    TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 = 0x006b,
-    TLS_DHE_RSA_WITH_AES_128_CBC_SHA = 0x0033,
-    TLS_DHE_RSA_WITH_AES_256_CBC_SHA = 0x0039,
-    TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256 = 0xccaa,
+    def add_application_setting_old(self, alpn: str):
+        typ = ExtensionType.ApplicationSettingOld
+        DLL.Fingerprint_add_ext_alpn(self._raw, typ, alpn.encode('utf-8'))
 
-    # rsa
-    TLS_RSA_WITH_AES_128_GCM_SHA256 = 0x009c,
-    TLS_RSA_WITH_AES_256_GCM_SHA384 = 0x009d,
-    TLS_RSA_WITH_AES_128_CBC_SHA256 = 0x003c,
-    TLS_RSA_WITH_AES_256_CBC_SHA256 = 0x003d,
-    TLS_RSA_WITH_AES_128_CBC_SHA = 0x002f,
-    TLS_RSA_WITH_AES_256_CBC_SHA = 0x0035,
+    def add_supported_version(self, version: Union[Version, int]):
+        if type(version) == Version:
+            DLL.Fingerprint_add_ext_version(self._raw, ExtensionType.SupportedVersions.value, version.value)
+        else:
+            DLL.Fingerprint_add_ext_version(self._raw, ExtensionType.SupportedVersions.value, version)
 
-    # tls1.3
-    TLS_AES_128_GCM_SHA256 = 0x1301,
-    TLS_AES_256_GCM_SHA384 = 0x1302,
-    TLS_CHACHA20_POLY1305_SHA256 = 0x1303,
+    def add_supported_group(self, curve: Union[NamedCurve, int]):
+        if type(curve) == NamedCurve:
+            DLL.Fingerprint_add_ext_curve(self._raw, ExtensionType.SupportedGroup.value, curve.value)
+        else:
+            DLL.Fingerprint_add_ext_curve(self._raw, ExtensionType.SupportedGroup.value, curve)
 
-    TLS_EMPTY_RENEGOTIATION_INFO_SCSV = 0x00ff,
+    def add_key_share(self, curve: Union[NamedCurve, int]):
+        if type(curve) == NamedCurve:
+            DLL.Fingerprint_add_ext_curve(self._raw, ExtensionType.KeyShare.value, curve.value)
+        else:
+            DLL.Fingerprint_add_ext_curve(self._raw, ExtensionType.KeyShare.value, curve)
 
+    def add_compress_method(self, method: Union[CompressionMethod, int]):
+        if type(method) == CompressionMethod:
+            DLL.Fingerprint_add_ext_compress(self._raw, ExtensionType.CompressionCertificate.value, method.value)
+        else:
+            DLL.Fingerprint_add_ext_compress(self._raw, ExtensionType.CompressionCertificate.value, method)
 
-class H2Setting:
-    HeaderTableSize = "HeaderTableSize"
-    EnablePush = "EnablePush"
-    MaxConcurrentStreams = "MaxConcurrentStreams"
-    InitialWindowSize = "InitialWindowSize"
-    MaxFrameSize = "MaxFrameSize"
-    MaxHeaderListSize = "MaxHeaderListSize"
-    Reserved = "Reserved"
+    def add_psk_mode(self, mode: Union[PskMode, int]):
+        if type(mode) == PskMode:
+            DLL.Fingerprint_add_ext_psk_mode(self._raw, ExtensionType.PskKeyExchangeMode.value, mode.value)
+        else:
+            DLL.Fingerprint_add_ext_psk_mode(self._raw, ExtensionType.PskKeyExchangeMode.value, mode)
 
+    def add_padding(self, size: int):
+        DLL.Fingerprint_add_ext_padding(self._raw, ExtensionType.Padding.value, size)
 
-class PskMode(IntEnum):
-    PSK_DHE_KE = 0x1
+    def add_signature_algorithm(self, algorithm: Union[SignatureAlgorithm, int]):
+        if type(algorithm) == SignatureAlgorithm:
+            DLL.Fingerprint_add_ext_algorithm(self._raw, ExtensionType.SignatureAlgorithms.value, algorithm.value)
+        else:
+            DLL.Fingerprint_add_ext_algorithm(self._raw, ExtensionType.SignatureAlgorithms.value, algorithm)
+
+    def add_ec_point_format(self, point: Union[EcPointFormat, int]):
+        if type(point) == EcPointFormat:
+            DLL.Fingerprint_add_ext_ec_point(self._raw, ExtensionType.EcPointFormats.value, point.value)
+        else:
+            DLL.Fingerprint_add_ext_ec_point(self._raw, ExtensionType.EcPointFormats.value, point)
+
+    def clear_h2_frame(self):
+        DLL.Fingerprint_clear_h2_frame(self._raw)
+
+    def add_h2_setting(self, flag: int, value: int):
+        DLL.Fingerprint_add_h2_setting(self._raw, flag, value)
+
+    def add_h2_frame(self, typ: int, data: bytes):
+        bl, u8 = util.bytes_to_u8(data)
+        DLL.Fingerprint_add_h2_frame(self._raw, typ, u8, bl)
+
+    def set_h2_window_size(self, size: int):
+        DLL.Fingerprint_set_h2_window_size(self._raw, size)
+
+    def set_h2_priority(self, priority: bool, weight: int):
+        DLL.Fingerprint_set_h2_priority(self._raw, priority, weight)
+
+    def clear_h3_frame(self):
+        DLL.Fingerprint_clean_h3_frame(self._raw)
+
+    def add_h3_setting(self, flag: int, value: int):
+        DLL.Fingerprint_add_h3_setting(self._raw, flag, value)
+
+    def add_h3_frame(self, typ: int, data: bytes):
+        bl, u8 = util.bytes_to_u8(data)
+        DLL.Fingerprint_add_h3_frame(self._raw, typ, u8, bl)
+
+    def take(self):
+        ptr = self._raw
+        self._raw = None
+        return ptr
+
+    def __del__(self):
+        if hasattr(self, '_raw') and self._raw:
+            DLL.Fingerprint_drop(self._raw)
+            self._raw = None

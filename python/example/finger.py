@@ -32,11 +32,10 @@ def ua_tls():
     del fingerprint["tls_finger"]
     hdr = headers.copy()
     hdr.update(fingerprint)
-    session = Session(headers, alpn=ALPN.HTTP20, client_hello=client_hello, token=TOKEN)
+    session = Session(headers, alpn=ALPN.HTTP20, fingerprint=Fingerprint.from_client_hello(client_hello, TOKEN))
     resp = session.get('https://www.baidu.com')
     print('code: ', resp.status)
     print(resp.alpn.as_bytes())
-    # print(resp.body.as_bytes())
     print('body: ', len(resp.bytes()))
 
     resp = reqrio.get('https://www.baidu.com', headers, client_hello=client_hello, token=TOKEN)
@@ -47,7 +46,7 @@ def ua_tls():
 def ja3():
     print("================>[JA3 TLS]<==================")
     ja3_str = "771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-18-51-45-43-27-17513-21,29-23-24,0"
-    session = Session(ja3=ja3_str, token=TOKEN)
+    session = Session(fingerprint=Fingerprint.from_ja3(ja3_str, TOKEN))
     resp = session.get('https://www.baidu.com')
     print('code: ', resp.statue_code())
     print('body: ', len(resp.bytes()))
@@ -60,7 +59,7 @@ def ja3():
 def ja4():
     print("================>[JA4 TLS]<==================")
     ja4_str = "t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601"
-    session = Session(ja4=ja4_str, token=TOKEN)
+    session = Session(fingerprint=Fingerprint.from_ja4(ja4_str, TOKEN))
     resp = session.get('https://www.baidu.com')
     print('code: ', resp.statue_code())
     print('body: ', len(resp.bytes()))
@@ -68,7 +67,7 @@ def ja4():
 
 def rand_tls():
     print("================>[RANDOM TLS]<==================")
-    session = Session(random_tls=True, token=TOKEN)
+    session = Session(fingerprint=Fingerprint.from_random(TOKEN))
     resp = session.get('https://www.baidu.com')
     print('code: ', resp.statue_code())
     print('body: ', len(resp.bytes()))
@@ -92,26 +91,26 @@ def custom_finger():
         "extensions": {
             ExtensionType.StatusRequest: None,
             ExtensionType.SupportedGroup: [
-                Group.X25519,
-                Group.Secp256r1,
-                Group.Secp384r1,
-                Group.Secp521r1,
+                NamedCurve.X25519,
+                NamedCurve.Secp256r1,
+                NamedCurve.Secp384r1,
+                NamedCurve.Secp521r1,
             ],
             ExtensionType.EcPointFormats: [EcPointFormat.UNCOMPRESSED],
             ExtensionType.SignatureAlgorithms: [
-                Algorithm.RSA_PKCS1_SHA1,
-                Algorithm.RSA_PKCS1_SHA256,
-                Algorithm.RSA_PKCS1_SHA384,
-                Algorithm.RSA_PKCS1_SHA512,
-                Algorithm.ECDSA_SECP256R1_SHA256,
-                Algorithm.ECDSA_SECP384R1_SHA384,
-                Algorithm.ECDSA_SECP521R1_SHA512,
-                Algorithm.RSA_PSS_PSS_SHA256,
-                Algorithm.RSA_PSS_PSS_SHA384,
-                Algorithm.RSA_PSS_PSS_SHA512,
-                Algorithm.RSA_PSS_RSAE_SHA256,
-                Algorithm.RSA_PSS_RSAE_SHA384,
-                Algorithm.RSA_PSS_RSAE_SHA512,
+                SignatureAlgorithm.RSA_PKCS1_SHA1,
+                SignatureAlgorithm.RSA_PKCS1_SHA256,
+                SignatureAlgorithm.RSA_PKCS1_SHA384,
+                SignatureAlgorithm.RSA_PKCS1_SHA512,
+                SignatureAlgorithm.ECDSA_SECP256R1_SHA256,
+                SignatureAlgorithm.ECDSA_SECP384R1_SHA384,
+                SignatureAlgorithm.ECDSA_SECP521R1_SHA512,
+                SignatureAlgorithm.RSA_PSS_PSS_SHA256,
+                SignatureAlgorithm.RSA_PSS_PSS_SHA384,
+                SignatureAlgorithm.RSA_PSS_PSS_SHA512,
+                SignatureAlgorithm.RSA_PSS_RSAE_SHA256,
+                SignatureAlgorithm.RSA_PSS_RSAE_SHA384,
+                SignatureAlgorithm.RSA_PSS_RSAE_SHA512,
             ],
             ExtensionType.SignedCertificateTimestamp: None,
             ExtensionType.ExtendMasterSecret: None,
@@ -124,8 +123,8 @@ def custom_finger():
             ],
             ExtensionType.PskKeyExchangeMode: [PskMode.PSK_DHE_KE],
             ExtensionType.KeyShare: [
-                Group.X25519,
-                Group.Secp256r1,
+                NamedCurve.X25519,
+                NamedCurve.Secp256r1,
             ],
             ExtensionType.ApplicationSetting: [
                 ALPN.HTTP20,
@@ -151,28 +150,28 @@ def custom_finger():
         "priority": True
 
     }
-    import json
-    print(json.dumps(finger))
-    session = Session(headers, custom_tls=finger, token=TOKEN)
+    fingerprint = Fingerprint.from_custom(finger, TOKEN)
+    session = Session(headers, fingerprint=fingerprint)
     resp = session.get("https://www.baidu.com")
     print('code: ', resp.statue_code())
     print('body: ', len(resp.bytes()))
 
 
 def builtin_finger():
-    session = Session(builtin_finger="edge-148", token=TOKEN, key_log="../../../2.log")
+    session = Session(fingerprint=Fingerprint.from_builtin("edge-148", TOKEN), key_log="../../../2.log")
     resp = session.get("https://www.baidu.com")
     print(resp.status, len(resp.text()))
 
 
 def finger_idx():
-    session = Session(finger_idx=0, auth=AUTH, key_log="../../../2.log")
+    session = Session(fingerprint=Fingerprint.from_idx(0, AUTH), key_log="../../../2.log")
     resp = session.get("https://www.baidu.com")
     print(resp.text())
     print(resp.status, len(resp.text()))
 
-# def h3_req():
-#     ja4_str = "t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601"
-#     session = Session(headers, alpn=ALPN.HTTP30, ja4=ja4_str, token=TOKEN)
-#     resp = session.get("https://docs.rs")
-#     print(resp.statue_code())
+
+def h3_req():
+    ja4_str = "t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601"
+    session = Session(headers, alpn=ALPN.HTTP30, fingerprint=Fingerprint.from_ja4(ja4_str, TOKEN))
+    resp = session.get("https://cn.bing.com")
+    print(resp.statue_code())

@@ -1,7 +1,6 @@
 import os
 import sys
-from ctypes import cdll, c_void_p, c_int, c_char_p, c_bool, c_ubyte, c_size_t, c_uint16, c_uint64
-import reqrio
+from ctypes import cdll, c_void_p, c_int, c_char_p, c_bool, c_ubyte, c_size_t, c_uint64
 from _ctypes import POINTER
 
 base = os.path.dirname(__file__)
@@ -15,27 +14,7 @@ else:
     raise Exception('unsupported platform')
 DLL = cdll.LoadLibrary(dll_path)
 
-# ==========================>Fingerprint<=============================
-DLL.Fingerprint_from_ja3.argtypes = [c_char_p, c_char_p, POINTER(c_char_p)]
-DLL.Fingerprint_from_ja3.restype = c_void_p
 
-DLL.Fingerprint_from_ja4.argtypes = [c_char_p, c_char_p, POINTER(c_char_p)]
-DLL.Fingerprint_from_ja4.restype = c_void_p
-
-DLL.Fingerprint_from_client_hello.argtypes = [POINTER(c_ubyte), c_size_t, c_char_p, POINTER(c_char_p)]
-DLL.Fingerprint_from_client_hello.restype = c_void_p
-
-DLL.Fingerprint_random.argtypes = [c_char_p, POINTER(c_char_p)]
-DLL.Fingerprint_random.restype = c_void_p
-
-DLL.Fingerprint_custom.argtypes = [c_char_p, c_char_p, POINTER(c_char_p)]
-DLL.Fingerprint_custom.restype = c_void_p
-
-DLL.Fingerprint_from_builtin.argtypes = [c_char_p, c_bool, c_char_p, POINTER(c_char_p)]
-DLL.Fingerprint_from_builtin.restype = c_void_p
-
-DLL.Fingerprint_from_idx.argtypes = [c_size_t, c_char_p, c_bool, POINTER(c_char_p)]
-DLL.Fingerprint_from_idx.restype = c_void_p
 
 # ===========================>Url<===================================
 DLL.Url_new.argtypes = [c_char_p, POINTER(c_char_p)]

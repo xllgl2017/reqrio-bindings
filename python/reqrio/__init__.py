@@ -1,15 +1,16 @@
 from reqrio.alpn import ALPN
 from reqrio.response import Response
 from reqrio._session import Session
-from reqrio.method import Method
+from reqrio.http import Method, H2Setting
 from reqrio.websocket import WebSocket, WsOpCode, WsFrame
 from reqrio.cipher import CipherType, Cipher
 from reqrio.hash import HashType, Hasher, Hmac
 from reqrio.b64 import Base64, b64encode, b64decode
 from typing import Union
 from reqrio.rcode import url_encode, url_decode, hex_encode, hex_decode
-from reqrio._finger import Algorithm, CompressionMethod, Group, Version, EcPointFormat, ExtensionType, CipherSuite, \
-    H2Setting, PskMode
+from reqrio.tls import CipherSuite, SignatureAlgorithm, CompressionMethod, NamedCurve, Version, EcPointFormat, \
+    ExtensionType, PskMode
+from reqrio._finger import Fingerprint
 
 
 # pyinstaller.exe -F --collect-binaries reqrio .\1.py
@@ -43,12 +44,29 @@ def send(
         client_hello: bytes = None,
         random_tls: bool = False,
         custom_tls: dict = None,
+        builtin_name: str = None,
+        idx: int = None,
         token: str = "",
         sni: str = None,
-        stream=False
-
+        stream=False,
+        ignore_hdr_sort: bool = False,
 ):
-    req = Session(headers, alpn, verify, proxy, key_log, ja3, ja4, client_hello, random_tls, custom_tls, token)
+    fingerprint = None
+    if ja3 is not None:
+        fingerprint = Fingerprint.from_ja3(ja3, token)
+    if ja4 is not None:
+        fingerprint = Fingerprint.from_ja4(ja4, token)
+    if client_hello is not None:
+        fingerprint = Fingerprint.from_client_hello(client_hello, token)
+    if random_tls:
+        fingerprint = Fingerprint.from_random(token)
+    if custom_tls is not None:
+        fingerprint = Fingerprint.from_custom(custom_tls, token)
+    if builtin_name is not None:
+        fingerprint = Fingerprint.from_builtin(builtin_name, token)
+    if idx is not None:
+        fingerprint = Fingerprint.from_idx(idx, token)
+    req = Session(headers, alpn, verify, proxy, key_log, fingerprint, ignore_hdr_sort)
     resp = req.pre_send(method, url, params, data, json, bytes, text, files, content_type, auto_redirect=auto_redirect,
                         sni=sni, stream=stream)
     if stream:

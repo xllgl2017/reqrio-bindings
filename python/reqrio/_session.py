@@ -4,8 +4,9 @@ import reqrio
 from reqrio import util
 from reqrio.alpn import ALPN
 from reqrio.bindings import DLL
-from reqrio.method import Method
+from reqrio.http import Method
 from reqrio.response import Response
+from reqrio._finger import Fingerprint
 
 # ===========================>ScReq<===================================
 
@@ -70,17 +71,9 @@ class Session:
             verify: bool = True,
             proxy: str = None,
             key_log: str = None,
-            ja3: str = None,
-            ja4: str = None,
-            client_hello: bytes = None,
-            random_tls: bool = False,
-            custom_tls: dict = None,
-            token: str = "",
+            fingerprint: Fingerprint = None,
             ignore_hdr_sort: bool = False,
-            builtin_finger: str = None,
-            finger_idx: int = None,
-            auth: str = None,
-            sec_full: bool = False
+
     ):
         """
         :param
@@ -88,14 +81,7 @@ class Session:
         :param verify: 是否进行证书链验证
         :param proxy: 格式:http://127.0.0.1:10000、socks5://127.0.0.1:10001、socks5://username@password127.0.0.1:10001
         :param key_log: 导出TLS握手密钥，可用于Wireshark抓包分析
-        :param ja3: 使用ja3设置指纹
-        :param ja4: 使用ja4设置指纹
-        :param client_hello: 使用client_hello数据设置指纹
-        :param random_tls: 使用随机指纹
-        :param custom_tls: 使用自定义指纹，具体参数参阅https://github.com/xllgl2017/reqrio
-        :param token: 修改指纹时所有的认证token
         :param ignore_hdr_sort: 忽略内置请求头顺序
-        :param sec_full: 是否使用完整的sec请求头
         """
 
         self.dll = DLL
@@ -105,8 +91,6 @@ class Session:
         err, msg = util.check_char_err(err)
         if err: raise Exception(msg)
         # verify
-        self._set_fingerprint(random_tls, ja3, ja4, client_hello, custom_tls, token)
-        self._set_finger_file(sec_full, builtin_finger, auth, finger_idx, token)
         err, msg = util.check_char_err(self.dll.ScReq_set_verify(self.hid, verify))
         if err: raise Exception(msg)
         # proxy
@@ -119,6 +103,8 @@ class Session:
             if err: raise Exception(msg)
         if headers is not None:
             self.set_headers(headers)
+        if fingerprint is not None:
+            self.set_fingerprint(fingerprint)
 
     def set_timeout(self, connect: int = 3000, read: int = 3000, write: int = 3000, handle: int = 30000,
                     connect_times: int = 3, handle_times: int = 3):
@@ -159,69 +145,10 @@ class Session:
         err, msg = util.check_char_err(self.dll.ScReq_remove_header(self.hid, name.encode('utf-8')))
         if err: raise Exception(msg);
 
-    def _set_fingerprint(
-            self,
-            random: bool = None,
-            ja3: str = None,
-            ja4: str = None,
-            client_hello: bytes = None,
-            custom: dict = None,
-            token: str = ""
-    ):
-        err = c_char_p()
-        if ja3 is not None:
-            fingerprint = self.dll.Fingerprint_from_ja3(ja3.encode('utf-8'), token.encode('utf-8'), byref(err))
-            err, msg = util.check_char_err(err)
-            if err: raise Exception(msg)
-        elif ja4 is not None:
-            fingerprint = self.dll.Fingerprint_from_ja4(ja4.encode('utf-8'), token.encode('utf-8'), byref(err))
-            err, msg = util.check_char_err(err)
-            if err: raise Exception(msg)
-        elif client_hello is not None:
-            dl, data = util.bytes_to_u8(client_hello)
-            fingerprint = self.dll.Fingerprint_from_client_hello(data, dl, token.encode('utf-8'), byref(err))
-            err, msg = util.check_char_err(err)
-            if err: raise Exception(msg)
-        elif random:
-            fingerprint = self.dll.Fingerprint_random(token.encode('utf-8'), byref(err))
-            err, msg = util.check_char_err(err)
-            if err: raise Exception(msg)
-        elif custom is not None:
-            import json
-            custom = json.dumps(custom)
-            fingerprint = self.dll.Fingerprint_custom(custom.encode('utf-8'), token.encode('utf-8'), byref(err))
-            err, msg = util.check_char_err(err)
-            if err: raise Exception(msg)
-        else:
-            return
-        err = self.dll.ScReq_set_fingerprint(self.hid, fingerprint)
-        print(111, err, type(err))
+    def set_fingerprint(self, fingerprint: Fingerprint):
+        err = self.dll.ScReq_set_fingerprint(self.hid, fingerprint.take())
         err, msg = util.check_char_err(err)
         if err: raise Exception(msg)
-
-    def _set_finger_file(self, sec_full: bool, name: str = None, auth: str = None, idx: int = None, token: str = None):
-        print(name)
-        if name is not None and token is not None:
-            err = c_char_p()
-            fingerprint = DLL.Fingerprint_from_builtin(name.encode('utf-8'), sec_full, token.encode('utf-8'),
-                                                       byref(err))
-            print(fingerprint)
-            err, msg = util.check_char_err(err)
-            if err: raise Exception(msg)
-            err = self.dll.ScReq_set_fingerprint(self.hid, fingerprint)
-            err, msg = util.check_char_err(err)
-            if err: raise Exception(msg)
-            return
-        if auth is not None and auth is not None:
-            print(idx, auth)
-            err = c_char_p()
-            fingerprint = DLL.Fingerprint_from_idx(idx, auth.encode('utf-8'), sec_full, byref(err))
-            err, msg = util.check_char_err(err)
-            if err: raise Exception(msg)
-            err = self.dll.ScReq_set_fingerprint(self.hid, fingerprint)
-            err, msg = util.check_char_err(err)
-            if err: raise Exception(msg)
-            return
 
     def set_cookie(self, cookie: str):
         err, msg = util.check_char_err(self.dll.ScReq_set_cookie(self.hid, cookie.encode('utf-8')))
