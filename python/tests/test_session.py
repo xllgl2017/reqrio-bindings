@@ -7,7 +7,7 @@ ja3()
 ja4()
 rand_tls()
 custom_finger()
-builtin_finger()
+# builtin_finger()
 # finger_idx()
 
 # req test
