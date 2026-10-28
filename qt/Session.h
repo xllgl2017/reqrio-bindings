@@ -46,7 +46,9 @@ char *ScReq_set_cookie(ScReq *req, const char *cookie);
 
 char *ScReq_add_cookie(ScReq *req, const char *name, const char *value);
 
-RespInner *ScReq_do_http(ScReq *req, Method method, UrlInner *url, bindings::Body *body, bool stream, char **err);
+uint64_t ScReq_send(ScReq *req, Method method, UrlInner *url, bindings::Body *body, char **err);
+
+RespInner *ScReq_recv(ScReq *req, uint64_t sid, bool stream, char **err);
 
 char *ScReq_reconnect(ScReq *req);
 
@@ -134,8 +136,11 @@ public:
     /// @param method: HTTP method
     /// @param url: request URL
     /// @param body: request body
+
+    [[nodiscard]] uint64_t send(Method method, Url *url, Body *body) const;
+
     /// @param stream: whether to use a streaming request
-    [[nodiscard]] Response send(Method method, Url *url, Body *body, bool stream = false) const;
+    [[nodiscard]] Response recv(uint64_t sid, bool stream = false) const;
 
     [[nodiscard]] Response get(Url *, Body *) const;
 

@@ -10,7 +10,6 @@ const uint16Ptr = ref.refType(ref.types.uint16);
 const sizeTPtr = ref.refType(ref.types.size_t);
 
 
-
 function binding_library() {
     let libname;
     if (process.platform === "win32") {
@@ -39,7 +38,8 @@ function binding_library() {
         ScReq_set_timeout: [charPtr, [voidPtr, 'string']],
         ScReq_set_cookie: [charPtr, [voidPtr, 'string']],
         ScReq_add_cookie: [charPtr, [voidPtr, 'string', 'string']],
-        ScReq_do_http: [voidPtr, [voidPtr, 'int', voidPtr, voidPtr, 'bool', charPtrPtr]],
+        ScReq_send: ['uint64', [voidPtr, 'int', voidPtr, voidPtr, charPtrPtr]],
+        ScReq_recv: [voidPtr, [voidPtr, 'uint64', 'bool', charPtrPtr]],
         ScReq_recv_stream: [voidPtr, [voidPtr, 'uint64', voidPtr, charPtrPtr]],
         ScReq_reconnect: [charPtr, [voidPtr]],
         ScReq_connect: [charPtr, [voidPtr, 'string', "string"]],

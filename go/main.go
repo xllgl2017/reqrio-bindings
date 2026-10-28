@@ -367,7 +367,7 @@ func flow_reader() {
 func finger_builtin() {
 	session := reqrio.NewSession(false)
 	defer session.Close()
-	finger, err := reqrio.FromBuiltin("edge-148", false, readToken())
+	finger, err := reqrio.FromBuiltin("win-x64-edge-148", false, readToken())
 	if err != nil {
 		panic(err)
 	}

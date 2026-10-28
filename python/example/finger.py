@@ -161,6 +161,8 @@ def builtin_finger():
     session = Session(fingerprint=Fingerprint.from_builtin("edge-148", TOKEN), key_log="../../../2.log")
     resp = session.get("https://www.baidu.com")
     print(resp.status, len(resp.text()))
+    import os
+    os.remove("builtin.dat")
 
 
 def finger_idx():
@@ -171,7 +173,8 @@ def finger_idx():
 
 
 def h3_req():
-    ja4_str = "t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601"
-    session = Session(headers, alpn=ALPN.HTTP30, fingerprint=Fingerprint.from_ja4(ja4_str, TOKEN))
+    # ja4_str = "t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601"
+    Fingerprint.new_custom(Version.TLS_1_0, Version.TLS_1_2, TOKEN)
+    session = Session(headers, alpn=ALPN.HTTP30)
     resp = session.get("https://cn.bing.com")
     print(resp.statue_code())

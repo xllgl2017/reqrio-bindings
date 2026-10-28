@@ -43,7 +43,9 @@ public interface ReqrioLibrary extends Library {
 
     Pointer ScReq_connect(Pointer req, String url, String sni);
 
-    Pointer ScReq_do_http(Pointer req, int method, Pointer url, Pointer body, boolean stream, PointerByReference err);
+    int ScReq_send(Pointer req, int method, Pointer url, Pointer body, PointerByReference err);
+
+    Pointer ScReq_recv(Pointer req, int sid, boolean stream, PointerByReference err);
 
     Pointer ScReq_recv_stream(Pointer req, int sid, LongByReference len, PointerByReference err);
 
@@ -151,7 +153,6 @@ public interface ReqrioLibrary extends Library {
     void Fingerprint_set_h2_priority(Pointer finger, boolean priority, int weight);
 
     void Fingerprint_drop(Pointer finger);
-
 
 
     /// =======================>[WebSocket]<=======================

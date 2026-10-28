@@ -1,4 +1,4 @@
-const {library, check_error, ref_char_ptr} = require('./bindings')
+const {check_error, ref_char_ptr} = require('./bindings')
 
 class Url {
 
@@ -29,7 +29,7 @@ class Url {
      **/
     add_param(name, value) {
         const err = this.library.Url_add_param(this.ptr, name, value);
-        check_error(this.library, err, this.close);
+        check_error(this.library, err, this.drop);
     }
 
     /**Remove a query parameter.
@@ -37,7 +37,7 @@ class Url {
      **/
     remove_param(name) {
         const err = this.library.Url_remove_param(this.ptr, name);
-        check_error(err, this.close);
+        check_error(err, this.drop);
     }
 
     /**Set the SNI for this URL; useful when the URL points to an IP address.
@@ -45,10 +45,16 @@ class Url {
      **/
     set_sni(sni) {
         const err = this.library.Url_set_sni(this.ptr, sni);
-        check_error(err, this.close);
+        check_error(err, this.drop);
     }
 
-    close() {
+    take() {
+        let res = this.ptr;
+        this.ptr = null;
+        return res;
+    }
+
+    drop() {
         if (this.ptr == null) return;
         this.library.Url_drop(this.ptr);
         this.ptr = null;

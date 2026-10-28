@@ -7,6 +7,8 @@ ja3()
 ja4()
 rand_tls()
 custom_finger()
+builtin_finger()
+# finger_idx()
 
 # req test
 get()
@@ -18,7 +20,6 @@ upload_file()
 
 flow_reader()
 
-# h3_req()
-builtin_finger()
-# finger_idx()
+h3_req()
+
 

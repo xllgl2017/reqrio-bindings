@@ -193,6 +193,7 @@ function custom_fingerprint() {
     ]);
     fingerprint.addExtensionPadding(ExtensionType.Padding, 12);
     fingerprint.addExtensionBytes(0xdada, [0]);
+    fingerprint.clearH2Frame();
     fingerprint.addH2Setting(H2SettingType.HeaderTableSize, 65536);
     fingerprint.addH2Setting(H2SettingType.EnablePush, 0);
     fingerprint.addH2Setting(H2SettingType.InitialWindowSize, 6291456);
@@ -222,7 +223,11 @@ function finger_builtin(name) {
     let fingerprint = Fingerprint.fromFingerBuiltin(name, read_token(), false, session.library);
     session.set_fingerprint(fingerprint);
     let resp = session.get("https://www.baidu.com");
-    console.log(resp.status_code())
+    console.log(resp.status_code());
+    const fs = require("fs")
+    fs.unlink("builtin.dat", (err) => {
+        console.log(err)
+    })
 
 }
 

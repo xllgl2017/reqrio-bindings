@@ -67,8 +67,9 @@ def send(
     if idx is not None:
         fingerprint = Fingerprint.from_idx(idx, token)
     req = Session(headers, alpn, verify, proxy, key_log, fingerprint, ignore_hdr_sort)
-    resp = req.pre_send(method, url, params, data, json, bytes, text, files, content_type, auto_redirect=auto_redirect,
-                        sni=sni, stream=stream)
+    sid = req.pre_send(method, url, params, data, json, bytes, text, sni, files, content_type,
+                       auto_redirect=auto_redirect)
+    resp = req.recv(sid, stream)
     if stream:
         resp.__req_free__ = True
         req.hid = None

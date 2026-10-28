@@ -136,12 +136,14 @@ class Session {
 
     /**Send a request.
      * @param {Method} method HTTP method
-     * @param {string} url_str request URL
+     * @param {string|Url} url request URL
      * @param {object} options request body and transport options
      */
-    send(method, url_str, options = {}) {
-        const {data, json, files, bytes, ct, params, sni, stream} = options;
-        const url = new Url(this.library, url_str, params, sni)
+    send(method, url, options = {}) {
+        const {data, json, files, bytes, ct, params, sni} = options;
+        if (typeof url === "string") {
+            url = new Url(this.library, url, params, sni)
+        }
 
 
         // Create Body
@@ -159,54 +161,59 @@ class Session {
                 body_ptr = Body.none(this.library);
             }
         } catch (e) {
-            url.close();
+            url.drop();
             throw e;
         }
-        let stream1 = stream === null ? false : stream;
 
         // Send request
         const errPtr = ref_char_ptr();
-        const respPtr = this.library.ScReq_do_http(this.req, method, url.ptr, body_ptr, stream1, errPtr);
-        url.ptr = null;
-        body_ptr = null;
+        const sid = this.library.ScReq_send(this.req, method, url.take(), body_ptr, errPtr);
         check_error(this.library, errPtr.deref())
+        return sid;
+    }
+
+    recv(sid, stream) {
+        stream = stream === null || stream === undefined ? false : stream
+        console.log(stream)
+        const errPtr = ref_char_ptr();
+        let respPtr = this.library.ScReq_recv(this.req, sid, stream, errPtr);
         return new Response(this.library, respPtr, this.req);
     }
 
-    get(url, options) {
-        return this.send(Method.GET, url, options);
+    get(url, options = {}) {
+        return this.recv(this.send(Method.GET, url, options), options.stream)
     }
 
-    post(url, options) {
-        return this.send(Method.POST, url, options);
+    post(url, options = {}) {
+        return this.recv(this.send(Method.POST, url, options), options.stream)
     }
 
-    put(url, options) {
-        return this.send(Method.PUT, url, options);
+    put(url, options = {}) {
+        return this.recv(this.send(Method.PUT, url, options), options.stream)
     }
 
-    head(url, options) {
-        return this.send(Method.HEAD, url, options);
+    head(url, options = {}) {
+        return this.recv(this.send(Method.HEAD, url, options), options.stream)
     }
 
-    delete(url, options) {
-        return this.send(Method.DELETE, url, options);
+    delete(url, options = {}) {
+        return this.recv(this.send(Method.DELETE, url, options), options.stream)
     }
 
-    options(url, options) {
-        return this.send(Method.OPTIONS, url, options);
+    options(url, options = {}) {
+        return this.recv(this.send(Method.OPTIONS, url, options), options.stream)
     }
 
-    trace(url, options) {
-        return this.send(Method.TRACE, url, options);
+    trace(url, options = {}) {
+        return this.recv(this.send(Method.TRACE, url, options), options.stream)
     }
 
-    patch(url, options) {
-        return this.send(Method.PATCH, url, options);
+    patch(url, options = {}) {
+        return this.recv(this.send(Method.PATCH, url, options), options.stream)
     }
 
-    query(url, options) {
-        return this.send(Method.QUERY, url, options);
+    query(url, options = {}) {
+        return this.recv(this.send(Method.QUERY, url, options), options.stream)
     }
 
     close() {

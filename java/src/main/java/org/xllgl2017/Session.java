@@ -155,30 +155,56 @@ public class Session implements AutoCloseable {
     }
 
 
-    /// 发送 HTTP 请求
+    /// 发送 HTTP 请求, 返回sid，用于后续的接收
     ///
     /// @param method : 请求方法
     /// @param url    :请求地址
     /// @param body   :请求体
-    /// @param stream :流式请求
-    public Response send(@NotNull Method method, @NotNull Url url, @NotNull Body body, boolean stream) throws Exception {
+    public int send(@NotNull Method method, @NotNull Url url, @NotNull Body body) throws Exception {
         try (url; body) {
             PointerByReference err = new PointerByReference();
-            Pointer ptr = REQRIO.ScReq_do_http(this.pointer(), method.getValue(), url.pointer(), body.pointer(), stream, err);
+            int sid = REQRIO.ScReq_send(this.pointer(), method.getValue(), url.pointer(), body.pointer(), err);
             url.setRaw(null);
             body.setRaw(null);
             util.check_err_pointer(err);
-            return new Response(ptr, this.req, stream);
+            return sid;
         }
     }
 
-    public Response send(@NotNull Method method, @NotNull Url url, @NotNull Body body) throws Exception {
-        return send(method, url, body, false);
+    public int send(@NotNull Method method, @NotNull Url url) throws Exception {
+        Body body = new Body();
+        try (body) {
+            return this.send(method, url, body);
+        }
+    }
+
+    public Response send_stream(@NotNull Method method, @NotNull Url url, @NotNull Body body) throws Exception {
+        int sid = this.send(method, url, body);
+        return this.recv(sid, true);
+    }
+
+    public Response send_stream(@NotNull Method method, @NotNull Url url) throws Exception {
+        Body body = new Body();
+        try (body) {
+            return this.send_stream(method, url, body);
+        }
+    }
+
+
+    public Response recv(int sid, boolean stream) throws Exception {
+        PointerByReference err = new PointerByReference();
+        Pointer pointer = REQRIO.ScReq_recv(this.pointer(), sid, stream, err);
+        util.check_err_pointer(err);
+        return new Response(pointer, this.pointer(), stream);
+    }
+
+    public Response recv(int sid) throws Exception {
+        return this.recv(sid, false);
     }
 
     /// 参考 send
     public Response get(Url url, Body body) throws Exception {
-        return this.send(Method.GET, url, body);
+        return this.recv(this.send(Method.GET, url, body), false);
     }
 
     /// 参考 send
@@ -200,7 +226,7 @@ public class Session implements AutoCloseable {
 
     /// 参考 send
     public Response post(Url url, Body body) throws Exception {
-        return this.send(Method.POST, url, body);
+        return this.recv(this.send(Method.POST, url, body), false);
     }
 
     /// 参考 send
@@ -212,7 +238,7 @@ public class Session implements AutoCloseable {
 
     /// 参考 send
     public Response put(Url url, Body body) throws Exception {
-        return this.send(Method.PUT, url, body);
+        return this.recv(this.send(Method.PUT, url, body), false);
     }
 
     /// 参考 send
@@ -224,7 +250,7 @@ public class Session implements AutoCloseable {
 
     /// 参考 send
     public Response options(Url url, Body body) throws Exception {
-        return this.send(Method.OPTIONS, url, body);
+        return this.recv(this.send(Method.OPTIONS, url, body), false);
     }
 
     /// 参考 send
@@ -236,7 +262,7 @@ public class Session implements AutoCloseable {
 
     /// 参考 send
     public Response head(Url url, Body body) throws Exception {
-        return this.send(Method.HEAD, url, body);
+        return this.recv(this.send(Method.HEAD, url, body), false);
     }
 
     /// 参考 send
@@ -248,7 +274,7 @@ public class Session implements AutoCloseable {
 
     /// 参考 send
     public Response delete(Url url, Body body) throws Exception {
-        return this.send(Method.DELETE, url, body);
+        return this.recv(this.send(Method.DELETE, url, body), false);
     }
 
     /// 参考 send
@@ -260,7 +286,7 @@ public class Session implements AutoCloseable {
 
     /// 参考 send
     public Response trace(Url url, Body body) throws Exception {
-        return this.send(Method.TRACE, url, body);
+        return this.recv(this.send(Method.TRACE, url, body), false);
     }
 
     /// 参考 send
@@ -272,7 +298,7 @@ public class Session implements AutoCloseable {
 
     /// 参考 send
     public Response patch(Url url, Body body) throws Exception {
-        return this.send(Method.PATCH, url, body);
+        return this.recv(this.send(Method.PATCH, url, body), false);
     }
 
     /// 参考 send
@@ -284,7 +310,7 @@ public class Session implements AutoCloseable {
 
     /// 参考 send
     public Response query(Url url, Body body) throws Exception {
-        return this.send(Method.QUERY, url, body);
+        return this.recv(this.send(Method.QUERY, url, body), false);
     }
 
     /// 参考 send

@@ -215,10 +215,11 @@ void flow_reader() {
     const auto *session = new Session(HTTP20);
     session->addHeader("User-Agent",
                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0");
-    Response resp = session->send(
+    uint64_t sid = session->send(
         GET, new Url(
             "https://ms.bdimg.com/pacific/0/pic/-742236409_-1564646186.png?x=0&y=0&h=340&w=510&vh=340.00&vw=510.00&oh=340.00&ow=510.00"),
-        new Body(), true);
+        new Body());
+    Response resp = session->recv(sid, true);
     qDebug() << resp.statusCode();
     QFile file("1.png");
     file.open(QIODevice::WriteOnly);
@@ -230,10 +231,10 @@ void flow_reader() {
 }
 
 
-void finger_builtin() {
+void finger_builtin(const QString& name) {
     printf("================>[Builtin Finger]<==================\n");
     const auto *session = new Session(HTTP20);
-    const auto finger = Fingerprint::fromBuiltin("edge-148", false, read_token());
+    const auto finger = Fingerprint::fromBuiltin(name, false, read_token());
     session->setFingerprint(finger);
     const Response response = session->get("https://www.baidu.com");
     qDebug() << response.statusCode();
@@ -264,6 +265,6 @@ int main(int argc, char *argv[]) {
     rand_tls();
     custom_finger();
     flow_reader();
-    finger_builtin();
+    finger_builtin("win-x64-edge-148");
     tlcp();
 }

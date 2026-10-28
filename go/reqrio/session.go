@@ -24,7 +24,8 @@ extern char * ScReq_set_version(void *req, uint16_t ver);
 extern char * ScReq_set_cookie(void *req, const char *cookie);
 extern char * ScReq_add_cookie(void *req, const char *name, const char *value);
 //callback
-extern void * ScReq_do_http(void *req, int method, void *url, void * body, bool stream, char **err);
+extern uint64_t ScReq_send(void *req, int method, void *url, void * body, char **err);
+extern void * ScReq_recv(void *req, uint64_t sid, bool stream, char **err);
 extern char * ScReq_reconnect(void *req);
 extern char * ScReq_connect(void *req, const char *url, const char *sni);
 extern char * ScReq_close_stream(void *req);
@@ -284,24 +285,44 @@ func buildBody(param ConnParam) (unsafe.Pointer, error) {
 }
 
 func (session *Session) SendRequest(param ConnParam) (Response, error) {
-	gUrl, err := buildUrl(param.Url, param.Params, param.Sni)
+	sid, err := session.send(param)
 	if err != nil {
 		return Response{}, err
+	}
+	return session.recv(sid, param.Stream)
+}
+
+func (session *Session) send(param ConnParam) (C.uint64_t, error) {
+	gUrl, err := buildUrl(param.Url, param.Params, param.Sni)
+	if err != nil {
+		return 0, err
 	}
 	bodyPtr, err := buildBody(param)
 	if err != nil {
 		gUrl.delete()
-		return Response{}, err
+		return 0, err
 	}
 
 	var errPtr *C.char
-	ptr := C.ScReq_do_http(session.req, C.int(param.Method), gUrl.ptr, bodyPtr, C.bool(param.Stream), (**C.char)(unsafe.Pointer(&errPtr)))
+	sid := C.ScReq_send(session.req, C.int(param.Method), gUrl.ptr, bodyPtr, (**C.char)(unsafe.Pointer(&errPtr)))
+	if errPtr != nil {
+		errMsg := C.GoString(errPtr)
+		C.char_free(errPtr)
+		return 0, errors.New(errMsg)
+	}
+	return sid, nil
+}
+
+func (session *Session) recv(sid C.uint64_t, stream bool) (Response, error) {
+	var errPtr *C.char
+	ptr := C.ScReq_recv(session.req, sid, C.bool(stream), (**C.char)(unsafe.Pointer(&errPtr)))
 	if errPtr != nil {
 		errMsg := C.GoString(errPtr)
 		C.char_free(errPtr)
 		return Response{}, errors.New(errMsg)
 	}
 	return newResponse(ptr, session.req)
+
 }
 
 func (session *Session) Reconnect() error {

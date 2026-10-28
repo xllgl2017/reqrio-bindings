@@ -31,5 +31,5 @@ ja4();
 client_hello();
 custom_fingerprint()
 flow_reader()
-// finger_builtin("edge-148")
+finger_builtin("win-x64-edge-148")
 tlcp();

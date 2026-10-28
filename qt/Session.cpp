@@ -83,17 +83,23 @@ void Session::close_stream() const {
     util::check_err(ScReq_close_stream(this->req));
 }
 
-Response Session::send(const Method method, Url *url, Body *body, const bool stream) const {
+uint64_t Session::send(const Method method, Url *url, Body *body) const {
     char *err = nullptr;
-    const auto resp_ptr = ScReq_do_http(this->req, method, url->take(), body->take(), stream, &err);
+    const auto sid = ScReq_send(this->req, method, url->take(), body->take(), &err);
     delete url;
     delete body;
     util::check_err(err);
-    return Response(resp_ptr, this->req);
+    return sid;
+}
+
+Response Session::recv(const uint64_t sid, const bool stream) const {
+    char *err = nullptr;
+    const auto ptr = ScReq_recv(this->req, sid, stream, &err);
+    return Response(ptr, this->req);
 }
 
 Response Session::get(Url *url, Body *body) const {
-    return send(GET, url, body);
+    return recv(send(GET, url, body));
 }
 
 Response Session::get(const QString &url, Body *body) const {
@@ -105,7 +111,7 @@ Response Session::get(const QString &url) const {
 }
 
 Response Session::post(Url *url, Body *body) const {
-    return send(POST, url, body);
+    return recv(send(POST, url, body));
 }
 
 Response Session::post(const QString &url, Body *body) const {
@@ -121,31 +127,31 @@ Response Session::post(const QString &url, const QMap<QString, QString> &body) c
 }
 
 Response Session::put(Url *url, Body *body) const {
-    return send(PUT, url, body);
+    return recv(send(PUT, url, body));
 }
 
 Response Session::head(Url *url, Body *body) const {
-    return send(HEAD, url, body);
+    return recv(send(HEAD, url, body));
 }
 
 Response Session::options(Url *url, Body *body) const {
-    return send(OPTIONS, url, body);
+    return recv(send(OPTIONS, url, body));
 }
 
 Response Session::trace(Url *url, Body *body) const {
-    return send(TRACE, url, body);
+    return recv(send(TRACE, url, body));
 }
 
 Response Session::delete_(Url *url, Body *body) const {
-    return send(DELETE, url, body);
+    return recv(send(DELETE, url, body));
 }
 
 Response Session::patch(Url *url, Body *body) const {
-    return send(PATCH, url, body);
+    return recv(send(PATCH, url, body));
 }
 
 Response Session::query(Url *url, Body *body) const {
-    return send(QUERY, url, body);
+    return recv(send(QUERY, url, body));
 }
 
 
