@@ -1,8 +1,10 @@
 const {
-    Session, ALPN, Fingerprint, CipherSuite, ExtensionType, Version, SignatureAlgorithm, NamedCurve, H2SettingType,
-    EcPointFormat
+    Session, ALPN, Fingerprint, CipherSuite, ExtensionType, Version, Method,
+    SignatureAlgorithm, NamedCurve, H2SettingType, EcPointFormat
 } = require("./index")
 
+/**普通的get，和并发get
+ **/
 function get() {
     let session = new Session(ALPN.HTTP20);
     session.add_header("a", "s")
@@ -12,21 +14,28 @@ function get() {
     });
     console.log("Status:", resp.status_code());
     session.connect('https://www.baidu.com', 'www.baidu.com')
-    let resp1 = session.get("https://www.baidu.com", {
+    let sid1 = session.send(Method.GET, "https://www.baidu.com", {
+        params: {foo: "bar"},
+    })
+    let sid2 = session.send(Method.GET, "https://www.baidu.com", {
         params: {foo: "bar"},
     });
+    let sid3 = session.send(Method.GET, "https://www.baidu.com", {
+        params: {foo: "bar"},
+    })
+    let sid4 = session.send(Method.GET, "https://www.baidu.com", {
+        params: {foo: "bar"},
+    });
+
+    let resp2 = session.recv(sid2, false);
+    let resp4 = session.recv(sid4, false)
+    let resp1 = session.recv(sid1, false);
+    let resp3 = session.recv(sid3, false);
+
+
     console.log("Status:", resp1.status_code());
-    let resp2 = session.get("https://www.baidu.com", {
-        params: {foo: "bar"},
-    });
     console.log("Status:", resp2.status_code());
-    let resp3 = session.get("https://www.baidu.com", {
-        params: {foo: "bar"},
-    });
     console.log("Status:", resp3.status_code());
-    let resp4 = session.get("https://www.baidu.com", {
-        params: {foo: "bar"},
-    });
     console.log("Status:", resp4.status_code());
     console.log(resp4.cookies().length)
     console.log(resp4.get_header("server"))
@@ -34,6 +43,8 @@ function get() {
     session.close();
 }
 
+/**表单post示例
+ **/
 function post_form() {
     let session = new Session(ALPN.HTTP20);
     let resp = session.post("https://www.baidu.com", {
@@ -48,6 +59,8 @@ function post_form() {
     session.close();
 }
 
+/**json post示例
+ **/
 function post_json() {
     let session = new Session(ALPN.HTTP20);
     let resp = session.post("https://www.baidu.com", {
@@ -71,7 +84,8 @@ function read_token() {
     return token
 }
 
-
+/**ja3指纹示例
+ **/
 function ja3() {
     let session = new Session(ALPN.HTTP20, {}, false);
     let fingerprint = Fingerprint.fromJa3(
@@ -85,6 +99,8 @@ function ja3() {
     session.close();
 }
 
+/**ja4指纹示例
+ **/
 function ja4() {
     let session = new Session(ALPN.HTTP20, {}, false);
     let fingerprint = Fingerprint.fromJa4(
@@ -98,6 +114,8 @@ function ja4() {
     session.close();
 }
 
+/**client_hello指纹示例
+ **/
 function client_hello() {
     const headers = {
         "sec-ch-ua": "\"Microsoft Edge\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
@@ -173,7 +191,7 @@ function custom_fingerprint() {
     fingerprint.addExtension(ExtensionType.CompressionCertificate);
     fingerprint.addExtension(ExtensionType.SessionTicket);
     fingerprint.addExtensionVersions(ExtensionType.SupportedVersions, [
-        0xeaea,
+        0x0a0a,
         Version.TLS_1_3,
         Version.TLS_1_2
     ]);
@@ -192,7 +210,7 @@ function custom_fingerprint() {
         ALPN.HTTP11
     ]);
     fingerprint.addExtensionPadding(ExtensionType.Padding, 12);
-    fingerprint.addExtensionBytes(0xdada, [0]);
+    fingerprint.addExtensionBytes(0x0a0a, [0]);
     fingerprint.clearH2Frame();
     fingerprint.addH2Setting(H2SettingType.HeaderTableSize, 65536);
     fingerprint.addH2Setting(H2SettingType.EnablePush, 0);
@@ -218,6 +236,8 @@ function flow_reader() {
     session.close();
 }
 
+/**内置指纹的请求示例，具体指纹参考官方文档
+ **/
 function finger_builtin(name) {
     let session = new Session(ALPN.HTTP20)
     let fingerprint = Fingerprint.fromFingerBuiltin(name, read_token(), false, session.library);

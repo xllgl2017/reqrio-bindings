@@ -2,6 +2,7 @@ from enum import IntEnum
 
 
 class CipherSuite(IntEnum):
+    """TLS cipher suite values used by a fingerprint."""
     # ecdhe-ecdhe
     TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 = 0xc02b,
     TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 = 0xc02c,
@@ -46,6 +47,7 @@ class CipherSuite(IntEnum):
 
 
 class SignatureAlgorithm(IntEnum):
+    """Signature algorithm values for TLS extension configuration."""
     RSA_PKCS1_SHA1 = 0x0201,
     RSA_PKCS1_SHA256 = 0x0401,
     RSA_PKCS1_SHA384 = 0x0501,
@@ -72,6 +74,7 @@ class SignatureAlgorithm(IntEnum):
 
 
 class CompressionMethod(IntEnum):
+    """Compression method identifiers for TLS negotiation."""
     NULL = 0,
     DEFLATE = 1,
     BROTLI = 2,
@@ -80,6 +83,7 @@ class CompressionMethod(IntEnum):
 
 
 class NamedCurve(IntEnum):
+    """Supported elliptic curve values."""
     X25519 = 0x1d,
     X448 = 0x1e,
     X25519MLKEM768 = 0x11ec,
@@ -94,6 +98,7 @@ class NamedCurve(IntEnum):
 
 
 class Version(IntEnum):
+    """TLS/QUIC protocol versions used by the engine."""
     TLCP = 0x101,
     TLS_1_0 = 0x301,
     TLS_1_1 = 0x302,
@@ -102,12 +107,14 @@ class Version(IntEnum):
 
 
 class EcPointFormat(IntEnum):
+    """EC point format identifiers."""
     UNCOMPRESSED = 0,
     ANSI_X962_PRIME = 1,
     ANSI_X962_CHAR2 = 2
 
 
 class ExtensionType(IntEnum):
+    """TLS extension identifiers used when building fingerprints."""
     ServerName = 0x0
     StatusRequest = 0x5
     SupportedGroup = 0xa
@@ -131,4 +138,6 @@ class ExtensionType(IntEnum):
     ApplicationSettingOld = 0x4469
 
 class PskMode(IntEnum):
+    """PSK key exchange mode values."""
+
     PSK_DHE_KE = 0x1

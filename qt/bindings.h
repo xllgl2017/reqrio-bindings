@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+/// HTTP methods supported by the Qt binding.
 enum Method {
     GET = 0,
     POST = 1,

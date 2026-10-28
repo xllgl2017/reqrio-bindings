@@ -25,6 +25,7 @@ import (
 	"unsafe"
 )
 
+// Response represents an HTTP response returned by the session.
 type Response struct {
 	ptr     unsafe.Pointer
 	req_ptr unsafe.Pointer
@@ -42,6 +43,7 @@ func newResponse(ptr unsafe.Pointer, req_ptr unsafe.Pointer) (Response, error) {
 	return Response{ptr: ptr, req_ptr: req_ptr, sid: sid, err: nil}, nil
 }
 
+// StatusCode returns the HTTP status code.
 func (resp *Response) StatusCode() (int16, error) {
 	var errPtr *C.char
 	code := C.Response_status_code(resp.ptr, (**C.char)(unsafe.Pointer(&errPtr)))
@@ -52,6 +54,7 @@ func (resp *Response) StatusCode() (int16, error) {
 	return int16(code), nil
 }
 
+// Bytes returns the raw response body.
 func (resp *Response) Bytes() ([]byte, error) {
 	var errPtr *C.char
 	var length C.size_t
@@ -64,6 +67,7 @@ func (resp *Response) Bytes() ([]byte, error) {
 	return bytes, nil
 }
 
+// Text returns the response body as text.
 func (resp *Response) Text() (string, error) {
 	bytes, err := resp.Bytes()
 	if err != nil {
@@ -72,6 +76,8 @@ func (resp *Response) Text() (string, error) {
 	return string(bytes), nil
 }
 
+// GetHeader returns a header value by name.
+// name: header name.
 func (resp *Response) GetHeader(name string) (string, error) {
 	cName := C.CString(name)
 	defer C.free(unsafe.Pointer(cName))
@@ -85,6 +91,7 @@ func (resp *Response) GetHeader(name string) (string, error) {
 	return C.GoString(valuePtr), nil
 }
 
+// Delete releases the native response object.
 func (resp *Response) Delete() {
 	if resp.ptr != nil {
 		C.Response_drop(resp.ptr)
@@ -92,6 +99,7 @@ func (resp *Response) Delete() {
 	}
 }
 
+// Cookies returns response cookies.
 func (resp *Response) Cookies() ([]Cookie, error) {
 	var errPtr *C.char
 	cookiePtr := C.Response_cookies(resp.ptr, (**C.char)(unsafe.Pointer(&errPtr)))
@@ -109,6 +117,7 @@ func (resp *Response) Cookies() ([]Cookie, error) {
 	return cookies, nil
 }
 
+// Chunks returns a stream iterator for response chunks.
 func (resp *Response) Chunks() func(func([]byte) bool) {
 	return func(yield func([]byte) bool) {
 		for {
@@ -130,6 +139,7 @@ func (resp *Response) Chunks() func(func([]byte) bool) {
 	}
 }
 
+// Err returns the last chunk-stream error.
 func (resp *Response) Err() error {
 	return resp.err
 }

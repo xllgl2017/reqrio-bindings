@@ -22,6 +22,7 @@ import (
 	"unsafe"
 )
 
+// Url wraps a request URL and query parameters.
 type Url struct {
 	ptr unsafe.Pointer
 }

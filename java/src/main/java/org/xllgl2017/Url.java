@@ -7,30 +7,46 @@ import java.util.HashMap;
 
 import static org.xllgl2017.ReqrioLibrary.REQRIO;
 
+/**
+ * URL wrapper for request construction.
+ */
 public class Url implements AutoCloseable {
     private Pointer raw;
 
+    /**
+     * Get the native URL pointer.
+     * @return Native pointer.
+     */
     public Pointer pointer() throws Exception {
         if (this.raw == null) throw new Exception("Url had dropped");
         return this.raw;
     }
 
-    /// 初始化
-    ///
-    /// @param url :请求地址
+    /**
+     * Create a URL wrapper.
+     * @param url Request URL.
+     */
     public Url(String url) throws Exception {
         PointerByReference err = new PointerByReference();
         this.raw = REQRIO.Url_new(url, err);
         util.check_err_pointer(err);
     }
 
-    /// @param sni :域名
+    /**
+     * Create a URL wrapper and set SNI.
+     * @param url Request URL.
+     * @param sni SNI host name.
+     */
     public Url(String url, String sni) throws Exception {
         this(url);
         this.setSni(sni);
     }
 
-    /// @param params url请求参数，value应为未编码
+    /**
+     * Create a URL wrapper with query params.
+     * @param url_str Base URL.
+     * @param params Query parameter map.
+     */
     public Url(String url_str, HashMap<String, String> params) throws Exception {
         this(url_str);
         for (String key : params.keySet()) {
@@ -38,10 +54,11 @@ public class Url implements AutoCloseable {
         }
     }
 
-    /// 添加一个请求参数，若这个值已存在则会被覆盖
-    ///
-    /// @param name  :参数名
-    /// @param value :参数值
+    /**
+     * Add a query parameter.
+     * @param name Parameter name.
+     * @param value Parameter value.
+     */
     public void addParam(String name, String value) throws Exception {
         try {
             util.check_err(REQRIO.Url_add_param(this.pointer(), name, value));
@@ -51,9 +68,10 @@ public class Url implements AutoCloseable {
         }
     }
 
-    /// 删除一个参数
-    ///
-    /// @param name :待删除的参数名
+    /**
+     * Remove a query parameter.
+     * @param name Parameter name.
+     */
     public void removeParam(String name) throws Exception {
         try {
             util.check_err(REQRIO.Url_remove_param(this.pointer(), name));
@@ -63,11 +81,18 @@ public class Url implements AutoCloseable {
         }
     }
 
+    /**
+     * Set the native pointer directly.
+     * @param raw Native URL pointer.
+     */
     public void setRaw(Pointer raw) {
         this.raw = raw;
     }
 
-    /// @param sni :域名，在使用ip url时设置
+    /**
+     * Set the SNI for this URL.
+     * @param sni SNI host name.
+     */
     public void setSni(String sni) throws Exception {
         try {
             util.check_err(REQRIO.Url_set_sni(this.pointer(), sni));

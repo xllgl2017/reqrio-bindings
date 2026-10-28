@@ -55,6 +55,7 @@ import (
 	"unsafe"
 )
 
+// ALPN is a negotiated protocol value for the TLS layer.
 type ALPN string
 
 const (
@@ -63,10 +64,12 @@ const (
 	HTTP11 ALPN = "http/1.1"
 )
 
+// Session represents a reusable HTTP client session.
 type Session struct {
 	req unsafe.Pointer
 }
 
+// ConnParam contains the request configuration for a single call.
 type ConnParam struct {
 	Method      Method
 	Url         string
@@ -80,12 +83,15 @@ type ConnParam struct {
 	Stream      bool
 }
 
-// NewSession /*
+// NewSession creates a session instance.
+// ignoreHdrSort: whether to skip built-in header sorting.
 func NewSession(ignoreHdrSort bool) Session {
 	p := C.ScReq_new(C.bool(ignoreHdrSort))
 	return Session{req: p}
 }
 
+// SetHeaders replaces the request headers.
+// headers: header key/value map.
 func (session *Session) SetHeaders(headers map[string]string) error {
 	hdr, jeer := json.Marshal(headers)
 	if jeer != nil {
@@ -102,6 +108,10 @@ func (session *Session) SetHeaders(headers map[string]string) error {
 	return nil
 }
 
+// AddHeader adds or overwrites one header.
+// name: header name.
+// value: header value.
+// reversed: whether to add in reverse order.
 func (session *Session) AddHeader(name string, value string, reversed bool) error {
 	cName, cValue := C.CString(name), C.CString(value)
 	defer C.free(unsafe.Pointer(cName))
@@ -114,6 +124,8 @@ func (session *Session) AddHeader(name string, value string, reversed bool) erro
 	return nil
 }
 
+// SetAlpn configures the ALPN protocol.
+// alpn: ALPN value such as h2 or http/1.1.
 func (session *Session) SetAlpn(alpn ALPN) error {
 	cALpn := C.CString(string(alpn))
 	defer C.free(unsafe.Pointer(cALpn))
@@ -125,6 +137,8 @@ func (session *Session) SetAlpn(alpn ALPN) error {
 	return nil
 }
 
+// SetVerify enables or disables certificate verification.
+// verify: whether to validate certificates.
 func (session *Session) SetVerify(verify bool) error {
 	err := C.ScReq_set_verify(session.req, C.bool(verify))
 	if err != nil {
@@ -134,6 +148,8 @@ func (session *Session) SetVerify(verify bool) error {
 	return nil
 }
 
+// SetRedirect enables or disables automatic redirect following.
+// autoRedirect: whether to follow redirects automatically.
 func (session *Session) SetRedirect(autoRedirect bool) error {
 	err := C.ScReq_set_redirect(session.req, C.bool(autoRedirect))
 	if err != nil {
@@ -143,6 +159,8 @@ func (session *Session) SetRedirect(autoRedirect bool) error {
 	return nil
 }
 
+// SetKeyLog configures the TLS key log output path.
+// keyLog: output path for key logs.
 func (session *Session) SetKeyLog(keyLog string) error {
 	cKeyLog := C.CString(keyLog)
 	defer C.free(unsafe.Pointer(cKeyLog))
@@ -154,6 +172,8 @@ func (session *Session) SetKeyLog(keyLog string) error {
 	return nil
 }
 
+// SetFingerprint applies a TLS fingerprint to the session.
+// fingerprint: TLS fingerprint to use.
 func (session *Session) SetFingerprint(fingerprint Fingerprint) error {
 	err := C.ScReq_set_fingerprint(session.req, fingerprint.rawPtr)
 	if err != nil {
@@ -163,6 +183,8 @@ func (session *Session) SetFingerprint(fingerprint Fingerprint) error {
 	return nil
 }
 
+// SetProxy sets the HTTP proxy address.
+// proxy: proxy URL string.
 func (session *Session) SetProxy(proxy string) error {
 	cProxy := C.CString(proxy)
 	defer C.free(unsafe.Pointer(cProxy))
@@ -174,7 +196,8 @@ func (session *Session) SetProxy(proxy string) error {
 	return nil
 }
 
-// SetTimeout sets the request timeout configuration.
+// SetTimeout configures the request timeout JSON.
+// timeout: timeout JSON string.
 func (session *Session) SetTimeout(timeout string) error {
 	cTimeout := C.CString(timeout)
 	defer C.free(unsafe.Pointer(cTimeout))
@@ -186,7 +209,8 @@ func (session *Session) SetTimeout(timeout string) error {
 	return nil
 }
 
-// SetVersion sets the TLS handshake version.
+// SetVersion configures the TLS version.
+// ver: TLS version enum.
 func (session *Session) SetVersion(ver Version) error {
 	err := C.ScReq_set_version(session.req, C.uint16_t(ver))
 	if err != nil {
@@ -196,7 +220,8 @@ func (session *Session) SetVersion(ver Version) error {
 	return nil
 }
 
-// SetCookie 设置请求的Cookie；将清空现有cookie，并设置传入
+// SetCookie replaces the current cookie header.
+// cookie: cookie string value.
 func (session *Session) SetCookie(cookie string) error {
 	cCookie := C.CString(cookie)
 	defer C.free(unsafe.Pointer(cCookie))
@@ -208,7 +233,9 @@ func (session *Session) SetCookie(cookie string) error {
 	return nil
 }
 
-// AddCookie 添加一条Cookie
+// AddCookie appends a single cookie.
+// name: cookie name.
+// value: cookie value.
 func (session *Session) AddCookie(name string, value string) error {
 	cName, cValue := C.CString(name), C.CString(value)
 	defer C.free(unsafe.Pointer(cName))
@@ -284,6 +311,8 @@ func buildBody(param ConnParam) (unsafe.Pointer, error) {
 
 }
 
+// SendRequest sends a single request and returns the response.
+// param: request parameters.
 func (session *Session) SendRequest(param ConnParam) (Response, error) {
 	sid, err := session.send(param)
 	if err != nil {
@@ -325,6 +354,7 @@ func (session *Session) recv(sid C.uint64_t, stream bool) (Response, error) {
 
 }
 
+// Reconnect re-establishes the underlying connection.
 func (session *Session) Reconnect() error {
 	err := C.ScReq_reconnect(session.req)
 	if err != nil {
@@ -335,6 +365,9 @@ func (session *Session) Reconnect() error {
 	return nil
 }
 
+// Connect establishes a connection without sending a request.
+// url: target URL.
+// sni: custom SNI host.
 func (session *Session) Connect(url string, sni string) error {
 	cUrl := C.CString(url)
 	defer C.free(unsafe.Pointer(cUrl))
@@ -349,6 +382,7 @@ func (session *Session) Connect(url string, sni string) error {
 	return nil
 }
 
+// CloseStream closes the TLS stream with a close notify.
 func (session *Session) CloseStream() error {
 	err := C.ScReq_close_stream(session.req)
 	if err != nil {
@@ -359,6 +393,7 @@ func (session *Session) CloseStream() error {
 	return nil
 }
 
+// Close releases the native session object.
 func (session *Session) Close() {
 	if session.req != nil {
 		C.ScReq_drop(session.req)

@@ -9,6 +9,7 @@ const {
     flow_reader,
     finger_builtin, tlcp
 } = require("./example");
+const {Websocket} = require("./ws");
 
 async function test_ws() {
     try {

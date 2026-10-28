@@ -40,6 +40,8 @@ class RespInner(ctypes.Structure):
 
 
 class Response:
+    """HTTP response wrapper returned by the session."""
+
     sid: int
     method: int
     status: int
@@ -47,6 +49,13 @@ class Response:
     body: Buffer
 
     def __init__(self, ptr, req, stream=False):
+        """Create a response object from a native pointer.
+
+        Args:
+            ptr: native response pointer.
+            req: native session pointer.
+            stream: whether the response is streamed.
+        """
         self.__ptr__ = ptr
         self.__inner__ = self.__ptr__.contents
         self.__req__ = req
@@ -76,9 +85,16 @@ class Response:
             self.__req__ = None
 
     def statue_code(self) -> int:
+        """Return the HTTP status code."""
         return self.status
 
     def get_header(self, name: str, default: str = None) -> str:
+        """Get a response header value.
+
+        Args:
+            name: header name.
+            default: fallback value when header is missing.
+        """
         err = ctypes.c_char_p()
         ptr = DLL.Response_get_header(self.__ptr__, name.encode('utf-8'), ctypes.byref(err))
         err, msg = util.check_char_err(err)
@@ -91,9 +107,11 @@ class Response:
         return res
 
     def location(self) -> str:
+        """Return the Location header value."""
         return self.get_header("location")
 
     def cookies(self):
+        """Return cookies included in the response."""
         err = ctypes.c_char_p()
         ptr = DLL.Response_cookies(self.__ptr__, ctypes.byref(err))
         err, msg = util.check_char_err(err)
@@ -107,15 +125,19 @@ class Response:
             return res
 
     def bytes(self) -> bytes:
+        """Return the raw response body bytes."""
         return self.body.as_bytes()
 
     def json(self) -> dict:
+        """Parse the response body as JSON."""
         return json.loads(self.bytes())
 
     def text(self) -> str:
+        """Return the response body as UTF-8 text."""
         return self.bytes().decode('utf-8')
 
     def chunks(self) -> StreamChunk:
+        """Return a stream chunk iterator for this response."""
         err = ctypes.c_char_p()
         sid = DLL.Response_sid(self.__ptr__, ctypes.byref(err))
         err, msg = util.check_char_err(err)

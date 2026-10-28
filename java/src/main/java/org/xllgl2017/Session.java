@@ -11,21 +11,32 @@ import java.util.HashMap;
 
 import static org.xllgl2017.ReqrioLibrary.REQRIO;
 
+/**
+ * HTTP session for sending and receiving requests.
+ */
 public class Session implements AutoCloseable {
     private Pointer req;
 
-    /// 初始化Session
-    ///
-    /// @param alpn :设置请求的版本，默认HTTP/2.0
+    /**
+     * Create a session with a negotiated ALPN value.
+     * @param alpn ALPN protocol.
+     */
     public Session(ALPN alpn) throws Exception {
         this();
         this.setALPN(alpn);
     }
 
+    /**
+     * Create a default session.
+     */
     public Session() {
         this(false);
     }
 
+    /**
+     * Create a session.
+     * @param ignore_hdr_sort Whether to skip the built-in header ordering.
+     */
     public Session(boolean ignore_hdr_sort) {
         this.req = REQRIO.ScReq_new(ignore_hdr_sort);
     }
@@ -35,42 +46,63 @@ public class Session implements AutoCloseable {
         return this.req;
     }
 
-    /// 是否对证书链进行验证
+    /**
+     * Enable or disable certificate validation.
+     * @param verify true to verify the server certificate chain.
+     */
     public void setVerify(boolean verify) throws Exception {
         util.check_err(REQRIO.ScReq_set_verify(this.pointer(), verify));
     }
 
-    /// 对重定向链接是否自动跳转，默认跳转
+    /**
+     * Enable or disable automatic redirect following.
+     * @param auto_redirect true to follow redirects automatically.
+     */
     public void setAutoRedirect(boolean auto_redirect) throws Exception {
         util.check_err(REQRIO.ScReq_set_redirect(this.pointer(), auto_redirect));
     }
 
-    /// 设置 TLS 导出握手中生成的通讯密钥的路径
-    ///
-    /// @param path :keylog导出的路径
+    /**
+     * Set the TLS key log path.
+     * @param path Output path for TLS key logs.
+     */
     public void setKeyLog(String path) throws Exception {
         util.check_err(REQRIO.ScReq_set_key_log(this.pointer(), path));
     }
 
-    /// 设置请求头
-    ///
-    /// @param header :是一个json字符串，例如: {"User-Agent":"xxx","Host":"xxx"}
+    /**
+     * Replace all request headers from a JSON string.
+     * @param header JSON header string.
+     */
     public void setHeaders(String header) throws Exception {
         util.check_err(REQRIO.ScReq_set_header_json(this.pointer(), header));
     }
 
-    /// 设置请求头
+    /**
+     * Set request headers from a map.
+     * @param headers Header key-value pairs.
+     */
     public void setHeaders(HashMap<String, String> headers) throws Exception {
         for (String name : headers.keySet()) {
             this.setHeader(name, headers.get(name));
         }
     }
 
-    /// 添加请求头，若已存在则进行覆盖
+    /**
+     * Set a single request header.
+     * @param name Header name.
+     * @param value Header value.
+     */
     public void setHeader(String name, String value) throws Exception {
         this.setHeader(name, value, false);
     }
 
+    /**
+     * Set a single request header with optional reverse mode.
+     * @param name Header name.
+     * @param value Header value.
+     * @param reversed If true, the header is left empty and not sent.
+     */
     public void setHeader(String name, String value, boolean reversed) throws Exception {
         if (name.equalsIgnoreCase("cookie")) {
             this.setCookie(value);
@@ -79,13 +111,18 @@ public class Session implements AutoCloseable {
         }
     }
 
-    /// @param name :待删除的请求头名
+    /**
+     * Remove a request header.
+     * @param name Header name to remove.
+     */
     public void removeHeader(String name) throws Exception {
         util.check_err(REQRIO.ScReq_remove_header(this.pointer(), name));
     }
 
-
-    /// 设置请求头
+    /**
+     * Set request headers from a Headers object.
+     * @param headers Header container.
+     */
     public void setHeaders(Headers headers) throws Exception {
         HashMap<String, String> keys = headers.getKeys();
         for (String name : keys.keySet()) {
@@ -96,6 +133,10 @@ public class Session implements AutoCloseable {
         }
     }
 
+    /**
+     * Set a custom TLS fingerprint.
+     * @param fingerprint Fingerprint instance.
+     */
     public void setFingerprint(Fingerprint fingerprint) throws Exception {
         util.check_err(REQRIO.ScReq_set_fingerprint(this.pointer(), fingerprint.getRaw()));
         fingerprint.drop();
@@ -105,61 +146,86 @@ public class Session implements AutoCloseable {
         util.check_err(REQRIO.ScReq_set_alpn(this.pointer(), alpn.getValue()));
     }
 
-    /// 设置TLS握手的版本:
-    ///
-    /// @param ver: 版本
+    /**
+     * Set the TLS handshake version.
+     * @param ver TLS version.
+     */
     public void setVersion(Version ver) throws Exception {
         util.check_err(REQRIO.ScReq_set_version(this.pointer(), ver.value));
     }
 
-
-    /// 设置代理，需要在初始化时设置；后期修改需要调reconnect
-    ///
-    /// @param proxy :代理地址，例如:http_plain: http://127.0.0.1:10280; socks5: socks://127.0.0.1:10279
+    /**
+     * Set a proxy address.
+     * @param proxy Proxy URL, for example http://127.0.0.1:10280 or socks5://127.0.0.1:10279.
+     */
     public void setProxy(String proxy) throws Exception {
         util.check_err(REQRIO.ScReq_set_proxy(this.pointer(), proxy));
     }
 
+    /**
+     * Configure request timeout parameters.
+     * @param timeout Timeout object.
+     */
     public void setTimeout(Timeout timeout) throws Exception {
         Gson gson = new Gson();
         util.check_err(REQRIO.ScReq_set_timeout(this.pointer(), gson.toJson(timeout)));
     }
 
+    /**
+     * Set a Cookie header value.
+     * @param cookie Cookie string.
+     */
     public void setCookie(String cookie) throws Exception {
         util.check_err(REQRIO.ScReq_set_cookie(this.pointer(), cookie));
     }
 
+    /**
+     * Add a cookie.
+     * @param name Cookie name.
+     * @param value Cookie value.
+     */
     public void addCookie(String name, String value) throws Exception {
         util.check_err(REQRIO.ScReq_add_cookie(this.pointer(), name, value));
     }
 
-    /// 关闭 tls 流，将发送Alert(CloseNotify)
+    /**
+     * Close the current TLS stream.
+     */
     public void closeStream() throws Exception {
         util.check_err(REQRIO.ScReq_close_stream(this.pointer()));
     }
 
+    /**
+     * Reconnect the session.
+     */
     public void reconnect() throws Exception {
         util.check_err(REQRIO.ScReq_reconnect(this.pointer()));
     }
 
-    /// 连接到目标主机，在需要提前建立连接的情况下调用
-    ///
-    /// @param url :目标主机地址
-    /// @param sni :域名
+    /**
+     * Connect to a URL without sending an HTTP request.
+     * @param url Target URL.
+     * @param sni Custom SNI value.
+     */
     public void connect(String url, String sni) throws Exception {
         util.check_err(REQRIO.ScReq_connect(this.pointer(), url, sni));
     }
 
+    /**
+     * Connect to a URL without sending an HTTP request.
+     * @param url Target URL.
+     */
     public void connect(String url) throws Exception {
         this.connect(url, null);
     }
 
-
-    /// 发送 HTTP 请求, 返回sid，用于后续的接收
-    ///
-    /// @param method : 请求方法
-    /// @param url    :请求地址
-    /// @param body   :请求体
+    /**
+     * Send an HTTP request and return the request id.
+     * @param method HTTP method.
+     * @param url Request URL.
+     * @param body Request body.
+     * @return Request session id.
+     */
     public int send(@NotNull Method method, @NotNull Url url, @NotNull Body body) throws Exception {
         try (url; body) {
             PointerByReference err = new PointerByReference();
@@ -171,6 +237,12 @@ public class Session implements AutoCloseable {
         }
     }
 
+    /**
+     * Send an HTTP request with an empty body.
+     * @param method HTTP method.
+     * @param url Request URL.
+     * @return Request session id.
+     */
     public int send(@NotNull Method method, @NotNull Url url) throws Exception {
         Body body = new Body();
         try (body) {
@@ -178,11 +250,24 @@ public class Session implements AutoCloseable {
         }
     }
 
+    /**
+     * Send a request and stream the response.
+     * @param method HTTP method.
+     * @param url Request URL.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response send_stream(@NotNull Method method, @NotNull Url url, @NotNull Body body) throws Exception {
         int sid = this.send(method, url, body);
         return this.recv(sid, true);
     }
 
+    /**
+     * Send a request and stream the response with an empty body.
+     * @param method HTTP method.
+     * @param url Request URL.
+     * @return Response object.
+     */
     public Response send_stream(@NotNull Method method, @NotNull Url url) throws Exception {
         Body body = new Body();
         try (body) {
@@ -190,7 +275,12 @@ public class Session implements AutoCloseable {
         }
     }
 
-
+    /**
+     * Receive a response for a request id.
+     * @param sid Request session id.
+     * @param stream Whether to stream the response.
+     * @return Response object.
+     */
     public Response recv(int sid, boolean stream) throws Exception {
         PointerByReference err = new PointerByReference();
         Pointer pointer = REQRIO.ScReq_recv(this.pointer(), sid, stream, err);
@@ -198,122 +288,225 @@ public class Session implements AutoCloseable {
         return new Response(pointer, this.pointer(), stream);
     }
 
+    /**
+     * Receive a non-streaming response for a request id.
+     * @param sid Request session id.
+     * @return Response object.
+     */
     public Response recv(int sid) throws Exception {
         return this.recv(sid, false);
     }
 
-    /// 参考 send
+    /**
+     * Send a GET request.
+     * @param url Request URL.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response get(Url url, Body body) throws Exception {
         return this.recv(this.send(Method.GET, url, body), false);
     }
 
-    /// 参考 send
+    /**
+     * Send a GET request.
+     * @param url Request URL string.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response get(String url, Body body) throws Exception {
         try (body) {
             return this.get(new Url(url), body);
         }
     }
 
-    /// 参考 send
+    /**
+     * Send a GET request with an empty body.
+     * @param url Request URL.
+     * @return Response object.
+     */
     public Response get(Url url) throws Exception {
         return this.get(url, new Body());
     }
 
-    /// 参考 send
+    /**
+     * Send a GET request with an empty body.
+     * @param url Request URL string.
+     * @return Response object.
+     */
     public Response get(String url) throws Exception {
         return this.get(url, new Body());
     }
 
-    /// 参考 send
+    /**
+     * Send a POST request.
+     * @param url Request URL.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response post(Url url, Body body) throws Exception {
         return this.recv(this.send(Method.POST, url, body), false);
     }
 
-    /// 参考 send
+    /**
+     * Send a POST request.
+     * @param url Request URL string.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response post(String url, Body body) throws Exception {
         try (body) {
             return this.post(new Url(url), body);
         }
     }
 
-    /// 参考 send
+    /**
+     * Send a PUT request.
+     * @param url Request URL.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response put(Url url, Body body) throws Exception {
         return this.recv(this.send(Method.PUT, url, body), false);
     }
 
-    /// 参考 send
+    /**
+     * Send a PUT request.
+     * @param url Request URL string.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response put(String url, Body body) throws Exception {
         try (body) {
             return this.put(new Url(url), body);
         }
     }
 
-    /// 参考 send
+    /**
+     * Send an OPTIONS request.
+     * @param url Request URL.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response options(Url url, Body body) throws Exception {
         return this.recv(this.send(Method.OPTIONS, url, body), false);
     }
 
-    /// 参考 send
+    /**
+     * Send an OPTIONS request.
+     * @param url Request URL string.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response options(String url, Body body) throws Exception {
         try (body) {
             return this.options(new Url(url), body);
         }
     }
 
-    /// 参考 send
+    /**
+     * Send a HEAD request.
+     * @param url Request URL.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response head(Url url, Body body) throws Exception {
         return this.recv(this.send(Method.HEAD, url, body), false);
     }
 
-    /// 参考 send
+    /**
+     * Send a HEAD request.
+     * @param url Request URL string.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response head(String url, Body body) throws Exception {
         try (body) {
             return this.head(new Url(url), body);
         }
     }
 
-    /// 参考 send
+    /**
+     * Send a DELETE request.
+     * @param url Request URL.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response delete(Url url, Body body) throws Exception {
         return this.recv(this.send(Method.DELETE, url, body), false);
     }
 
-    /// 参考 send
+    /**
+     * Send a DELETE request.
+     * @param url Request URL string.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response delete(String url, Body body) throws Exception {
         try (body) {
             return this.delete(new Url(url), body);
         }
     }
 
-    /// 参考 send
+    /**
+     * Send a TRACE request.
+     * @param url Request URL.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response trace(Url url, Body body) throws Exception {
         return this.recv(this.send(Method.TRACE, url, body), false);
     }
 
-    /// 参考 send
+    /**
+     * Send a TRACE request.
+     * @param url Request URL string.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response trace(String url, Body body) throws Exception {
         try (body) {
             return this.trace(new Url(url), body);
         }
     }
 
-    /// 参考 send
+    /**
+     * Send a PATCH request.
+     * @param url Request URL.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response patch(Url url, Body body) throws Exception {
         return this.recv(this.send(Method.PATCH, url, body), false);
     }
 
-    /// 参考 send
+    /**
+     * Send a PATCH request.
+     * @param url Request URL string.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response patch(String url, Body body) throws Exception {
         try (body) {
             return this.patch(new Url(url), body);
         }
     }
 
-    /// 参考 send
+    /**
+     * Send a custom query request.
+     * @param url Request URL.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response query(Url url, Body body) throws Exception {
         return this.recv(this.send(Method.QUERY, url, body), false);
     }
 
-    /// 参考 send
+    /**
+     * Send a custom query request.
+     * @param url Request URL string.
+     * @param body Request body.
+     * @return Response object.
+     */
     public Response query(String url, Body body) throws Exception {
         try (body) {
             return this.query(new Url(url), body);

@@ -36,6 +36,7 @@ const uint8_t *ScReq_recv_stream(ScReq *req, uint64_t sid, size_t *len, char **e
 }
 
 
+/// HTTP response wrapper returned by a session request.
 class Response : QObject {
     Q_OBJECT
 
@@ -44,20 +45,31 @@ class Response : QObject {
     bool read_stream = false;
 
 public:
+    /// Create a response wrapper from native data.
+    /// @param ptr: native response instance.
+    /// @param req: owning request session.
+    /// @param parent: parent QObject.
     explicit Response(RespInner *ptr, ScReq *req, QObject *parent = nullptr);
 
     ~Response() override;
 
+    /// Return the HTTP status code.
     [[nodiscard]] int statusCode() const;
 
+    /// Return the raw response body bytes.
     [[nodiscard]] QByteArray bytes() const;
 
+    /// Return the response body as UTF-8 text.
     [[nodiscard]] QString text() const;
 
+    /// Parse the response body as JSON.
     [[nodiscard]] QJsonDocument json() const;
 
+    /// Read a response header by name.
+    /// @param name: header name.
     [[nodiscard]] QString getHeader(const QString &name) const;
 
+    /// Return cookies contained in the response.
     [[nodiscard]] QList<Cookie> cookies() const;
 
     class ChunkIterator {
@@ -106,6 +118,7 @@ public:
         }
     };
 
+    /// Return a streaming chunk iterator for the response body.
     [[nodiscard]] ChunkRange chunks();
 };
 

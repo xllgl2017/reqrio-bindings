@@ -14,6 +14,9 @@ import java.util.NoSuchElementException;
 
 import static org.xllgl2017.ReqrioLibrary.REQRIO;
 
+/**
+ * HTTP response wrapper.
+ */
 public class Response {
     private final int statusCode;
     private final Headers headers = new Headers();
@@ -21,16 +24,19 @@ public class Response {
     private final int sid;
     private final Pointer req;
 
-
+    /**
+     * Create a response object from native data.
+     * @param raw Native response pointer.
+     * @param req Native request pointer.
+     * @param stream Whether the response is streamed.
+     */
     public Response(Pointer raw, Pointer req, boolean stream) throws Exception {
         try {
             this.req = req;
-            // status code
             PointerByReference err = new PointerByReference();
             this.statusCode = REQRIO.Response_status_code(raw, err);
             util.check_err_pointer(err);
 
-            //header
             Pointer key_ptr = REQRIO.Response_header_keys(raw, err);
             util.check_err_pointer(err);
             String[] keys = key_ptr.getString(0).split(",,,,");
@@ -42,7 +48,6 @@ public class Response {
                 REQRIO.char_free(ptr);
             }
 
-            //cookies
             Pointer ptr = REQRIO.Response_cookies(raw, err);
             util.check_err_pointer(err);
             String cookie_str = ptr.getString(0);
@@ -52,7 +57,6 @@ public class Response {
             }.getType());
             this.headers.setCookies(cookies);
 
-            //body
             LongByReference len = new LongByReference();
             Pointer body_ptr = REQRIO.Response_bytes(raw, len, err);
             util.check_err_pointer(err);
@@ -64,36 +68,69 @@ public class Response {
         }
     }
 
+    /**
+     * Get the HTTP status code.
+     * @return Status code.
+     */
     public int statusCode() {
         return this.statusCode;
 
     }
 
+    /**
+     * Get response header by name.
+     * @param name Header name.
+     * @return Header value or null.
+     */
     public String getHeader(String name) {
         return this.headers.get(name);
     }
 
+    /**
+     * Get the Location header value.
+     * @return Redirect location or null.
+     */
     public String location() {
         return this.getHeader("location");
     }
 
+    /**
+     * Get the full response body as bytes.
+     * @return Body bytes.
+     */
     public byte[] bytes() {
         return this.body;
     }
 
+    /**
+     * Get the response body as text.
+     * @return Body text.
+     */
     public String text() {
         return new String(this.bytes());
     }
 
+    /**
+     * Parse the response body as JSON.
+     * @return JSON element.
+     */
     public JsonElement json() {
         Gson gson = new Gson();
         return gson.fromJson(this.text(), JsonElement.class);
     }
 
+    /**
+     * Get all cookies in the response.
+     * @return Cookie list.
+     */
     public List<Cookie> getCookies() {
         return headers.getCookies();
     }
 
+    /**
+     * Stream response chunks.
+     * @return Iterable chunk stream.
+     */
     public Iterable<byte[]> chunks() {
         return () -> new Iterator<>() {
             boolean hashNext = true;
@@ -127,6 +164,10 @@ public class Response {
         };
     }
 
+    /**
+     * Get the request session id.
+     * @return Session id.
+     */
     public int getSid() {
         return sid;
     }

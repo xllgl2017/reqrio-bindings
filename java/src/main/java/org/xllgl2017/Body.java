@@ -11,36 +11,51 @@ import static org.xllgl2017.ReqrioLibrary.REQRIO;
 import java.io.StringWriter;
 import java.util.HashMap;
 
+/**
+ * HTTP request body wrapper.
+ */
 public class Body implements AutoCloseable {
     private Pointer raw;
 
+    /**
+     * Get the native pointer for the body.
+     * @return Native body pointer.
+     */
     public Pointer pointer() throws Exception {
         if (this.raw == null) throw new Exception("Body had dropped");
         return this.raw;
     }
 
+    /**
+     * Create an empty body.
+     */
     public Body() {
         this.raw = REQRIO.Body_none();
     }
 
-    /// @param body        :请求体二进制
-    /// @param contentType : 请求头类型
+    /**
+     * Create a body from raw bytes.
+     * @param body Raw request bytes.
+     * @param contentType Content-Type header.
+     */
     public Body(byte[] body, String contentType) throws Exception {
         PointerByReference err = new PointerByReference();
         this.raw = REQRIO.Body_new(body, body.length, contentType, err);
         util.check_err_pointer(err);
     }
 
-    /// JSON 数据格式(application/json)
-    ///
-    /// @param json :json请求头
+    /**
+     * Create a JSON body.
+     * @param json JSON payload.
+     */
     public Body(@NotNull JsonElement json) throws Exception {
         this(json.toString().getBytes(), "application/json");
     }
 
-    /// Urlencoded 表单数据格式(application/x-www-form-urlencoded)
-    ///
-    /// @param forms :表单数据，key和value都应该未进行编码
+    /**
+     * Create a form body.
+     * @param forms Form fields map.
+     */
     public Body(@NotNull HashMap<String, String> forms) throws Exception {
         StringWriter writer = new StringWriter();
         for (String key : forms.keySet()) {
@@ -63,22 +78,35 @@ public class Body implements AutoCloseable {
 
     }
 
-    /// 文本数据格式(text/plain)
-    ///
-    /// @param text :请求体文本
+    /**
+     * Create a plain-text body.
+     * @param text Text payload.
+     */
     public Body(@NotNull String text) throws Exception {
         this(text.getBytes(), "text/plain");
     }
 
+    /**
+     * Create a multipart body from a file.
+     * @param file File to upload.
+     */
     public Body(HttpFile file) throws Exception {
         this(file, new HashMap<>());
     }
 
+    /**
+     * Set the native raw body pointer.
+     * @param raw Native pointer.
+     */
     public void setRaw(Pointer raw) {
         this.raw = raw;
     }
 
-    /// @param data 表单其他字段
+    /**
+     * Create a multipart body from a file and extra form data.
+     * @param file File to upload.
+     * @param data Extra form fields.
+     */
     public Body(HttpFile file, HashMap<String, String> data) throws Exception {
         PointerByReference err = new PointerByReference();
         Gson gson = new Gson();

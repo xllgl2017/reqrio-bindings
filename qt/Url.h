@@ -21,20 +21,34 @@ char *Url_set_sni(UrlInner *url, const char *sni);
 void Url_drop(UrlInner *url);
 }
 
+/// Request URL wrapper with query parameters and optional SNI.
 class Url : QObject {
     Q_OBJECT
 
     UrlInner *raw_ptr;
 
 public:
+    /// Create a URL wrapper.
+    /// @param url: target URL.
+    /// @param parent: parent QObject.
     explicit Url(const QString &url, QObject *parent = nullptr);
 
+    /// Create a URL wrapper with a custom SNI host.
+    /// @param url: target URL.
+    /// @param sni: custom SNI hostname.
+    /// @param parent: parent QObject.
     explicit Url(const QString &url, const QString &sni, QObject *parent = nullptr);
 
+    /// Add a query parameter.
+    /// @param name: parameter name.
+    /// @param value: parameter value.
     void addParam(const QString &name, const QString &value) const;
 
+    /// Remove a query parameter by name.
+    /// @param name: parameter name.
     void removeParam(const QString &name) const;
 
+    /// Return and detach the native pointer.
     UrlInner *take();
 
     ~Url() override;

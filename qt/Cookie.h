@@ -8,6 +8,7 @@
 #include <qstring.h>
 
 
+/// Parsed cookie value used in response headers.
 class Cookie {
     QString name;
     QString value;
@@ -21,14 +22,22 @@ class Cookie {
     bool icpsp = false;
 
 public:
+    /// Create an empty cookie.
     explicit Cookie();
 
+    /// Create a cookie from a JSON object.
+    /// @param cookie: cookie data.
     explicit Cookie(const QJsonObject& cookie);
 
+    /// Create a cookie with a name and value.
+    /// @param name: cookie name.
+    /// @param value: cookie value.
     explicit Cookie(QString name, QString value);
 
+    /// Return the cookie name.
     QString getName();
 
+    /// Return the cookie value.
     QString getValue();
 };
 

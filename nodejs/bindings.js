@@ -9,7 +9,10 @@ const uint8Ptr = ref.refType(ref.types.uint8);
 const uint16Ptr = ref.refType(ref.types.uint16);
 const sizeTPtr = ref.refType(ref.types.size_t);
 
-
+/**
+ * Load the native reqrio library.
+ * @returns {object} Loaded ffi library instance.
+ */
 function binding_library() {
     let libname;
     if (process.platform === "win32") {
@@ -118,6 +121,13 @@ function binding_library() {
     });
 }
 
+/**
+ * Read a native C string and free this ptr while ptr is not null and free is true.
+ * @param {object} library Native library handle.
+ * @param {Buffer} ptr Pointer to the C string.
+ * @param {boolean} [free=false] Whether to free the native buffer after reading.
+ * @returns {string|undefined} Decoded string.
+ */
 function read_c_str(library, ptr, free) {
     if (ptr === null) return;
     let c_str = ref.readCString(ptr, 0);
@@ -125,10 +135,20 @@ function read_c_str(library, ptr, free) {
     return c_str;
 }
 
+/**
+ * Allocate a pointer slot for native error data.
+ * @returns {Buffer} Pointer reference buffer.
+ */
 function ref_char_ptr() {
     return ref.alloc(charPtr)
 }
 
+/**
+ * Throw a JS error when a native call returns an error pointer.
+ * @param {object} library Native library handle.
+ * @param {Buffer} err Error pointer.
+ * @param {Function|null} [func=null] Cleanup callback when an error is raised.
+ */
 function check_error(library, err, func = null) {
     if (ref.isNull(err)) return;
     let msg = read_c_str(library, err, true);

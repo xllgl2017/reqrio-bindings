@@ -30,6 +30,7 @@ import (
 	"unsafe"
 )
 
+// HttpFile describes a multipart upload file.
 type HttpFile struct {
 	Path      string
 	FieldName string

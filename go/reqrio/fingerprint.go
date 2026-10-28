@@ -44,10 +44,15 @@ import (
 	"unsafe"
 )
 
+// Fingerprint represents a TLS fingerprint configuration.
 type Fingerprint struct {
 	rawPtr unsafe.Pointer
 }
 
+// NewFingerprint creates a custom fingerprint.
+// rv: record version.
+// mv: message version.
+// token: auth token.
 func NewFingerprint(rv Version, mv Version, token string) Fingerprint {
 	var fingerprint Fingerprint
 	cToken := C.CString(token)
@@ -56,16 +61,23 @@ func NewFingerprint(rv Version, mv Version, token string) Fingerprint {
 	return fingerprint
 }
 
+// AddCipherSuites appends TLS cipher suites.
+// suites: cipher suite list.
 func (fingerprint *Fingerprint) AddCipherSuites(suites []CipherSuite) {
 	for _, suite := range suites {
 		C.Fingerprint_add_cipher_suite(fingerprint.rawPtr, C.uint16_t(suite))
 	}
 }
 
+// AddExtensionDefault adds a basic extension.
+// typ: extension type.
 func (fingerprint *Fingerprint) AddExtensionDefault(typ ExtensionType) {
 	C.Fingerprint_add_ext(fingerprint.rawPtr, C.uint16_t(typ))
 }
 
+// AddExtAlps adds ALPN values to an extension.
+// typ: extension type.
+// alps: ALPN values.
 func (fingerprint *Fingerprint) AddExtAlps(typ ExtensionType, alps []ALPN) {
 	for _, alp := range alps {
 		cAlpn := C.CString(string(alp))
@@ -74,84 +86,130 @@ func (fingerprint *Fingerprint) AddExtAlps(typ ExtensionType, alps []ALPN) {
 	}
 }
 
+// AddExtVersions adds supported TLS versions.
+// typ: extension type.
+// versions: TLS versions.
 func (fingerprint *Fingerprint) AddExtVersions(typ ExtensionType, versions []Version) {
 	for _, version := range versions {
 		C.Fingerprint_add_ext_version(fingerprint.rawPtr, C.uint16_t(typ), C.uint16_t(version))
 	}
 }
 
+// AddExtGroups adds supported groups.
+// typ: extension type.
+// groups: support groups.
 func (fingerprint *Fingerprint) AddExtGroups(typ ExtensionType, groups []SupportGroup) {
 	for _, group := range groups {
 		C.Fingerprint_add_ext_curve(fingerprint.rawPtr, C.uint16_t(typ), C.uint16_t(group))
 	}
 }
 
+// AddExtCompresses adds compression methods.
+// typ: extension type.
+// methods: compression methods.
 func (fingerprint *Fingerprint) AddExtCompresses(typ ExtensionType, methods []CompressionMethod) {
 	for _, method := range methods {
 		C.Fingerprint_add_ext_compress(fingerprint.rawPtr, C.uint16_t(typ), C.uint16_t(method))
 	}
 }
 
+// AddExtPskMode adds the PSK key exchange mode.
+// typ: extension type.
+// mode: PSK mode.
 func (fingerprint *Fingerprint) AddExtPskMode(typ ExtensionType, mode PskMode) {
 	C.Fingerprint_add_ext_psk_mode(fingerprint.rawPtr, C.uint16_t(typ), C.uint8_t(mode))
 }
 
+// AddExtPadding adds padding to an extension.
+// typ: extension type.
+// padding: padding length.
 func (fingerprint *Fingerprint) AddExtPadding(typ ExtensionType, padding int) {
 	C.Fingerprint_add_ext_padding(fingerprint.rawPtr, C.uint16_t(typ), C.size_t(padding))
 }
 
+// AddExtBytes appends raw extension bytes.
+// typ: extension type.
+// bytes: raw extension payload.
 func (fingerprint *Fingerprint) AddExtBytes(typ ExtensionType, bytes []byte) {
 	dataPtr := (*C.uint8_t)(unsafe.Pointer(&bytes[0]))
 	C.Fingerprint_add_ext_bytes(fingerprint.rawPtr, C.uint16_t(typ), dataPtr, C.size_t(len(bytes)))
 }
 
+// AddExtAlgorithm adds signature algorithms.
+// typ: extension type.
+// algorithms: algorithm list.
 func (fingerprint *Fingerprint) AddExtAlgorithm(typ ExtensionType, algorithms []Algorithm) {
 	for _, algo := range algorithms {
 		C.Fingerprint_add_ext_algorithm(fingerprint.rawPtr, C.uint16_t(typ), C.uint16_t(algo))
 	}
 }
 
+// AddExtEcPoint adds EC point formats.
+// typ: extension type.
+// points: EC point list.
 func (fingerprint *Fingerprint) AddExtEcPoint(typ ExtensionType, points []EcPointFormat) {
 	for _, point := range points {
 		C.Fingerprint_add_ext_ec_point(fingerprint.rawPtr, C.uint16_t(typ), C.uint8_t(point))
 	}
 }
 
+// CleanH2 clears all HTTP/2 frames.
 func (fingerprint *Fingerprint) CleanH2() {
 	C.Fingerprint_clear_h2_frame(fingerprint.rawPtr)
 }
 
+// CleanH3 clears all HTTP/3 frames.
 func (fingerprint *Fingerprint) CleanH3() {
 	C.Fingerprint_clean_h3_frame(fingerprint.rawPtr)
 }
 
+// AddH2Setting adds an HTTP/2 setting.
+// setting: setting type.
+// value: setting value.
 func (fingerprint *Fingerprint) AddH2Setting(setting H2SettingType, value uint32) {
 	C.Fingerprint_add_h2_setting(fingerprint.rawPtr, C.uint16_t(setting), C.uint32_t(value))
 }
 
+// AddH2Frame adds an HTTP/2 frame.
+// typ: frame type.
+// payload: frame payload bytes.
 func (fingerprint *Fingerprint) AddH2Frame(typ H2FrameType, payload []byte) {
 	dataPtr := (*C.uint8_t)(unsafe.Pointer(&payload[0]))
 	C.Fingerprint_add_h2_frame(fingerprint.rawPtr, C.uint8_t(typ), dataPtr, C.size_t(len(payload)))
 }
 
+// SetH2WindowSize sets the HTTP/2 window size.
+// size: window size.
 func (fingerprint *Fingerprint) SetH2WindowSize(size uint32) {
 	C.Fingerprint_set_h2_window_size(fingerprint.rawPtr, C.uint32_t(size))
 }
 
+// SetH2Priority sets the HTTP/2 priority.
+// priority: whether to enable priority.
+// weight: priority weight.
 func (fingerprint *Fingerprint) SetH2Priority(priority bool, weight uint8) {
 	C.Fingerprint_set_h2_priority(fingerprint.rawPtr, C.bool(priority), C.uint8_t(weight))
 }
 
+// AddH3Setting adds an HTTP/3 setting.
+// setting: setting type.
+// value: setting value.
 func (fingerprint *Fingerprint) AddH3Setting(setting H3SettingType, value uint64) {
 	C.Fingerprint_add_h3_setting(fingerprint.rawPtr, C.uint64_t(setting), C.uint64_t(value))
 }
 
+// AddH3Frame adds an HTTP/3 frame.
+// typ: frame type.
+// payload: frame payload bytes.
 func (fingerprint *Fingerprint) AddH3Frame(typ H3FrameType, payload []byte) {
 	dataPtr := (*C.uint8_t)(unsafe.Pointer(&payload[0]))
 	C.Fingerprint_add_h3_frame(fingerprint.rawPtr, C.uint64_t(typ), dataPtr, C.size_t(len(payload)))
 
 }
 
+// FromJa3 builds a fingerprint from a JA3 string.
+// ja3: JA3 value.
+// token: auth token.
 func FromJa3(ja3 string, token string) (Fingerprint, error) {
 	var fingerprint Fingerprint
 	cJa3 := C.CString(ja3)
@@ -167,6 +225,9 @@ func FromJa3(ja3 string, token string) (Fingerprint, error) {
 	return fingerprint, nil
 }
 
+// FromJa4 builds a fingerprint from a JA4 string.
+// ja4: JA4 value.
+// token: auth token.
 func FromJa4(ja4 string, token string) (Fingerprint, error) {
 	var fingerprint Fingerprint
 	cJa4 := C.CString(ja4)
@@ -182,6 +243,10 @@ func FromJa4(ja4 string, token string) (Fingerprint, error) {
 	return fingerprint, nil
 }
 
+// FromBuiltin loads a built-in fingerprint.
+// name: fingerprint name.
+// secFull: whether to include full sec headers.
+// token: auth token.
 func FromBuiltin(name string, secFull bool, token string) (Fingerprint, error) {
 	var fingerprint Fingerprint
 	cName := C.CString(name)
@@ -197,6 +262,10 @@ func FromBuiltin(name string, secFull bool, token string) (Fingerprint, error) {
 	return fingerprint, nil
 }
 
+// FromIdx loads a fingerprint by index.
+// idx: fingerprint index.
+// secFull: whether to include full sec headers.
+// auth: auth token.
 func FromIdx(idx int, secFull bool, auth string) (Fingerprint, error) {
 	var fingerprint Fingerprint
 	cAuth := C.CString(auth)
@@ -210,6 +279,9 @@ func FromIdx(idx int, secFull bool, auth string) (Fingerprint, error) {
 	return fingerprint, nil
 }
 
+// FromClientHello builds a fingerprint from ClientHello bytes.
+// clientHello: ClientHello payload.
+// token: auth token.
 func FromClientHello(clientHello []byte, token string) (Fingerprint, error) {
 	var fingerprint Fingerprint
 	dataPtr := (*C.uint8_t)(unsafe.Pointer(&clientHello[0]))
@@ -224,6 +296,8 @@ func FromClientHello(clientHello []byte, token string) (Fingerprint, error) {
 	return fingerprint, nil
 }
 
+// RandomFingerprint creates a random fingerprint.
+// token: auth token.
 func RandomFingerprint(token string) (Fingerprint, error) {
 	var fingerprint Fingerprint
 	cToken := C.CString(token)

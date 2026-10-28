@@ -158,7 +158,7 @@ def custom_finger():
 
 
 def builtin_finger():
-    session = Session(fingerprint=Fingerprint.from_builtin("edge-148", TOKEN), key_log="../../../2.log")
+    session = Session(fingerprint=Fingerprint.from_builtin("win-x64-edge-148", TOKEN))
     resp = session.get("https://www.baidu.com")
     print(resp.status, len(resp.text()))
     import os
@@ -166,7 +166,7 @@ def builtin_finger():
 
 
 def finger_idx():
-    session = Session(fingerprint=Fingerprint.from_idx(0, AUTH), key_log="../../../2.log")
+    session = Session(fingerprint=Fingerprint.from_idx(0, AUTH))
     resp = session.get("https://www.baidu.com")
     print(resp.text())
     print(resp.status, len(resp.text()))

@@ -15,7 +15,13 @@ from reqrio._finger import Fingerprint
 
 # pyinstaller.exe -F --collect-binaries reqrio .\1.py
 
+
 def _pyinstaller_hooks_dir():
+    """Return PyInstaller hook directory for bundled assets.
+
+    Returns:
+        list[str]: hook directory path list.
+    """
     from pathlib import Path
     return [str(Path(__file__).with_name("hooks").resolve())]
 
@@ -80,11 +86,31 @@ def send(
 
 def get(url: str, headers: dict = None, data: dict = None, json: dict = None, params: dict = None,
         **kwargs) -> Response:
+    """Send a GET request.
+
+    Args:
+        url: request URL.
+        headers: request headers.
+        data: form data.
+        json: JSON payload.
+        params: URL query params.
+        **kwargs: extra session options.
+    """
     return send(Method.GET, url, params, headers, data=data, json=json, **kwargs)
 
 
 def post(url: str, headers: dict = None, data: dict = None, json: dict = None, params: dict = None,
          **kwargs) -> Response:
+    """Send a POST request.
+
+    Args:
+        url: request URL.
+        headers: request headers.
+        data: form data.
+        json: JSON payload.
+        params: URL query params.
+        **kwargs: extra session options.
+    """
     return send(Method.POST, url, params, headers, data=data, json=json, **kwargs)
 
 

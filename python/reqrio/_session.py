@@ -72,6 +72,8 @@ DLL.ScReq_recv.restype = POINTER(reqrio.response.RespInner)
 
 
 class Session:
+    """Reusable HTTP client session for sending and receiving requests."""
+
     def __init__(
             self,
             headers: dict = None,
@@ -83,13 +85,16 @@ class Session:
             ignore_hdr_sort: bool = False,
 
     ):
-        """
-        :param
-        :param alpn: HTTP版本
-        :param verify: 是否进行证书链验证
-        :param proxy: 格式:http://127.0.0.1:10000、socks5://127.0.0.1:10001、socks5://username@password127.0.0.1:10001
-        :param key_log: 导出TLS握手密钥，可用于Wireshark抓包分析
-        :param ignore_hdr_sort: 忽略内置请求头顺序
+        """Create a session.
+
+        Args:
+            headers: default request headers.
+            alpn: negotiated ALPN value.
+            verify: whether to validate certificates.
+            proxy: proxy URL such as http://127.0.0.1:10000.
+            key_log: TLS key log path.
+            fingerprint: TLS fingerprint configuration.
+            ignore_hdr_sort: whether to skip built-in header ordering.
         """
 
         self.dll = DLL
@@ -116,14 +121,15 @@ class Session:
 
     def set_timeout(self, connect: int = 3000, read: int = 3000, write: int = 3000, handle: int = 30000,
                     connect_times: int = 3, handle_times: int = 3):
-        """
-        :param connect: 连接超时,默认3s
-        :param read: tcp读取超时,默认3s
-        :param write: tcp写出超时,默认3s
-        :param handle: 发包处理超时,默认30s
-        :param connect_times: 尝试连接次数,默认3次
-        :param handle_times:尝试处理次数,默认3次
-        :return:
+        """Set connection and request timeout values.
+
+        Args:
+            connect: connect timeout in milliseconds.
+            read: read timeout in milliseconds.
+            write: write timeout in milliseconds.
+            handle: request handle timeout in milliseconds.
+            connect_times: retry count for connection attempts.
+            handle_times: retry count for request handling.
         """
         timeout = {
             'connect': connect,
@@ -139,30 +145,63 @@ class Session:
         return
 
     def set_headers(self, headers: dict):
+        """Replace all request headers.
+
+        Args:
+            headers: header name/value mapping.
+        """
         import json
         err, msg = util.check_char_err(self.dll.ScReq_set_header_json(self.hid, json.dumps(headers).encode('utf-8')))
         if err: raise Exception(msg)
         return
 
     def add_header(self, name: str, value: str, _reversed=False):
+        """Add or overwrite a request header.
+
+        Args:
+            name: header name.
+            value: header value.
+            _reversed: whether to reverse the addition order.
+        """
         err = self.dll.ScReq_add_header(self.hid, name.encode('utf-8'), value.encode('utf-8'), _reversed)
         err, msg = util.check_char_err(err)
         if err: raise Exception(msg)
 
     def remove_header(self, name: str):
+        """Remove a request header by name.
+
+        Args:
+            name: header name.
+        """
         err, msg = util.check_char_err(self.dll.ScReq_remove_header(self.hid, name.encode('utf-8')))
         if err: raise Exception(msg);
 
     def set_fingerprint(self, fingerprint: Fingerprint):
+        """Set the TLS fingerprint used by this session.
+
+        Args:
+            fingerprint: fingerprint object.
+        """
         err = self.dll.ScReq_set_fingerprint(self.hid, fingerprint.take())
         err, msg = util.check_char_err(err)
         if err: raise Exception(msg)
 
     def set_cookie(self, cookie: str):
+        """Set the Cookie header.
+
+        Args:
+            cookie: cookie string.
+        """
         err, msg = util.check_char_err(self.dll.ScReq_set_cookie(self.hid, cookie.encode('utf-8')))
         if err: raise Exception(msg)
 
     def add_cookie(self, name: str, value: str):
+        """Add a single cookie.
+
+        Args:
+            name: cookie name.
+            value: cookie value.
+        """
         err, msg = util.check_char_err(self.dll.ScReq_add_cookie(self.hid, name.encode('utf-8'), value.encode('utf-8')))
         if err: raise Exception(msg)
 
@@ -173,14 +212,13 @@ class Session:
             body: c_void_p,
             auto_redirect: bool = True,
     ) -> int:
-        """
-        :param method: 请求方法
-        :param url: 请求地址
-        :param body: 请求体
-        :param params: 请求参数
-        :param auto_redirect: 是否对重定向链接进行自动跳转，默认是
-        :param sni: 域名，使用ip url时设置
-        :return:
+        """Send a request body and return the request id.
+
+        Args:
+            method: HTTP method.
+            url: URL object.
+            body: native request body pointer.
+            auto_redirect: whether to follow redirects.
         """
         try:
             err, msg = util.check_char_err(self.dll.ScReq_set_redirect(self.hid, auto_redirect))
@@ -207,6 +245,20 @@ class Session:
             files: list[dict[str, str]] = None,
             content_type: str = None,
             **kwargs) -> int:
+        """Build a request and send it with the given method.
+
+        Args:
+            method: HTTP method.
+            url: request URL or URL object.
+            params: query parameters.
+            data: form payload.
+            json: JSON payload.
+            bytes: raw request bytes.
+            text: plain-text body.
+            sni: custom SNI host.
+            files: multipart upload files.
+            content_type: request content type.
+        """
         if files is not None:
             http_file = self.dll.HttpFile_new()
             for file in files:
@@ -271,6 +323,12 @@ class Session:
         return self.send_inner(method, url, body, **kwargs)
 
     def recv(self, sid: int, stream: bool):
+        """Receive a response for a request id.
+
+        Args:
+            sid: request id.
+            stream: whether to read the response as a stream.
+        """
         err = c_char_p()
         resp = self.dll.ScReq_recv(self.hid, sid, stream, byref(err))
         err, msg = util.check_char_err(err)
@@ -279,48 +337,65 @@ class Session:
 
     def send(self, method: Method, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
              bytes: bytes = None, text: str = None, **kwargs):
+        """Send a request and return the request id."""
         return self.pre_send(method, url, params, data, json, bytes, text, **kwargs)
 
     def get(self, url: Union[str, Url], params: dict = None, stream: bool = False, **kwargs) -> Response:
+        """Send a GET request and return the response."""
         return self.recv(self.send(Method.GET, url, params, **kwargs), stream)
 
     def post(self, url: Union[str, Url], data: dict = None, json: dict = None, bytes: bytes = None,
              text: str = None, stream: bool = False, **kwargs) -> Response:
+        """Send a POST request and return the response."""
         return self.recv(self.send(Method.POST, url, data=data, json=json, bytes=bytes, text=text, **kwargs), stream)
 
     def put(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
             bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
+        """Send a PUT request and return the response."""
         return self.recv(self.send(Method.PUT, url, params, data, json, bytes, text, **kwargs), stream)
 
     def head(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
              bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
+        """Send a HEAD request and return the response."""
         return self.recv(self.send(Method.HEAD, url, params, data, json, bytes, text, **kwargs), stream)
 
     def delete(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
                bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
+        """Send a DELETE request and return the response."""
         return self.recv(self.send(Method.DELETE, url, params, data, json, bytes, text, **kwargs), stream)
 
     def options(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
                 bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
+        """Send an OPTIONS request and return the response."""
         return self.recv(self.send(Method.OPTIONS, url, params, data, json, bytes, text, **kwargs), stream)
 
     def trace(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
               bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
+        """Send a TRACE request and return the response."""
         return self.recv(self.send(Method.TRACE, url, params, data, json, bytes, text, **kwargs), stream)
 
     def patch(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
               bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
+        """Send a PATCH request and return the response."""
         return self.recv(self.send(Method.PATCH, url, params, data, json, bytes, text, **kwargs), stream)
 
     def query(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
               bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
+        """Send a custom QUERY request and return the response."""
         return self.recv(self.send(Method.QUERY, url, params, data, json, bytes, text, **kwargs), stream)
 
     def reconnect(self):
+        """Reconnect the session."""
         err, msg = util.check_char_err(self.dll.ScReq_reconnect(self.hid))
         if err: raise Exception(msg)
 
     def connect(self, url: str, sni: str = None):
+        """Open a connection without sending an HTTP request.
+
+        Args:
+            url: target URL.
+            sni: custom SNI host.
+        """
         sni_bs = sni
         if sni is not None:
             sni_bs = sni.encode('utf-8')
@@ -328,11 +403,12 @@ class Session:
         if err: raise Exception(msg)
 
     def close_stream(self):
+        """Close the active TLS stream."""
         err, msg = util.check_char_err(self.dll.ScReq_close_stream(self.hid))
         if err: raise Exception(msg)
 
     def close(self):
-        """记得关闭资源，否则容易造成内存溢出"""
+        """Release native session resources."""
         self.dll.ScReq_drop(self.hid)
         self.hid = None
 

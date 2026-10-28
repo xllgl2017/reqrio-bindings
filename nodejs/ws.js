@@ -7,15 +7,18 @@ const registry = new FinalizationRegistry(ws => {
 })
 
 class Websocket {
+    /**
+     * Create a WebSocket client.
+     */
     constructor() {
         this.build = library.ws_build();
         this.ws = null;
     }
 
     /**
-     * Open WebSocket connection with a Url object pointer
-     * @param {string} url - url
-     * @param {Object} hdr - header
+     * Open a WebSocket connection with a URL pointer.
+     * @param {string} url WebSocket URL.
+     * @param {Object} [hdr={}] Custom headers.
      */
     open(url, hdr) {
         this.ws = library.ws_open(url, JSON.stringify(hdr ? hdr : {}));
@@ -24,9 +27,9 @@ class Websocket {
     }
 
     /**
-     * Open WebSocket connection directly with URL string
-     * @param {string} url - WebSocket URL
-     * @param {string} context - optional context string
+     * Open a WebSocket connection directly from a URL string.
+     * @param {string} url WebSocket URL.
+     * @param {string} [context=""] Optional connection context.
      */
     open_raw(url, context = "") {
         this.ws = library.ws_open_raw(url, context)
@@ -34,6 +37,10 @@ class Websocket {
         registry.register(this, this.ws)
     }
 
+    /**
+     * Read one WebSocket frame.
+     * @returns {object} Parsed frame payload.
+     */
     read() {
         const frameStr = library.ws_read(this.ws)
         if (frameStr === null || frameStr === undefined) {
@@ -42,11 +49,20 @@ class Websocket {
         return JSON.parse(frameStr)
     }
 
+    /**
+     * Send a WebSocket frame.
+     * @param {number} opcode Frame opcode.
+     * @param {boolean} mask Whether to mask payload.
+     * @param {string} msg Message payload.
+     */
     write(opcode, mask, msg) {
         let ret = library.ws_write(this.ws, opcode, mask, msg)
         if (ret === -1) throw new Error("ws write error")
     }
 
+    /**
+     * Close the WebSocket connection.
+     */
     close() {
         registry.unregister(this);
         if (this.ws && !this.ws.isNull()) {

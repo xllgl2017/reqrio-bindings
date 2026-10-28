@@ -56,12 +56,24 @@ DLL.Fingerprint_drop.argtypes = [c_void_p]
 
 
 class Fingerprint:
+    """TLS fingerprint builder and mutator."""
 
     def __init__(self, ptr):
+        """Create a Fingerprint from an existing native pointer.
+
+        Args:
+            ptr: native fingerprint pointer.
+        """
         self._raw = ptr
 
     @staticmethod
     def from_ja3(ja3: str, token: str):
+        """Build a fingerprint from a JA3 string.
+
+        Args:
+            ja3: JA3 value.
+            token: auth token.
+        """
         err = c_char_p()
         ptr = DLL.Fingerprint_from_ja3(ja3.encode('utf-8'), token.encode('utf-8'), byref(err))
         err, msg = util.check_char_err(err)
@@ -78,6 +90,12 @@ class Fingerprint:
 
     @staticmethod
     def from_client_hello(client_hello: bytes, token: str):
+        """Build a fingerprint from ClientHello bytes.
+
+        Args:
+            client_hello: raw ClientHello payload.
+            token: auth token.
+        """
         err = c_char_p()
         dl, data = util.bytes_to_u8(client_hello)
         ptr = DLL.Fingerprint_from_client_hello(data, dl, token.encode('utf-8'), byref(err))
@@ -95,6 +113,12 @@ class Fingerprint:
 
     @staticmethod
     def from_custom(custom: dict, token: str):
+        """Build a custom fingerprint from a dict config.
+
+        Args:
+            custom: fingerprint config.
+            token: auth token.
+        """
         import json
         err = c_char_p()
         custom = json.dumps(custom)
@@ -116,6 +140,13 @@ class Fingerprint:
 
     @staticmethod
     def from_idx(idx: int, auth: str, sec_full=False):
+        """Load a fingerprint by index.
+
+        Args:
+            idx: fingerprint index.
+            auth: auth token.
+            sec_full: whether to include full sec headers.
+        """
         err = c_char_p()
         ptr = DLL.Fingerprint_from_idx(idx, auth.encode('utf-8'), sec_full, byref(err))
         err, msg = util.check_char_err(err)
@@ -124,10 +155,22 @@ class Fingerprint:
 
     @staticmethod
     def new_custom(rv: Version, mv: Version, token: str):
+        """Create a new custom fingerprint.
+
+        Args:
+            rv: record version.
+            mv: message version.
+            token: auth token.
+        """
         ptr = DLL.Fingerprint_new(rv.value, mv.value, token.encode('utf-8'))
         return Fingerprint(ptr)
 
     def add_cipher_suite(self, suite: Union[CipherSuite, int]):
+        """Add a cipher suite.
+
+        Args:
+            suite: cipher suite enum or integer value.
+        """
         if type(suite) == CipherSuite:
             DLL.Fingerprint_add_cipher_suite(self._raw, c_uint16(suite.value))
         else:
@@ -147,10 +190,20 @@ class Fingerprint:
                 DLL.Fingerprint_add_ext_bytes(self._raw, typ, u8, bl)
 
     def add_application_layer_protocol_negotiation(self, alpn: str):
+        """Add an ALPN value as an extension.
+
+        Args:
+            alpn: ALPN string.
+        """
         typ = ExtensionType.ApplicationLayerProtocolNegotiation
         DLL.Fingerprint_add_ext_alpn(self._raw, typ, alpn.encode('utf-8'))
 
     def add_application_settings(self, alpn: str):
+        """Add an application setting value.
+
+        Args:
+            alpn: setting string.
+        """
         typ = ExtensionType.ApplicationSetting
         DLL.Fingerprint_add_ext_alpn(self._raw, typ, alpn.encode('utf-8'))
 
@@ -159,6 +212,11 @@ class Fingerprint:
         DLL.Fingerprint_add_ext_alpn(self._raw, typ, alpn.encode('utf-8'))
 
     def add_supported_version(self, version: Union[Version, int]):
+        """Add a supported TLS version.
+
+        Args:
+            version: version enum or integer.
+        """
         if type(version) == Version:
             DLL.Fingerprint_add_ext_version(self._raw, ExtensionType.SupportedVersions.value, version.value)
         else:

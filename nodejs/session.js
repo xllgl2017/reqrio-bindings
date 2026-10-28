@@ -43,52 +43,63 @@ class Session {
         this.set_headers(headers)
     }
 
+    /**
+     * Set the TLS key log file path.
+     * @param {string} key_log Path to the TLS key log file.
+     * @param {Function|null} [func=null] Error callback for the underlying binding call.
+     */
     set_key_log(key_log, func = null) {
         check_error(this.library, this.library.ScReq_set_key_log(this.req, key_log), func)
     }
 
-    /**Set a custom TLS fingerprint.
-     * @param {Fingerprint} fingerprint
-     **/
+    /**
+     * Set a custom TLS fingerprint.
+     * @param {Fingerprint} fingerprint TLS fingerprint instance.
+     */
     set_fingerprint(fingerprint) {
         check_error(this.library, this.library.ScReq_set_fingerprint(this.req, fingerprint.ptr));
         fingerprint.ptr = null;
     }
 
-    /**Set all request headers in a single call.
-     * @param {object} header
-     **/
+    /**
+     * Replace all request headers in one call.
+     * @param {object} header Header key-value map.
+     */
     set_headers(header) {
         let header_str = JSON.stringify(header);
         check_error(this.library, this.library.ScReq_set_header_json(this.req, header_str));
     }
 
-    /**Add a request header.
-     * @param {string} name
-     * @param {string} value
-     * @param {boolean} reversed when true, the value is left empty and the header is not sent
-     **/
+    /**
+     * Add a request header.
+     * @param {string} name Header name.
+     * @param {string} value Header value.
+     * @param {boolean} [reversed=false] If true, the header is marked disabled and not sent.
+     */
     add_header(name, value, reversed = false) {
         check_error(this.library, this.library.ScReq_add_header(this.req, name, value, reversed));
     }
 
-    /**Remove a request header.
-     * @param {string} name
-     **/
+    /**
+     * Remove a request header.
+     * @param {string} name Header name to remove.
+     */
     remove_header(name) {
         check_error(this.library, this.library.ScReq_remove_header(this.req, name))
     }
 
-    /**Set an HTTP or SOCKS proxy.
-     * @param {string} proxy example: http://127.0.0.1:8080 or socks5://127.0.0.1:8080
-     **/
+    /**
+     * Set an HTTP or SOCKS proxy.
+     * @param {string} proxy Proxy URL, such as http://127.0.0.1:8080 or socks5://127.0.0.1:8080.
+     */
     set_proxy(proxy) {
         check_error(this.library, this.library.ScReq_set_proxy(this.req, proxy))
     }
 
-    /**Set timeout values for connection, read, write, and overall handling.
-     * @param {object} timeout
-     **/
+    /**
+     * Configure timeout values.
+     * @param {object} timeout Connection, read, write, and total timeout settings.
+     */
     set_timeout(timeout) {
         let timeout_str = JSON.stringify(timeout);
         check_error(this.library, this.library.ScReq_set_timeout(this.req, timeout_str))
@@ -96,48 +107,58 @@ class Session {
 
     /**
      * Set the TLS handshake version.
-     * @param {Version} ver
-     * */
+     * @param {Version} ver TLS version enum.
+     */
     set_version(ver) {
         check_error(this.library, this.library.ScReq_set_version(this.req, ver))
     }
 
-    /**Set a Cookie header.
-     * @param {string} cookie example: name1=a; name2=fdg
-     **/
+    /**
+     * Set a Cookie header.
+     * @param {string} cookie Cookie string, for example: name1=a; name2=fdg.
+     */
     set_cookie(cookie) {
         check_error(this.library, this.library.ScReq_set_cookie(this.req, cookie))
     }
 
-    /**Add a single cookie.
-     * @param {string} name
-     * @param {string} value
-     **/
+    /**
+     * Add a single cookie.
+     * @param {string} name Cookie name.
+     * @param {string} value Cookie value.
+     */
     add_cookie(name, value) {
         check_error(this.library, this.library.ScReq_add_cookie(this.req, name, value))
     }
 
+    /**
+     * Reconnect the session.
+     */
     reconnect() {
         check_error(this.library, this.library.ScReq_reconnect(this.req));
     }
 
-    /**Connect to a URL without sending an HTTP request.
-     * @param {string} url
-     * @param {string|null} sni
-     **/
+    /**
+     * Connect to a URL without sending an HTTP request.
+     * @param {string} url Target URL.
+     * @param {string|null} [sni=null] Custom SNI value.
+     */
     connect(url, sni = null) {
         check_error(this.library, this.library.ScReq_connect(this.req, url, sni))
     }
 
-
+    /**
+     * Close the current stream.
+     */
     close_stream() {
         check_error(this.library, this.library.ScReq_close_stream(this.req))
     }
 
-    /**Send a request.
-     * @param {Method} method HTTP method
-     * @param {string|Url} url request URL
-     * @param {object} options request body and transport options
+    /**
+     * Send a request.
+     * @param {Method} method HTTP method.
+     * @param {string|Url} url Request URL.
+     * @param {object} [options={}] Request body and transport options.
+     * @returns {number} Request session ID.
      */
     send(method, url, options = {}) {
         const {data, json, files, bytes, ct, params, sni} = options;
@@ -172,50 +193,112 @@ class Session {
         return sid;
     }
 
+    /**
+     * Receive a response for a request.
+     * @param {number} sid Request ID.
+     * @param {boolean} [stream=false] Whether to stream the response body.
+     * @returns {Response} Response object.
+     */
     recv(sid, stream) {
         stream = stream === null || stream === undefined ? false : stream
-        console.log(stream)
         const errPtr = ref_char_ptr();
         let respPtr = this.library.ScReq_recv(this.req, sid, stream, errPtr);
         return new Response(this.library, respPtr, this.req);
     }
 
+    /**
+     * Send a GET request.
+     * @param {string|Url} url Request URL.
+     * @param {object} [options={}] Request options.
+     * @returns {Response} Response object.
+     */
     get(url, options = {}) {
         return this.recv(this.send(Method.GET, url, options), options.stream)
     }
 
+    /**
+     * Send a POST request.
+     * @param {string|Url} url Request URL.
+     * @param {object} [options={}] Request options.
+     * @returns {Response} Response object.
+     */
     post(url, options = {}) {
         return this.recv(this.send(Method.POST, url, options), options.stream)
     }
 
+    /**
+     * Send a PUT request.
+     * @param {string|Url} url Request URL.
+     * @param {object} [options={}] Request options.
+     * @returns {Response} Response object.
+     */
     put(url, options = {}) {
         return this.recv(this.send(Method.PUT, url, options), options.stream)
     }
 
+    /**
+     * Send a HEAD request.
+     * @param {string|Url} url Request URL.
+     * @param {object} [options={}] Request options.
+     * @returns {Response} Response object.
+     */
     head(url, options = {}) {
         return this.recv(this.send(Method.HEAD, url, options), options.stream)
     }
 
+    /**
+     * Send a DELETE request.
+     * @param {string|Url} url Request URL.
+     * @param {object} [options={}] Request options.
+     * @returns {Response} Response object.
+     */
     delete(url, options = {}) {
         return this.recv(this.send(Method.DELETE, url, options), options.stream)
     }
 
+    /**
+     * Send an OPTIONS request.
+     * @param {string|Url} url Request URL.
+     * @param {object} [options={}] Request options.
+     * @returns {Response} Response object.
+     */
     options(url, options = {}) {
         return this.recv(this.send(Method.OPTIONS, url, options), options.stream)
     }
 
+    /**
+     * Send a TRACE request.
+     * @param {string|Url} url Request URL.
+     * @param {object} [options={}] Request options.
+     * @returns {Response} Response object.
+     */
     trace(url, options = {}) {
         return this.recv(this.send(Method.TRACE, url, options), options.stream)
     }
 
+    /**
+     * Send a PATCH request.
+     * @param {string|Url} url Request URL.
+     * @param {object} [options={}] Request options.
+     * @returns {Response} Response object.
+     */
     patch(url, options = {}) {
         return this.recv(this.send(Method.PATCH, url, options), options.stream)
     }
 
+    /**
+     * Send a custom query request.
+     * @param {string|Url} url Request URL.
+     * @param {object} [options={}] Request options.
+     * @returns {Response} Response object.
+     */
     query(url, options = {}) {
         return this.recv(this.send(Method.QUERY, url, options), options.stream)
     }
 
+    /**
+     * Release the underlying native request handle.
+     */
     close() {
         // registry.unregister(this);
         if (this.req == null) return

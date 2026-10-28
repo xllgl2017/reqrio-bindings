@@ -2,6 +2,7 @@ package reqrio
 
 import "errors"
 
+// Method represents an HTTP method.
 type Method int
 
 const (
@@ -16,6 +17,8 @@ const (
 	QUERY
 )
 
+// ParseStringMethod converts a string to a Method.
+// method: HTTP method text.
 func ParseStringMethod(method string) (Method, error) {
 	switch method {
 	case "GET":
