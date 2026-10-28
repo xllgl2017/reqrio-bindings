@@ -321,7 +321,7 @@ func (session *Session) SendRequest(param ConnParam) (Response, error) {
 	return session.recv(sid, param.Stream)
 }
 
-func (session *Session) send(param ConnParam) (C.uint64_t, error) {
+func (session *Session) Send(param ConnParam) (C.uint64_t, error) {
 	gUrl, err := buildUrl(param.Url, param.Params, param.Sni)
 	if err != nil {
 		return 0, err
@@ -342,7 +342,7 @@ func (session *Session) send(param ConnParam) (C.uint64_t, error) {
 	return sid, nil
 }
 
-func (session *Session) recv(sid C.uint64_t, stream bool) (Response, error) {
+func (session *Session) Recv(sid C.uint64_t, stream bool) (Response, error) {
 	var errPtr *C.char
 	ptr := C.ScReq_recv(session.req, sid, C.bool(stream), (**C.char)(unsafe.Pointer(&errPtr)))
 	if errPtr != nil {
