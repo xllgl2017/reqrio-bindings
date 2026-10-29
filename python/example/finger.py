@@ -178,3 +178,15 @@ def h3_req():
     session = Session(headers, alpn=ALPN.HTTP30)
     resp = session.get("https://www.bing.com")
     print(resp.statue_code())
+
+
+def tlcp():
+    print("================>[TLCP]<==================")
+    fingerprint = Fingerprint.new_custom(Version.TLCP, Version.TLCP, TOKEN)
+    fingerprint.add_cipher_suite(CipherSuite.ECC_SM4_CBC_SM3)
+    fingerprint.add_extension(0xdada)
+    fingerprint.add_extension(ExtensionType.ServerName)
+    fingerprint.add_extension(0x8a8a, bytes([0]))
+    session = Session(headers, alpn=ALPN.HTTP20, fingerprint=fingerprint)
+    resp = session.get("https://test.gmssl.cn")
+    print(resp.statue_code())

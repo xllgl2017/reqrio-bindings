@@ -1,7 +1,6 @@
 import os
 import sys
-from ctypes import cdll, c_void_p, c_int, c_char_p, c_bool, c_ubyte, c_size_t, c_uint64
-from _ctypes import POINTER
+from ctypes import cdll, c_void_p, c_int, c_char_p, c_bool, c_ubyte, c_size_t, c_uint64, POINTER
 
 base = os.path.dirname(__file__)
 if sys.platform == 'win32':

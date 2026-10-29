@@ -4,17 +4,11 @@ Run from bindings/python:
     py tests/binding_docs_test.py
 """
 
-import ctypes
-import _ctypes
 import json
 import os
 import pathlib
 import sys
 import traceback
-
-# Python 3.14 no longer exposes _ctypes.POINTER; reqrio.bindings imports it.
-if not hasattr(_ctypes, "POINTER"):
-    _ctypes.POINTER = ctypes.POINTER
 
 from reqrio import Session, ALPN, Method, Fingerprint, Version, CipherSuite, ExtensionType
 
