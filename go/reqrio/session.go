@@ -25,6 +25,7 @@ extern char * ScReq_set_cookie(void *req, const char *cookie);
 extern char * ScReq_add_cookie(void *req, const char *name, const char *value);
 //callback
 extern uint64_t ScReq_send(void *req, int method, void *url, void * body, char **err);
+extern void * ScReq_do_http(void *req, int method, void *url, void * body, char **err);
 extern void * ScReq_recv(void *req, uint64_t sid, bool stream, char **err);
 extern char * ScReq_reconnect(void *req);
 extern char * ScReq_connect(void *req, const char *url, const char *sni);
@@ -314,11 +315,30 @@ func buildBody(param ConnParam) (unsafe.Pointer, error) {
 // SendRequest sends a single request and returns the response.
 // param: request parameters.
 func (session *Session) SendRequest(param ConnParam) (Response, error) {
-	sid, err := session.send(param)
+	if param.Stream {
+		sid, err := session.Send(param)
+		if err != nil {
+			return Response{}, err
+		}
+		return session.Recv(sid, param.Stream)
+	}
+	cUrl, err := buildUrl(param.Url, param.Params, param.Sni)
 	if err != nil {
 		return Response{}, err
 	}
-	return session.recv(sid, param.Stream)
+	defer cUrl.delete()
+	cBody, err := buildBody(param)
+	if err != nil {
+		return Response{}, err
+	}
+	var errPtr *C.char
+	resp := C.ScReq_do_http(session.req, C.int(param.Method), cUrl.take(), cBody, (**C.char)(unsafe.Pointer(&errPtr)))
+	if errPtr != nil {
+		errMsg := C.GoString(errPtr)
+		defer C.char_free(errPtr)
+		return Response{}, errors.New(errMsg)
+	}
+	return newResponse(resp, session.req)
 }
 
 func (session *Session) Send(param ConnParam) (C.uint64_t, error) {

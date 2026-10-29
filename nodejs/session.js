@@ -38,9 +38,13 @@ class Session {
         this.req = this.library.ScReq_new(ignore_hdr_sort);
         if (alpn) check_error(this.library, this.library.ScReq_set_alpn(this.req, alpn));
         check_error(this.library, this.library.ScReq_set_verify(this.req, verify), this.close);
-        check_error(this.library, this.library.ScReq_set_redirect(this.req, auto_redirect), this.close);
+        this.set_auto_redirect(auto_redirect)
         if (key_log !== null) this.set_key_log(key_log, this.close)
         this.set_headers(headers)
+    }
+
+    set_auto_redirect(auto_redirect){
+        check_error(this.library, this.library.ScReq_set_redirect(this.req, auto_redirect), this.close);
     }
 
     /**
@@ -158,9 +162,10 @@ class Session {
      * @param {Method} method HTTP method.
      * @param {string|Url} url Request URL.
      * @param {object} [options={}] Request body and transport options.
+     * @param {function} call_func
      * @returns {number} Request session ID.
      */
-    send(method, url, options = {}) {
+    send(method, url, options = {}, call_func = undefined) {
         const {data, json, files, bytes, ct, params, sni} = options;
         if (typeof url === "string") {
             url = new Url(this.library, url, params, sni)
@@ -188,9 +193,13 @@ class Session {
 
         // Send request
         const errPtr = ref_char_ptr();
-        const sid = this.library.ScReq_send(this.req, method, url.take(), body_ptr, errPtr);
+        let res;
+        if (call_func === undefined)
+            res = this.library.ScReq_send(this.req, method, url.take(), body_ptr, errPtr);
+        else
+            res = this.library.ScReq_do_http(this.req, method, url.take(), body_ptr, errPtr);
         check_error(this.library, errPtr.deref())
-        return sid;
+        return res;
     }
 
     /**
@@ -203,7 +212,16 @@ class Session {
         stream = stream === null || stream === undefined ? false : stream
         const errPtr = ref_char_ptr();
         let respPtr = this.library.ScReq_recv(this.req, sid, stream, errPtr);
-        return new Response(this.library, respPtr, this.req);
+        return new Response(this.library, respPtr, this.req, stream);
+    }
+
+    __request__(method, url, options) {
+        if (options.stream)
+            return this.recv(this.send(method, url, options), options.stream)
+        else {
+            let resp = this.send(method, url, options, this.library.ScReq_do_http)
+            return new Response(this.library, resp, this.req, options.stream)
+        }
     }
 
     /**
@@ -213,7 +231,7 @@ class Session {
      * @returns {Response} Response object.
      */
     get(url, options = {}) {
-        return this.recv(this.send(Method.GET, url, options), options.stream)
+        return this.__request__(Method.GET, url, options);
     }
 
     /**
@@ -223,7 +241,7 @@ class Session {
      * @returns {Response} Response object.
      */
     post(url, options = {}) {
-        return this.recv(this.send(Method.POST, url, options), options.stream)
+        return this.__request__(Method.POST, url, options);
     }
 
     /**
@@ -233,7 +251,7 @@ class Session {
      * @returns {Response} Response object.
      */
     put(url, options = {}) {
-        return this.recv(this.send(Method.PUT, url, options), options.stream)
+        return this.__request__(Method.PUT, url, options);
     }
 
     /**
@@ -243,7 +261,7 @@ class Session {
      * @returns {Response} Response object.
      */
     head(url, options = {}) {
-        return this.recv(this.send(Method.HEAD, url, options), options.stream)
+        return this.__request__(Method.HEAD, url, options);
     }
 
     /**
@@ -253,7 +271,7 @@ class Session {
      * @returns {Response} Response object.
      */
     delete(url, options = {}) {
-        return this.recv(this.send(Method.DELETE, url, options), options.stream)
+        return this.__request__(Method.DELETE, url, options);
     }
 
     /**
@@ -263,7 +281,7 @@ class Session {
      * @returns {Response} Response object.
      */
     options(url, options = {}) {
-        return this.recv(this.send(Method.OPTIONS, url, options), options.stream)
+        return this.__request__(Method.OPTIONS, url, options);
     }
 
     /**
@@ -273,7 +291,7 @@ class Session {
      * @returns {Response} Response object.
      */
     trace(url, options = {}) {
-        return this.recv(this.send(Method.TRACE, url, options), options.stream)
+        return this.__request__(Method.TRACE, url, options);
     }
 
     /**
@@ -283,7 +301,7 @@ class Session {
      * @returns {Response} Response object.
      */
     patch(url, options = {}) {
-        return this.recv(this.send(Method.PATCH, url, options), options.stream)
+        return this.__request__(Method.PATCH, url, options);
     }
 
     /**
@@ -293,7 +311,7 @@ class Session {
      * @returns {Response} Response object.
      */
     query(url, options = {}) {
-        return this.recv(this.send(Method.QUERY, url, options), options.stream)
+        return this.__request__(Method.QUERY, url, options);
     }
 
     /**

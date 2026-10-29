@@ -1,13 +1,14 @@
 from example.finger import *
 from example.req import *
 
+
 # tls test
 ua_tls()
 ja3()
 ja4()
 rand_tls()
 custom_finger()
-# builtin_finger()
+builtin_finger()
 # finger_idx()
 
 # req test
@@ -20,6 +21,4 @@ upload_file()
 
 flow_reader()
 
-h3_req()
-
-
+# h3_req()

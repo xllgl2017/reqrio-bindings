@@ -19,9 +19,10 @@ public class Body implements AutoCloseable {
 
     /**
      * Get the native pointer for the body.
+     *
      * @return Native body pointer.
      */
-    public Pointer pointer() throws Exception {
+    private Pointer pointer() throws Exception {
         if (this.raw == null) throw new Exception("Body had dropped");
         return this.raw;
     }
@@ -35,7 +36,8 @@ public class Body implements AutoCloseable {
 
     /**
      * Create a body from raw bytes.
-     * @param body Raw request bytes.
+     *
+     * @param body        Raw request bytes.
      * @param contentType Content-Type header.
      */
     public Body(byte[] body, String contentType) throws Exception {
@@ -46,6 +48,7 @@ public class Body implements AutoCloseable {
 
     /**
      * Create a JSON body.
+     *
      * @param json JSON payload.
      */
     public Body(@NotNull JsonElement json) throws Exception {
@@ -54,6 +57,7 @@ public class Body implements AutoCloseable {
 
     /**
      * Create a form body.
+     *
      * @param forms Form fields map.
      */
     public Body(@NotNull HashMap<String, String> forms) throws Exception {
@@ -80,6 +84,7 @@ public class Body implements AutoCloseable {
 
     /**
      * Create a plain-text body.
+     *
      * @param text Text payload.
      */
     public Body(@NotNull String text) throws Exception {
@@ -88,6 +93,7 @@ public class Body implements AutoCloseable {
 
     /**
      * Create a multipart body from a file.
+     *
      * @param file File to upload.
      */
     public Body(HttpFile file) throws Exception {
@@ -96,6 +102,7 @@ public class Body implements AutoCloseable {
 
     /**
      * Set the native raw body pointer.
+     *
      * @param raw Native pointer.
      */
     public void setRaw(Pointer raw) {
@@ -104,6 +111,7 @@ public class Body implements AutoCloseable {
 
     /**
      * Create a multipart body from a file and extra form data.
+     *
      * @param file File to upload.
      * @param data Extra form fields.
      */
@@ -112,6 +120,12 @@ public class Body implements AutoCloseable {
         Gson gson = new Gson();
         this.raw = REQRIO.Body_new_files(file.getRaw(), gson.toJson(data), err);
         util.check_err_pointer(err);
+    }
+
+    protected Pointer take() throws Exception {
+        Pointer ptr = this.pointer();
+        this.raw = null;
+        return ptr;
     }
 
     @Override

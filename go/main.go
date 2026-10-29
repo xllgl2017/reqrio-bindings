@@ -340,7 +340,7 @@ func customTls() {
 
 }
 
-func flow_reader() {
+func flowReader() {
 	session := reqrio.NewSession(false)
 	err := session.SetHeaders(headers)
 	if err != nil {
@@ -364,7 +364,7 @@ func flow_reader() {
 
 }
 
-func finger_builtin() {
+func fingerBuiltin() {
 	session := reqrio.NewSession(false)
 	defer session.Close()
 	finger, err := reqrio.FromBuiltin("win-x64-edge-148", false, readToken())
@@ -387,6 +387,10 @@ func finger_builtin() {
 		panic(err2)
 	}
 	println("resp: ", code)
+	err = os.Remove("builtin.dat")
+	if err != nil {
+		panic(err)
+	}
 
 }
 
@@ -412,6 +416,25 @@ func tlcp() {
 	fmt.Println(resp.StatusCode())
 }
 
+func quic_http3() {
+	reqrio.NewFingerprint(reqrio.TLS_1_0, reqrio.TLS_1_2, readToken())
+	session := reqrio.NewSession(false)
+	err := session.SetAlpn(reqrio.HTTP30)
+	if err != nil {
+		panic(err)
+	}
+	resp, err := session.SendRequest(reqrio.ConnParam{
+		Method: reqrio.GET,
+		Url:    "https://cn.bing.com",
+	})
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Delete()
+	fmt.Println(resp.StatusCode())
+
+}
+
 func main() {
 	get()
 	postForm()
@@ -421,9 +444,10 @@ func main() {
 	clientHello()
 	ja3()
 	ja4()
-	randTls()
+	//randTls()
 	customTls()
-	flow_reader()
-	finger_builtin()
+	flowReader()
+	fingerBuiltin()
 	tlcp()
+	quic_http3()
 }

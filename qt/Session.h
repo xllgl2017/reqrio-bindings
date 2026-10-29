@@ -48,6 +48,8 @@ char *ScReq_add_cookie(ScReq *req, const char *name, const char *value);
 
 uint64_t ScReq_send(ScReq *req, Method method, UrlInner *url, bindings::Body *body, char **err);
 
+RespInner *ScReq_do_http(ScReq *req, Method method, UrlInner *url, bindings::Body *body, char **err);
+
 RespInner *ScReq_recv(ScReq *req, uint64_t sid, bool stream, char **err);
 
 char *ScReq_reconnect(ScReq *req);
@@ -69,6 +71,8 @@ static ALPN HTTP30 = "h3";
 class Session : QObject {
     Q_OBJECT
     ScReq *req = nullptr;
+
+    Response request(Method method, Url *url, Body *body) const;
 
 public:
     /// Create a session with default settings.

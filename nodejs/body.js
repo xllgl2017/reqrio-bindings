@@ -39,7 +39,7 @@ class Body {
         for (let i = 0; i < keys.length; i++) {
             res += keys[i];
             res += "=";
-            res += encodeURIComponent(JSON.stringify(form[keys[i]]));
+            res += encodeURIComponent(form[keys[i]]);
             res += "&";
         }
         if (res.endsWith("&")) {
@@ -82,8 +82,8 @@ class Body {
             let errPtr = ref_char_ptr();
             const form = library.FileForm_new(file["path"], file["field_name"], file["filetype"]);
             try {
-                check_error(errPtr.deref())
-                check_error(library.HttpFile_add_form(http_file, form))
+                check_error(library, errPtr.deref())
+                check_error(library, library.HttpFile_add_form(http_file, form))
             } catch (e) {
                 library.HttpFile_drop(file)
             }
@@ -93,7 +93,7 @@ class Body {
 
         const errPtr = ref_char_ptr();
         const bodyPtr = library.Body_new_files(http_file, dataPtr, errPtr);
-        check_error(errPtr);
+        check_error(library, errPtr);
         return bodyPtr;
     }
 

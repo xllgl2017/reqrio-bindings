@@ -16,7 +16,7 @@ class Url {
         check_error(this.library, errPtr.deref());
         if (params !== undefined && params !== null) {
             for (const [key, value] of Object.entries(params)) {
-                this.add_param(key, JSON.stringify(value));
+                this.add_param(key, value.toString());
             }
         }
         if (sni !== undefined && sni !== null) {

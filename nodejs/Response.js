@@ -7,11 +7,13 @@ class Response {
      * @param {object} library Native library handle.
      * @param {object} respPtr Native response pointer.
      * @param {object} reqPtr Native request pointer.
+     * @param {boolean} stream stream request
      */
-    constructor(library, respPtr, reqPtr) {
+    constructor(library, respPtr, reqPtr, stream ) {
         this.library = library;
         this.ptr = respPtr;
         this.req = reqPtr;
+        this.stream = stream;
     }
 
     /**
@@ -59,7 +61,7 @@ class Response {
     bytes() {
         const errPtr = ref_char_ptr();
         const lenPtr = Buffer.alloc(8);
-        const ptr = library.Response_bytes(this.ptr, lenPtr, errPtr);
+        const ptr = this.library.Response_bytes(this.ptr, lenPtr, errPtr);
         check_error(this.library, errPtr.deref());
         const len = Number(lenPtr.readBigUInt64LE(0));
         return Buffer.from(ref.reinterpret(ptr, len))
@@ -86,7 +88,7 @@ class Response {
      */
     close() {
         // registry.unregister(this)
-        if (this.ptr == null) return;
+        if (this.ptr == null || this.stream) return;
         this.library.Response_drop(this.ptr);
         this.ptr = null;
     }

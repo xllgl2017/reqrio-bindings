@@ -45,6 +45,8 @@ public interface ReqrioLibrary extends Library {
 
     int ScReq_send(Pointer req, int method, Pointer url, Pointer body, PointerByReference err);
 
+    Pointer ScReq_do_http(Pointer req, int method, Pointer url, Pointer body, PointerByReference err);
+
     Pointer ScReq_recv(Pointer req, int sid, boolean stream, PointerByReference err);
 
     Pointer ScReq_recv_stream(Pointer req, int sid, LongByReference len, PointerByReference err);

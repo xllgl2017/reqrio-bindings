@@ -37,14 +37,6 @@ def send(
         proxy: str = None,
         key_log: str = None,
 
-        data: dict = None,
-        json: dict = None,
-        bytes: bytes = None,
-        text: str = None,
-        files: list[dict[str, str]] = None,
-        content_type: str = None,
-
-        auto_redirect: bool = True,
         ja3: str = None,
         ja4: str = None,
         client_hello: bytes = None,
@@ -53,9 +45,10 @@ def send(
         builtin_name: str = None,
         idx: int = None,
         token: str = "",
-        sni: str = None,
         stream=False,
         ignore_hdr_sort: bool = False,
+
+        **kwargs
 ):
     fingerprint = None
     if ja3 is not None:
@@ -73,15 +66,19 @@ def send(
     if idx is not None:
         fingerprint = Fingerprint.from_idx(idx, token)
     req = Session(headers, alpn, verify, proxy, key_log, fingerprint, ignore_hdr_sort)
-    sid = req.pre_send(method, url, params, data, json, bytes, text, sni, files, content_type,
-                       auto_redirect=auto_redirect)
-    resp = req.recv(sid, stream)
+    from reqrio.bindings import DLL
     if stream:
+        call_func = DLL.ScReq_send
+    else:
+        call_func = DLL.ScReq_do_http
+    res = req.send(method, url, params, call_func=call_func, **kwargs)
+    if stream:
+        resp = req.recv(res, stream)
         resp.__req_free__ = True
         req.hid = None
+        return resp
     else:
-        req.close()
-    return resp
+        return Response(res, req.hid, stream)
 
 
 def get(url: str, headers: dict = None, data: dict = None, json: dict = None, params: dict = None,

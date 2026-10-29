@@ -33,7 +33,7 @@ def urlencoded_str(data: dict) -> str:
     for k in data.keys():
         res += k
         res += "="
-        res += rcode.url_encode(json.dumps(data[k]))
+        res += rcode.url_encode(str(data[k]))
         res += "&"
     if res.endswith("&"):
         res = res[:-1]

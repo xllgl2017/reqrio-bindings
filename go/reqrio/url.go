@@ -75,6 +75,12 @@ func (url *Url) setSni(sni string) error {
 	return nil
 }
 
+func (url *Url) take() unsafe.Pointer {
+	res := url.ptr
+	url.ptr = nil
+	return res
+}
+
 func (url *Url) delete() {
 	if url.ptr != nil {
 		C.Url_drop(url.ptr)

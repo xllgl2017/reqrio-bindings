@@ -15,15 +15,17 @@ public class Url implements AutoCloseable {
 
     /**
      * Get the native URL pointer.
+     *
      * @return Native pointer.
      */
-    public Pointer pointer() throws Exception {
+    private Pointer pointer() throws Exception {
         if (this.raw == null) throw new Exception("Url had dropped");
         return this.raw;
     }
 
     /**
      * Create a URL wrapper.
+     *
      * @param url Request URL.
      */
     public Url(String url) throws Exception {
@@ -34,6 +36,7 @@ public class Url implements AutoCloseable {
 
     /**
      * Create a URL wrapper and set SNI.
+     *
      * @param url Request URL.
      * @param sni SNI host name.
      */
@@ -44,8 +47,9 @@ public class Url implements AutoCloseable {
 
     /**
      * Create a URL wrapper with query params.
+     *
      * @param url_str Base URL.
-     * @param params Query parameter map.
+     * @param params  Query parameter map.
      */
     public Url(String url_str, HashMap<String, String> params) throws Exception {
         this(url_str);
@@ -56,7 +60,8 @@ public class Url implements AutoCloseable {
 
     /**
      * Add a query parameter.
-     * @param name Parameter name.
+     *
+     * @param name  Parameter name.
      * @param value Parameter value.
      */
     public void addParam(String name, String value) throws Exception {
@@ -70,6 +75,7 @@ public class Url implements AutoCloseable {
 
     /**
      * Remove a query parameter.
+     *
      * @param name Parameter name.
      */
     public void removeParam(String name) throws Exception {
@@ -83,6 +89,7 @@ public class Url implements AutoCloseable {
 
     /**
      * Set the native pointer directly.
+     *
      * @param raw Native URL pointer.
      */
     public void setRaw(Pointer raw) {
@@ -91,6 +98,7 @@ public class Url implements AutoCloseable {
 
     /**
      * Set the SNI for this URL.
+     *
      * @param sni SNI host name.
      */
     public void setSni(String sni) throws Exception {
@@ -100,6 +108,12 @@ public class Url implements AutoCloseable {
             close();
             throw e;
         }
+    }
+
+    protected Pointer take() throws Exception {
+        Pointer ptr = this.pointer();
+        this.raw = null;
+        return ptr;
     }
 
     @Override

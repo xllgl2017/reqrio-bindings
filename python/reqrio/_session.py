@@ -67,8 +67,8 @@ DLL.ScReq_send.restype = c_uint64
 DLL.ScReq_recv.argtypes = [c_void_p, c_uint64, c_bool, POINTER(c_char_p)]
 DLL.ScReq_recv.restype = POINTER(reqrio.response.RespInner)
 
-# DLL.ScReq_do_http.argtypes = [c_void_p, c_int, c_void_p, c_void_p, c_bool, POINTER(c_char_p)]
-# DLL.ScReq_do_http.restype = POINTER(reqrio.response.RespInner)
+DLL.ScReq_do_http.argtypes = [c_void_p, c_int, c_void_p, c_void_p, POINTER(c_char_p)]
+DLL.ScReq_do_http.restype = POINTER(reqrio.response.RespInner)
 
 
 class Session:
@@ -205,60 +205,15 @@ class Session:
         err, msg = util.check_char_err(self.dll.ScReq_add_cookie(self.hid, name.encode('utf-8'), value.encode('utf-8')))
         if err: raise Exception(msg)
 
-    def send_inner(
+    def __build_body(
             self,
-            method: Method,
-            url: Url,
-            body: c_void_p,
-            auto_redirect: bool = True,
-    ) -> int:
-        """Send a request body and return the request id.
-
-        Args:
-            method: HTTP method.
-            url: URL object.
-            body: native request body pointer.
-            auto_redirect: whether to follow redirects.
-        """
-        try:
-            err, msg = util.check_char_err(self.dll.ScReq_set_redirect(self.hid, auto_redirect))
-            if err: raise Exception(msg)
-            err = c_char_p()
-            sid = self.dll.ScReq_send(self.hid, method, url.take(), body, byref(err))
-            body = None
-            err, msg = util.check_char_err(err)
-            if err: raise Exception(msg)
-            return sid
-        finally:
-            self.dll.Body_drop(body)
-
-    def pre_send(
-            self,
-            method: Method,
-            url: Union[Url, str],
-            params: dict = None,
             data: dict = None,
             json: dict = None,
             bytes: bytes = None,
             text: str = None,
-            sni: str = None,
             files: list[dict[str, str]] = None,
             content_type: str = None,
-            **kwargs) -> int:
-        """Build a request and send it with the given method.
-
-        Args:
-            method: HTTP method.
-            url: request URL or URL object.
-            params: query parameters.
-            data: form payload.
-            json: JSON payload.
-            bytes: raw request bytes.
-            text: plain-text body.
-            sni: custom SNI host.
-            files: multipart upload files.
-            content_type: request content type.
-        """
+    ):
         if files is not None:
             http_file = self.dll.HttpFile_new()
             for file in files:
@@ -312,15 +267,7 @@ class Session:
             body = self.dll.Body_none()
         err, msg = util.check_char_err(err)
         if err: raise Exception(msg)
-        if type(url) == str:
-            url = Url(url, params, sni)
-        else:
-            if params is not None:
-                url.set_params(params)
-            if sni is not None:
-                url.set_sni(sni)
-
-        return self.send_inner(method, url, body, **kwargs)
+        return body
 
     def recv(self, sid: int, stream: bool):
         """Receive a response for a request id.
@@ -335,54 +282,93 @@ class Session:
         if err: raise Exception(msg)
         return Response(resp, self.hid, stream)
 
-    def send(self, method: Method, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
-             bytes: bytes = None, text: str = None, **kwargs):
+    def send(
+            self,
+            method: Method,
+            url: Union[str, Url],
+            params: dict = None,
+            data: dict = None,
+            json: dict = None,
+            bytes: bytes = None,
+            text: str = None,
+            files: list[dict[str, str]] = None,
+            content_type: str = None,
+            auto_redirect: bool = True,
+            sni: str = None,
+            call_func=DLL.ScReq_send,
+    ) -> Union[int, reqrio.response.RespInner]:
         """Send a request and return the request id."""
-        return self.pre_send(method, url, params, data, json, bytes, text, **kwargs)
+        if type(url) == str:
+            url = Url(url, params, sni)
+        else:
+            if params is not None:
+                url.set_params(params)
+            if sni is not None:
+                url.set_sni(sni)
+        body = self.__build_body(data, json, bytes, text, files, content_type)
+        try:
+            err, msg = util.check_char_err(self.dll.ScReq_set_redirect(self.hid, auto_redirect))
+            if err: raise Exception(msg)
+            err = c_char_p()
+            res = call_func(self.hid, method, url.take(), body, byref(err))
+            body = None
+            err, msg = util.check_char_err(err)
+            if err: raise Exception(msg)
+            return res
+        finally:
+            self.dll.Body_drop(body)
+
+    def __request(self, method: Method, url: Union[str, Url], params: dict = None, stream: bool = False, **kwargs):
+        if stream:
+            sid = self.send(Method.GET, url, params, **kwargs)
+            return self.recv(sid, stream)
+        else:
+            resp = self.send(method, url, params, call_func=self.dll.ScReq_do_http, **kwargs)
+            return Response(resp, self.hid, stream)
 
     def get(self, url: Union[str, Url], params: dict = None, stream: bool = False, **kwargs) -> Response:
         """Send a GET request and return the response."""
-        return self.recv(self.send(Method.GET, url, params, **kwargs), stream)
+        return self.__request(Method.GET, url, params, stream=stream, **kwargs)
 
     def post(self, url: Union[str, Url], data: dict = None, json: dict = None, bytes: bytes = None,
              text: str = None, stream: bool = False, **kwargs) -> Response:
         """Send a POST request and return the response."""
-        return self.recv(self.send(Method.POST, url, data=data, json=json, bytes=bytes, text=text, **kwargs), stream)
+        return self.__request(Method.POST, url, data=data, json=json, bytes=bytes, text=text, stream=stream, **kwargs)
 
     def put(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
             bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
         """Send a PUT request and return the response."""
-        return self.recv(self.send(Method.PUT, url, params, data, json, bytes, text, **kwargs), stream)
+        return self.__request(Method.PUT, url, data=data, json=json, bytes=bytes, text=text, stream=stream, **kwargs)
 
     def head(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
              bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
         """Send a HEAD request and return the response."""
-        return self.recv(self.send(Method.HEAD, url, params, data, json, bytes, text, **kwargs), stream)
+        return self.__request(Method.HEAD, url, data=data, json=json, bytes=bytes, text=text, stream=stream, **kwargs)
 
     def delete(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
                bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
         """Send a DELETE request and return the response."""
-        return self.recv(self.send(Method.DELETE, url, params, data, json, bytes, text, **kwargs), stream)
+        return self.__request(Method.DELETE, url, data=data, json=json, bytes=bytes, text=text, stream=stream, **kwargs)
 
     def options(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
                 bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
         """Send an OPTIONS request and return the response."""
-        return self.recv(self.send(Method.OPTIONS, url, params, data, json, bytes, text, **kwargs), stream)
+        return self.__request(Method.OPTIONS, url, data=data, json=json, bytes=bytes, text=text, stream=stream, **kwargs)
 
     def trace(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
               bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
         """Send a TRACE request and return the response."""
-        return self.recv(self.send(Method.TRACE, url, params, data, json, bytes, text, **kwargs), stream)
+        return self.__request(Method.TRACE, url, data=data, json=json, bytes=bytes, text=text, stream=stream, **kwargs)
 
     def patch(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
               bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
         """Send a PATCH request and return the response."""
-        return self.recv(self.send(Method.PATCH, url, params, data, json, bytes, text, **kwargs), stream)
+        return self.__request(Method.PATCH, url, data=data, json=json, bytes=bytes, text=text, stream=stream, **kwargs)
 
     def query(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
               bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
         """Send a custom QUERY request and return the response."""
-        return self.recv(self.send(Method.QUERY, url, params, data, json, bytes, text, **kwargs), stream)
+        return self.__request(Method.QUERY, url, data=data, json=json, bytes=bytes, text=text, stream=stream, **kwargs)
 
     def reconnect(self):
         """Reconnect the session."""
