@@ -77,7 +77,7 @@ class Session:
     def __init__(
             self,
             headers: dict = None,
-            alpn: str = ALPN.HTTP11,
+            alpn: str = ALPN.HTTP20,
             verify: bool = True,
             proxy: str = None,
             key_log: str = None,
@@ -108,16 +108,28 @@ class Session:
         if err: raise Exception(msg)
         # proxy
         if proxy is not None:
-            err, msg = util.check_char_err(self.dll.ScReq_set_proxy(self.hid, proxy.encode('utf-8')))
-            if err: raise Exception(msg)
+            self.set_proxy(proxy)
         # keylog
         if key_log is not None:
-            err, msg = util.check_char_err(self.dll.ScReq_set_key_log(self.hid, key_log.encode("utf-8")))
-            if err: raise Exception(msg)
+            self.set_key_log(key_log)
         if headers is not None:
             self.set_headers(headers)
         if fingerprint is not None:
             self.set_fingerprint(fingerprint)
+
+
+    def set_proxy(self,proxy:str):
+        """set proxy:
+
+        :param proxy:
+        :return: proxy URL such as http://127.0.0.1:10000.
+        """
+        err, msg = util.check_char_err(self.dll.ScReq_set_proxy(self.hid, proxy.encode('utf-8')))
+        if err: raise Exception(msg)
+
+    def set_key_log(self, path: str):
+        err, msg = util.check_char_err(self.dll.ScReq_set_key_log(self.hid, path.encode("utf-8")))
+        if err: raise Exception(msg)
 
     def set_timeout(self, connect: int = 3000, read: int = 3000, write: int = 3000, handle: int = 30000,
                     connect_times: int = 3, handle_times: int = 3):
@@ -155,15 +167,15 @@ class Session:
         if err: raise Exception(msg)
         return
 
-    def add_header(self, name: str, value: str, _reversed=False):
+    def add_header(self, name: str, value: str, rsv=False):
         """Add or overwrite a request header.
 
         Args:
             name: header name.
             value: header value.
-            _reversed: whether to reverse the addition order.
+            rsv: whether to reverse the addition order.
         """
-        err = self.dll.ScReq_add_header(self.hid, name.encode('utf-8'), value.encode('utf-8'), _reversed)
+        err = self.dll.ScReq_add_header(self.hid, name.encode('utf-8'), value.encode('utf-8'), rsv)
         err, msg = util.check_char_err(err)
         if err: raise Exception(msg)
 
@@ -318,7 +330,10 @@ class Session:
         finally:
             self.dll.Body_drop(body)
 
-    def __request(self, method: Method, url: Union[str, Url], params: dict = None, stream: bool = False, **kwargs):
+    def __request(self, method: Method, url: Union[str, Url], params: dict = None, stream: bool = False,
+                  headers: dict = None, **kwargs):
+        if headers is not None:
+            self.set_headers(headers)
         if stream:
             sid = self.send(Method.GET, url, params, **kwargs)
             return self.recv(sid, stream)
@@ -335,8 +350,8 @@ class Session:
         """Send a POST request and return the response."""
         return self.__request(Method.POST, url, data=data, json=json, bytes=bytes, text=text, stream=stream, **kwargs)
 
-    def put(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
-            bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
+    def put(self, url: Union[str, Url], data: dict = None, json: dict = None, bytes: bytes = None, text: str = None,
+            stream: bool = False, **kwargs) -> Response:
         """Send a PUT request and return the response."""
         return self.__request(Method.PUT, url, data=data, json=json, bytes=bytes, text=text, stream=stream, **kwargs)
 
@@ -353,7 +368,8 @@ class Session:
     def options(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
                 bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:
         """Send an OPTIONS request and return the response."""
-        return self.__request(Method.OPTIONS, url, data=data, json=json, bytes=bytes, text=text, stream=stream, **kwargs)
+        return self.__request(Method.OPTIONS, url, data=data, json=json, bytes=bytes, text=text, stream=stream,
+                              **kwargs)
 
     def trace(self, url: Union[str, Url], params: dict = None, data: dict = None, json: dict = None,
               bytes: bytes = None, text: str = None, stream: bool = False, **kwargs) -> Response:

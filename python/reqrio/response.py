@@ -1,5 +1,7 @@
 import ctypes
 import json
+from typing import Dict
+
 from reqrio.bindings import DLL
 from reqrio import util
 from reqrio.stream import StreamChunk
@@ -39,14 +41,31 @@ class RespInner(ctypes.Structure):
     ]
 
 
+class HdrInner(Dict):
+    def __init__(self, resp):
+        super().__init__()
+        self.resp = resp
+
+    def __getitem__(self, key):
+        return self.resp.get_header(key)
+
+    def get(self, key, default: None = None):
+        return self.resp.get_header(key, default)
+
+    def __str__(self) -> str:
+        return f'Headers{self.resp}'
+
+
 class Response:
     """HTTP response wrapper returned by the session."""
 
     sid: int
     method: int
-    status: int
+    status_code: int
     alpn: Buf
     body: Buffer
+    text: str
+    headers: HdrInner
 
     def __init__(self, ptr, req, stream=False):
         """Create a response object from a native pointer.
@@ -67,12 +86,16 @@ class Response:
             return self.__inner__.alpn
         elif item == "body":
             return self.__inner__.body
-        elif item == "status":
+        elif item == "status_code":
             return self.__inner__.status
         elif item == "sid":
             return self.__inner__.sid
         elif item == "method":
             return self.__inner__.method
+        elif item == 'text':
+            return self.bytes().decode('utf-8')
+        elif item == 'headers':
+            return HdrInner(self)
 
         return None
 
@@ -83,10 +106,6 @@ class Response:
         if hasattr(self, '__req__') and self.__req__ and self.__req_free__:
             DLL.ScReq_drop(self.__req__)
             self.__req__ = None
-
-    def statue_code(self) -> int:
-        """Return the HTTP status code."""
-        return self.status
 
     def get_header(self, name: str, default: str = None) -> str:
         """Get a response header value.
@@ -131,10 +150,6 @@ class Response:
     def json(self) -> dict:
         """Parse the response body as JSON."""
         return json.loads(self.bytes())
-
-    def text(self) -> str:
-        """Return the response body as UTF-8 text."""
-        return self.bytes().decode('utf-8')
 
     def chunks(self) -> StreamChunk:
         """Return a stream chunk iterator for this response."""

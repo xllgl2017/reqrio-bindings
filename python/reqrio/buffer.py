@@ -17,6 +17,9 @@ class Buf(ctypes.Structure):
     def as_bytes(self) -> bytes:
         return ctypes.string_at(self.__ptr__, self.__len__)
 
+    def __str__(self) -> str:
+        return self.as_bytes().decode('utf-8')
+
 
 class Buffer(ctypes.Structure):
     __start__: int

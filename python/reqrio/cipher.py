@@ -8,24 +8,26 @@ from reqrio import util
 
 
 class CipherType(Enum):
-    AES_128_CBC = 0
-    AES_192_CBC = 1
-    AES_256_CBC = 2
-    AES_128_ECB = 3
-    AES_192_ECB = 4
-    AES_256_ECB = 5
-    AES_128_CTR = 6
-    AES_192_CTR = 7
-    AES_256_CTR = 8
-    AES_128_GCM = 9
-    AES_192_GCM = 10
-    AES_256_GCM = 11
-    AES_128_OFB = 12
-    AES_192_OFB = 13
-    AES_256_OFB = 14
-    DES_CBC = 15
-    DES_ECB = 16
-    RC4 = 17
+    AES_128_CBC = 0,
+    AES_192_CBC = 1,
+    AES_256_CBC = 2,
+    AES_128_ECB = 3,
+    AES_192_ECB = 4,
+    AES_256_ECB = 5,
+    AES_128_CTR = 6,
+    AES_192_CTR = 7,
+    AES_256_CTR = 8,
+    AES_128_GCM = 9,
+    AES_192_GCM = 10,
+    AES_256_GCM = 11,
+    AES_128_OFB = 12,
+    AES_192_OFB = 13,
+    AES_256_OFB = 14,
+    DES_CBC = 15,
+    DES_ECB = 16,
+    RC4 = 17,
+    SM4_ECB = 18,
+    SM4_CBC = 19,
 
 
 class Cipher:

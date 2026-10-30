@@ -34,12 +34,12 @@ def ua_tls():
     hdr.update(fingerprint)
     session = Session(headers, alpn=ALPN.HTTP20, fingerprint=Fingerprint.from_client_hello(client_hello, TOKEN))
     resp = session.get('https://www.baidu.com')
-    print('code: ', resp.status)
-    print(resp.alpn.as_bytes())
+    print('code: ', resp.status_code)
+    print(resp.alpn)
     print('body: ', len(resp.bytes()))
 
     resp = reqrio.get('https://www.baidu.com', headers, client_hello=client_hello, token=TOKEN)
-    print('code: ', resp.statue_code())
+    print('code: ', resp.status_code)
     print('body: ', len(resp.bytes()))
 
 
@@ -48,11 +48,11 @@ def ja3():
     ja3_str = "771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-18-51-45-43-27-17513-21,29-23-24,0"
     session = Session(fingerprint=Fingerprint.from_ja3(ja3_str, TOKEN))
     resp = session.get('https://www.baidu.com')
-    print('code: ', resp.statue_code())
+    print('code: ', resp.status_code)
     print('body: ', len(resp.bytes()))
 
     resp = reqrio.get('https://www.baidu.com', headers, ja3=ja3_str, token=TOKEN)
-    print('code: ', resp.statue_code())
+    print('code: ', resp.status_code)
     print('body: ', len(resp.bytes()))
 
 
@@ -61,7 +61,7 @@ def ja4():
     ja4_str = "t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601"
     session = Session(fingerprint=Fingerprint.from_ja4(ja4_str, TOKEN))
     resp = session.get('https://www.baidu.com')
-    print('code: ', resp.statue_code())
+    print('code: ', resp.status_code)
     print('body: ', len(resp.bytes()))
 
 
@@ -69,7 +69,7 @@ def rand_tls():
     print("================>[RANDOM TLS]<==================")
     session = Session(fingerprint=Fingerprint.from_random(TOKEN))
     resp = session.get('https://www.baidu.com')
-    print('code: ', resp.statue_code())
+    print('code: ', resp.status_code)
     print('body: ', len(resp.bytes()))
 
 
@@ -153,14 +153,14 @@ def custom_finger():
     fingerprint = Fingerprint.from_custom(finger, TOKEN)
     session = Session(headers, fingerprint=fingerprint)
     resp = session.get("https://www.baidu.com")
-    print('code: ', resp.statue_code())
+    print('code: ', resp.status_code)
     print('body: ', len(resp.bytes()))
 
 
 def builtin_finger():
     session = Session(fingerprint=Fingerprint.from_builtin("win-x64-edge-148", TOKEN))
     resp = session.get("https://www.baidu.com")
-    print(resp.status, len(resp.text()))
+    print(resp.status_code, len(resp.text))
     import os
     os.remove("builtin.dat")
 
@@ -168,8 +168,8 @@ def builtin_finger():
 def finger_idx():
     session = Session(fingerprint=Fingerprint.from_idx(0, AUTH))
     resp = session.get("https://www.baidu.com")
-    print(resp.text())
-    print(resp.status, len(resp.text()))
+    print(resp.text)
+    print(resp.status_code, len(resp.text))
 
 
 def h3_req():
@@ -177,7 +177,7 @@ def h3_req():
     Fingerprint.new_custom(Version.TLS_1_0, Version.TLS_1_2, TOKEN)
     session = Session(headers, alpn=ALPN.HTTP30)
     resp = session.get("https://www.bing.com")
-    print(resp.statue_code())
+    print(resp.statue_code)
 
 
 def tlcp():
@@ -189,4 +189,6 @@ def tlcp():
     fingerprint.add_extension(0x8a8a, bytes([0]))
     session = Session(headers, alpn=ALPN.HTTP20, fingerprint=fingerprint)
     resp = session.get("https://test.gmssl.cn")
-    print(resp.statue_code())
+    print(resp.headers)
+    print(resp.headers["date"])
+    print(resp.status_code)

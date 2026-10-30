@@ -32,7 +32,7 @@ def send(
         params: dict = None,
 
         headers: dict = None,
-        alpn=ALPN.HTTP11,
+        alpn=ALPN.HTTP20,
         verify: bool = True,
         proxy: str = None,
         key_log: str = None,

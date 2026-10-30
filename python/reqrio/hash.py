@@ -5,6 +5,7 @@ from typing import Union
 
 from reqrio.bindings import DLL
 from reqrio import util
+from reqrio.rcode import hex_encode
 
 
 class HashType(Enum):
@@ -14,6 +15,7 @@ class HashType(Enum):
     Sha256 = 3
     Sha384 = 4
     Sha512 = 5
+    Sm3 = 6
 
 
 class Hasher:
@@ -77,3 +79,87 @@ class Hmac:
         if hasattr(self, "hasher") and self.hmac:
             DLL.Hmac_free(self.hmac)
             self.hmac = None
+
+
+def md5_hex(context: Union[str, bytes]) -> str:
+    hasher = Hasher(HashType.MD5)
+    hasher.update(context)
+    return hex_encode(hasher.finalize())
+
+
+def sha1_hex(context: Union[str, bytes]) -> str:
+    hasher = Hasher(HashType.Sha1)
+    hasher.update(context)
+    return hex_encode(hasher.finalize())
+
+
+def sha224_hex(context: Union[str, bytes]) -> str:
+    hasher = Hasher(HashType.Sha224)
+    hasher.update(context)
+    return hex_encode(hasher.finalize())
+
+
+def sha256_hex(context: Union[str, bytes]) -> str:
+    hasher = Hasher(HashType.Sha256)
+    hasher.update(context)
+    return hex_encode(hasher.finalize())
+
+
+def sha384_hex(context: Union[str, bytes]) -> str:
+    hasher = Hasher(HashType.Sha384)
+    hasher.update(context)
+    return hex_encode(hasher.finalize())
+
+
+def sha512_hex(context: Union[str, bytes]) -> str:
+    hasher = Hasher(HashType.Sha512)
+    hasher.update(context)
+    return hex_encode(hasher.finalize())
+
+
+def sm3_hex(context: Union[str, bytes]) -> str:
+    hasher = Hasher(HashType.Sm3)
+    hasher.update(context)
+    return hex_encode(hasher.finalize())
+
+
+def md5(context: Union[str, bytes]) -> bytes:
+    hasher = Hasher(HashType.MD5)
+    hasher.update(context)
+    return hasher.finalize()
+
+
+def sha1(context: Union[str, bytes]) -> bytes:
+    hasher = Hasher(HashType.Sha1)
+    hasher.update(context)
+    return hasher.finalize()
+
+
+def sha224(context: Union[str, bytes]) -> bytes:
+    hasher = Hasher(HashType.Sha224)
+    hasher.update(context)
+    return hasher.finalize()
+
+
+def sha256(context: Union[str, bytes]) -> bytes:
+    hasher = Hasher(HashType.Sha256)
+    hasher.update(context)
+    return hasher.finalize()
+
+
+def sha384(context: Union[str, bytes]) -> bytes:
+    hasher = Hasher(HashType.Sha384)
+    hasher.update(context)
+    return hasher.finalize()
+
+
+def sha512(context: Union[str, bytes]) -> bytes:
+    hasher = Hasher(HashType.Sha512)
+    hasher.update(context)
+    return hasher.finalize()
+
+
+def sm3(context: Union[str, bytes]) -> bytes:
+    hasher = Hasher(HashType.Sm3)
+    hasher.update(context)
+    return hasher.finalize()
