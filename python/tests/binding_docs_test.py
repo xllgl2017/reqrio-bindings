@@ -47,9 +47,9 @@ def session_get_text():
     s = session()
     try:
         r = s.get("https://www.baidu.com")
-        assert r.statue_code() == 200, r.statue_code()
+        assert r.status_code == 200, r.statue_code()
         assert len(r.bytes()) > 0
-        assert "baidu" in r.text().lower() or "百度" in r.text()
+        assert "baidu" in r.text.lower() or "百度" in r.text
     finally:
         s.close()
 
@@ -59,7 +59,7 @@ def query_params():
     s = session()
     try:
         r = s.get("https://httpbin.org/get", params={"q": "reqrio", "page": 1})
-        assert r.statue_code() == 200, r.statue_code()
+        assert r.status_code == 200, r.statue_code()
         data = r.json()
         assert data["args"]["q"] == "reqrio", data
         assert data["args"]["page"] == "1", data
@@ -72,7 +72,7 @@ def post_json():
     s = session()
     try:
         r = s.post("https://httpbin.org/post", json={"a": 1, "b": "two"})
-        assert r.statue_code() == 200, r.statue_code()
+        assert r.status_code == 200, r.statue_code()
         data = r.json()
         assert data["json"]["a"] == 1, data
         assert "application/json" in data["headers"].get("Content-Type", ""), data
@@ -110,7 +110,7 @@ def send_recv():
     try:
         sid = s.send(Method.GET, "https://httpbin.org/get?x=1")
         r = s.recv(sid, False)
-        assert r.statue_code() == 200
+        assert r.status_code == 200
         assert r.json()["args"]["x"] == "1"
     finally:
         s.close()
@@ -153,7 +153,7 @@ def fingerprint_ja3_ja4_random():
         try:
             s.set_fingerprint(fp)
             r = s.get("https://m.so.com")
-            assert r.statue_code() == 200, r.statue_code()
+            assert r.status_code == 200, r.statue_code()
         finally:
             s.close()
 
@@ -165,7 +165,7 @@ def fingerprint_builtin():
     try:
         s.set_fingerprint(fp)
         r = s.get("https://m.so.com")
-        assert r.statue_code() == 200, r.statue_code()
+        assert r.status_code == 200, r.statue_code()
         os.remove("builtin.dat")
     finally:
         s.close()
@@ -177,7 +177,7 @@ def http3():
     s = session(alpn=ALPN.HTTP30)
     try:
         r = s.get("https://www.bing.com")
-        assert r.statue_code() == 200, r.statue_code()
+        assert r.status_code == 200, r.statue_code()
     finally:
         s.close()
 
@@ -187,7 +187,7 @@ def module_level_get():
     import reqrio
 
     r = reqrio.get("https://www.baidu.com", {"User-Agent": "reqrio-test"})
-    assert r.statue_code() == 200, r.statue_code()
+    assert r.status_code == 200, r.statue_code()
     assert len(r.bytes()) > 0
 
 
