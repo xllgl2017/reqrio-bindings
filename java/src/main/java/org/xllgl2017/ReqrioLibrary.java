@@ -9,21 +9,23 @@ import com.sun.jna.ptr.PointerByReference;
 import java.io.IOException;
 
 public interface ReqrioLibrary extends Library {
+    // JNA maps java boolean to C int (4 bytes) while the native side declares C/Rust bool
+    // (1 byte), so a boolean arg always arrives as false. Use byte for all bool params.
     ReqrioLibrary REQRIO = ReqrioLibrary.loadLibrary();
 
-    Pointer ScReq_new(boolean ignore_hdr_sort);
+    Pointer ScReq_new(byte ignore_hdr_sort);
 
     Pointer ScReq_set_header_json(Pointer req, String header);
 
-    Pointer ScReq_add_header(Pointer req, String key, String value, boolean reversed);
+    Pointer ScReq_add_header(Pointer req, String key, String value, byte reversed);
 
     Pointer ScReq_remove_header(Pointer req, String key);
 
     Pointer ScReq_set_alpn(Pointer req, String alpn);
 
-    Pointer ScReq_set_verify(Pointer req, boolean verify);
+    Pointer ScReq_set_verify(Pointer req, byte verify);
 
-    Pointer ScReq_set_redirect(Pointer req, boolean redirect);
+    Pointer ScReq_set_redirect(Pointer req, byte redirect);
 
     Pointer ScReq_set_key_log(Pointer req, String path);
 
@@ -47,7 +49,7 @@ public interface ReqrioLibrary extends Library {
 
     Pointer ScReq_do_http(Pointer req, int method, Pointer url, Pointer body, PointerByReference err);
 
-    Pointer ScReq_recv(Pointer req, int sid, boolean stream, PointerByReference err);
+    Pointer ScReq_recv(Pointer req, int sid, byte stream, PointerByReference err);
 
     Pointer ScReq_recv_stream(Pointer req, int sid, LongByReference len, PointerByReference err);
 
@@ -104,9 +106,9 @@ public interface ReqrioLibrary extends Library {
     /// =======================>[Fingerprint]<=======================
     Pointer Fingerprint_new(int rv, int mv, String token);
 
-    Pointer Fingerprint_from_builtin(String name, boolean sec_full, String token, PointerByReference err);
+    Pointer Fingerprint_from_builtin(String name, byte sec_full, String token, PointerByReference err);
 
-    Pointer Fingerprint_from_idx(int idx, String auth, boolean sec_full, PointerByReference err);
+    Pointer Fingerprint_from_idx(int idx, String auth, byte sec_full, PointerByReference err);
 
     Pointer Fingerprint_from_ja3(String ja3, String token, PointerByReference err);
 
@@ -152,7 +154,7 @@ public interface ReqrioLibrary extends Library {
 
     void Fingerprint_set_h2_window_size(Pointer finger, int size);
 
-    void Fingerprint_set_h2_priority(Pointer finger, boolean priority, int weight);
+    void Fingerprint_set_h2_priority(Pointer finger, byte priority, int weight);
 
     void Fingerprint_drop(Pointer finger);
 
@@ -164,13 +166,17 @@ public interface ReqrioLibrary extends Library {
 
     Pointer ws_read(Pointer ws);
 
-    int ws_write(Pointer ws, int opcode, boolean mask, String msg);
+    int ws_write(Pointer ws, int opcode, byte mask, String msg);
 
     void ws_close(Pointer ws);
 
     Pointer url_encode(String value);
 
     static ReqrioLibrary loadLibrary() {
+        // use UTF-8 encoding for JNA
+        if (System.getProperty("jna.encoding") == null) {
+            System.setProperty("jna.encoding", "UTF-8");
+        }
         try {
             String os_name = System.getProperty("os.name").toLowerCase();
             String dll_name;
