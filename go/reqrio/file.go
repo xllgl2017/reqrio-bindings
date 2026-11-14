@@ -79,16 +79,18 @@ func buildFileBody(files []HttpFile, data map[string]string) (unsafe.Pointer, er
 		}
 	}
 	var errPtr *C.char
-	var dataPtr *C.char = nil
+	// Body_new_files 要求 data 是合法的 JSON 字符串，不能传 NULL
+	dataByte := []byte("{}")
 	if data != nil {
-		dataByte, err := json.Marshal(data)
+		encoded, err := json.Marshal(data)
 		if err != nil {
 			C.HttpFile_drop(filePtr)
 			return nil, err
 		}
-		dataPtr = C.CString(string(dataByte))
-		defer C.free(unsafe.Pointer(dataPtr))
+		dataByte = encoded
 	}
+	dataPtr := C.CString(string(dataByte))
+	defer C.free(unsafe.Pointer(dataPtr))
 	bodyPtr := C.Body_new_files(filePtr, dataPtr, (**C.char)(unsafe.Pointer(&errPtr)))
 	if errPtr != nil {
 		defer C.char_free(errPtr)

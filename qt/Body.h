@@ -49,8 +49,14 @@ public:
 
     /// Build a multipart upload body from files.
     /// @param paths: file paths.
+    /// @param fields: field names
     /// @param data: additional form data.
-    static Body *fromFiles(const QList<QString>& paths, const QJsonDocument &data);
+    static Body *fromFiles(const QList<QString> &paths, const QList<QString> &fields, const QJsonDocument &data);
+
+    /// Build a multipart upload body from files.
+    /// @param paths: file paths.
+    /// @param fields: field names
+    static Body *fromFiles(const QList<QString> &paths, const QList<QString> &fields);
 };
 
 

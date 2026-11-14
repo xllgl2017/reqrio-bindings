@@ -382,10 +382,7 @@ func fingerBuiltin() {
 	if err != nil {
 		panic(err)
 	}
-	code, err2 := resp.StatusCode()
-	if err2 != nil {
-		panic(err2)
-	}
+	code := resp.StatusCode()
 	println("resp: ", code)
 	err = os.Remove("builtin.dat")
 	if err != nil {

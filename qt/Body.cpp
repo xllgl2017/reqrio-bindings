@@ -7,6 +7,7 @@
 
 
 #include <QJsonDocument>
+#include <QJsonObject>
 
 #include "util.h"
 
@@ -49,12 +50,11 @@ bindings::Body *Body::take() {
     return raw;
 }
 
-Body *Body::fromFiles(const QList<QString>& paths, const QJsonDocument &data) {
+Body *Body::fromFiles(const QList<QString> &paths, const QList<QString> &fields, const QJsonDocument &data) {
     const auto http_file = bindings::HttpFile_new();
-    for (const QString &path: paths) {
-        QFile file(path);
+    for (int i = 0; i < paths.length(); i++) {
         char *err = nullptr;
-        const auto form = bindings::FileForm_new(path.toUtf8(), file.fileName().toUtf8(), nullptr, &err);
+        const auto form = bindings::FileForm_new(paths.at(i).toUtf8(), fields.at(i).toUtf8(), nullptr, &err);
         try {
             util::check_err(err);
             bindings::HttpFile_add_form(http_file, form);
@@ -65,5 +65,10 @@ Body *Body::fromFiles(const QList<QString>& paths, const QJsonDocument &data) {
     }
     char *err = nullptr;
     const auto raw = bindings::Body_new_files(http_file, data.toJson().data(), &err);
+    util::check_err(err);
     return new Body(raw);
+}
+
+Body *Body::fromFiles(const QList<QString> &paths, const QList<QString> &fields) {
+    return fromFiles(paths, fields, QJsonDocument(QJsonObject{}));
 }

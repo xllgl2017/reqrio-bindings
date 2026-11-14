@@ -158,6 +158,17 @@ public:
     /// @param body: request body.
     [[nodiscard]] uint64_t send(Method method, Url *url, Body *body) const;
 
+    /// Send an HTTP request and return the request id.
+    /// @param method: HTTP method.
+    /// @param url: request URL object.
+    /// @param body: request body.
+    [[nodiscard]] uint64_t send(Method method, const QString& url, Body *body) const;
+
+    /// Send an HTTP request and return the request id.
+    /// @param method: HTTP method.
+    /// @param url: request URL object.
+    [[nodiscard]] uint64_t send(Method method, const QString& url) const;
+
     /// Receive a response by request id.
     /// @param sid: request id.
     /// @param stream: whether to read as a streaming response.

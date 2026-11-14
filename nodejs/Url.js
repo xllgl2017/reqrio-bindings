@@ -40,7 +40,7 @@ class Url {
      */
     remove_param(name) {
         const err = this.library.Url_remove_param(this.ptr, name);
-        check_error(err, this.drop);
+        check_error(this.library, err, this.drop);
     }
 
     /**
@@ -49,7 +49,7 @@ class Url {
      */
     set_sni(sni) {
         const err = this.library.Url_set_sni(this.ptr, sni);
-        check_error(err, this.drop);
+        check_error(this.library, err, this.drop);
     }
 
     /**

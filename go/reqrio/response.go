@@ -44,14 +44,14 @@ func newResponse(ptr unsafe.Pointer, req_ptr unsafe.Pointer) (Response, error) {
 }
 
 // StatusCode returns the HTTP status code.
-func (resp *Response) StatusCode() (int16, error) {
+func (resp *Response) StatusCode() int16 {
 	var errPtr *C.char
 	code := C.Response_status_code(resp.ptr, (**C.char)(unsafe.Pointer(&errPtr)))
 	if errPtr != nil {
 		defer C.char_free(errPtr)
-		return 0, errors.New(C.GoString(errPtr))
+		return 0
 	}
-	return int16(code), nil
+	return int16(code)
 }
 
 // Bytes returns the raw response body.

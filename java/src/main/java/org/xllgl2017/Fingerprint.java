@@ -95,7 +95,7 @@ public class Fingerprint {
     public static Fingerprint fromBuiltin(String name, boolean sec_full, String token) throws Exception {
         PointerByReference err = new PointerByReference();
         if (token == null) token = "";
-        Pointer pointer = REQRIO.Fingerprint_from_builtin(name, sec_full, token, err);
+        Pointer pointer = REQRIO.Fingerprint_from_builtin(name, (byte) (sec_full ? 1 : 0), token, err);
         util.check_err_pointer(err);
         return new Fingerprint(pointer);
     }
@@ -109,7 +109,7 @@ public class Fingerprint {
      */
     public static Fingerprint fromIdx(int idx, String auth, boolean sec_full) throws Exception {
         PointerByReference err = new PointerByReference();
-        Pointer pointer = REQRIO.Fingerprint_from_idx(idx, auth, sec_full, err);
+        Pointer pointer = REQRIO.Fingerprint_from_idx(idx, auth, (byte) (sec_full ? 1 : 0), err);
         util.check_err_pointer(err);
         return new Fingerprint(pointer);
     }
@@ -389,7 +389,7 @@ public class Fingerprint {
      * @param weight Priority weight.
      */
     public void setH2Priority(boolean priority, int weight) {
-        REQRIO.Fingerprint_set_h2_priority(this.raw, priority, weight);
+        REQRIO.Fingerprint_set_h2_priority(this.raw, (byte) (priority ? 1 : 0), weight);
     }
 
     /**

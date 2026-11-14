@@ -28,57 +28,6 @@ static QString read_token() {
             .value("REQRIO_TOKEN");
 }
 
-void get() {
-    const auto *session = new Session(HTTP20);
-    session->addHeader("User-Agent",
-                       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0");
-    session->connect("https://www.baidu.com");
-    const Response resp = session->get("https://www.baidu.com");
-    qDebug() << resp.statusCode();
-    qDebug() << resp.text().mid(0, 100);
-    for (Cookie cookie: resp.cookies()) {
-        qDebug() << cookie.getName() << "=" << cookie.getValue();
-    }
-
-    const auto url = new Url("https://153.3.238.127", "www.baidu.com");
-    url->addParam("a", "3");
-    url->addParam("b", R"({"fgdg":"dg"})");
-    const Response resp1 = session->get(url, new Body());
-    qDebug() << resp.statusCode();
-    delete session;
-}
-
-void post_form() {
-    const auto *session = new Session(HTTP20);
-    session->setRedirect(false);
-    session->addHeader("User-Agent",
-                       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0");
-    QMap<QString, QString> forms;
-    forms.insert("a", "3");
-    forms.insert("b", R"({"fgdg":"dg"})");
-    const Response resp = session->post("https://www.baidu.com", new Body(forms));
-    qDebug() << resp.statusCode();
-
-    const Response resp1 = session->post("https://www.baidu.com", forms);
-    qDebug() << resp1.statusCode();
-    delete session;
-}
-
-void post_json() {
-    const auto *session = new Session(HTTP20);
-    session->setRedirect(false);
-    session->addHeader("User-Agent",
-                       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0");
-    QJsonObject json;
-    json.insert("a", "3");
-    QJsonObject obj;
-    obj.insert("fgdg", "dg");
-    json.insert("b", obj);
-    const Response resp = session->post("https://www.baidu.com", QJsonDocument(json));
-    qDebug() << resp.statusCode();
-    delete session;
-}
-
 void client_hello_finger() {
     printf("================>[TLS WITH ClientHello]<==================\n");
     //16030106b2
@@ -211,25 +160,6 @@ void custom_finger() {
     qDebug() << resp.statusCode();
 }
 
-void flow_reader() {
-    const auto *session = new Session(HTTP20);
-    session->addHeader("User-Agent",
-                       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0");
-    uint64_t sid = session->send(
-        GET, new Url(
-            "https://ms.bdimg.com/pacific/0/pic/-742236409_-1564646186.png?x=0&y=0&h=340&w=510&vh=340.00&vw=510.00&oh=340.00&ow=510.00"),
-        new Body());
-    Response resp = session->recv(sid, true);
-    qDebug() << resp.statusCode();
-    QFile file("1.png");
-    file.open(QIODevice::WriteOnly);
-
-    for (const auto chunk: resp.chunks()) {
-        file.write(chunk);
-        qDebug() << chunk.length();
-    }
-}
-
 
 void finger_builtin(const QString& name) {
     printf("================>[Builtin Finger]<==================\n");
@@ -256,15 +186,11 @@ void tlcp() {
 
 
 int main(int argc, char *argv[]) {
-    get();
-    post_form();
-    post_json();
     client_hello_finger();
     ja3();
     ja4();
     rand_tls();
     custom_finger();
-    flow_reader();
     finger_builtin("win-x64-edge-148");
     tlcp();
 }

@@ -45,7 +45,7 @@ public class WebSocket {
      * @param msg Message content.
      */
     public void write(int opcode, boolean mask, String msg) throws Exception {
-        int ret = INSTANCE.ws_write(this.ws, opcode, mask, msg);
+        int ret = INSTANCE.ws_write(this.ws, opcode, (byte) (mask ? 1 : 0), msg);
         if (ret == -1) throw new Exception("write error");
     }
 

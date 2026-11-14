@@ -117,8 +117,7 @@ class Session:
         if fingerprint is not None:
             self.set_fingerprint(fingerprint)
 
-
-    def set_proxy(self,proxy:str):
+    def set_proxy(self, proxy: str):
         """set proxy:
 
         :param proxy:
@@ -281,7 +280,7 @@ class Session:
         if err: raise Exception(msg)
         return body
 
-    def recv(self, sid: int, stream: bool):
+    def recv(self, sid: int, stream: bool = False):
         """Receive a response for a request id.
 
         Args:

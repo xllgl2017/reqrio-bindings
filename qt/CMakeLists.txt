@@ -21,7 +21,6 @@ add_library(reqrio-qt STATIC bindings.h
         Url.cpp
         Url.h
         util.h
-        util.cpp
         Body.cpp
         Body.h
         Fingerprint.cpp
@@ -32,3 +31,8 @@ target_link_libraries(reqrio-qt PUBLIC Qt${QT_VERSION_MAJOR}::Core reqrio)
 include(GNUInstallDirs)
 add_executable(test_reqrio test.cpp)
 target_link_libraries(test_reqrio reqrio-qt)
+add_executable(http_test
+        example/http_example.cpp
+        http_test.cpp
+)
+target_link_libraries(http_test reqrio-qt)

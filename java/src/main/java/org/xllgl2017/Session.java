@@ -40,7 +40,7 @@ public class Session implements AutoCloseable {
      * @param ignore_hdr_sort Whether to skip the built-in header ordering.
      */
     public Session(boolean ignore_hdr_sort) {
-        this.req = REQRIO.ScReq_new(ignore_hdr_sort);
+        this.req = REQRIO.ScReq_new((byte) (ignore_hdr_sort ? 1 : 0));
     }
 
     private Pointer pointer() throws Exception {
@@ -54,7 +54,7 @@ public class Session implements AutoCloseable {
      * @param verify true to verify the server certificate chain.
      */
     public void setVerify(boolean verify) throws Exception {
-        util.check_err(REQRIO.ScReq_set_verify(this.pointer(), verify));
+        util.check_err(REQRIO.ScReq_set_verify(this.pointer(), (byte) (verify ? 1 : 0)));
     }
 
     /**
@@ -63,7 +63,7 @@ public class Session implements AutoCloseable {
      * @param auto_redirect true to follow redirects automatically.
      */
     public void setAutoRedirect(boolean auto_redirect) throws Exception {
-        util.check_err(REQRIO.ScReq_set_redirect(this.pointer(), auto_redirect));
+        util.check_err(REQRIO.ScReq_set_redirect(this.pointer(), (byte) (auto_redirect ? 1 : 0)));
     }
 
     /**
@@ -116,7 +116,7 @@ public class Session implements AutoCloseable {
         if (name.equalsIgnoreCase("cookie")) {
             this.setCookie(value);
         } else {
-            util.check_err(REQRIO.ScReq_add_header(this.pointer(), name, value, reversed));
+            util.check_err(REQRIO.ScReq_add_header(this.pointer(), name, value, (byte) (reversed ? 1 : 0)));
         }
     }
 
@@ -267,6 +267,34 @@ public class Session implements AutoCloseable {
         return this.send(method, url, body);
     }
 
+
+    /**
+     * Send an HTTP request with an empty body.
+     *
+     * @param method HTTP method.
+     * @param url    Request URL.
+     * @return Request session id.
+     */
+    public int send(@NotNull Method method, @NotNull String url) throws Exception {
+        Body body = new Body();
+        Url url1 = new Url(url);
+        return this.send(method, url1, body);
+    }
+
+    /**
+     * Send an HTTP request with an empty body.
+     *
+     * @param method HTTP method.
+     * @param url    Request URL.
+     * @param body req body
+     * @return Request session id.
+     */
+    public int send(@NotNull Method method, @NotNull String url, @NotNull Body body) throws Exception {
+        Url url1 = new Url(url);
+        return this.send(method, url1, body);
+    }
+
+
     /**
      * Send a request and stream the response.
      *
@@ -303,7 +331,7 @@ public class Session implements AutoCloseable {
      */
     public Response recv(int sid, boolean stream) throws Exception {
         PointerByReference err = new PointerByReference();
-        Pointer pointer = REQRIO.ScReq_recv(this.pointer(), sid, stream, err);
+        Pointer pointer = REQRIO.ScReq_recv(this.pointer(), sid, (byte) (stream ? 1 : 0), err);
         util.check_err_pointer(err);
         return new Response(pointer, this.pointer(), stream);
     }

@@ -19,11 +19,13 @@ class Body {
      * Create a text/plain request body.
      * @param {object} library Native library handle.
      * @param {string} text Plain text content.
+     * @param {string} content_type
      * @returns {object} Native body pointer.
+     *
      */
-    static new_text(library, text) {
+    static new_text(library, text, content_type = 'text/plain') {
         const data = new TextEncoder().encode(text);
-        return Body.new(library, data, 'text/plain')
+        return Body.new(library, data, content_type)
     }
 
     /**
@@ -80,20 +82,23 @@ class Body {
         const http_file = library.HttpFile_new();
         for (const file of files) {
             let errPtr = ref_char_ptr();
-            const form = library.FileForm_new(file["path"], file["field_name"], file["filetype"]);
+            const form = library.FileForm_new(file["path"], file["field_name"], file["filetype"], errPtr);
             try {
                 check_error(library, errPtr.deref())
                 check_error(library, library.HttpFile_add_form(http_file, form))
             } catch (e) {
-                library.HttpFile_drop(file)
+                library.HttpFile_drop(http_file);
+                throw e
             }
         }
         let dataPtr = null;
-        if (data !== null && data !== undefined) dataPtr = JSON.stringify(dataPtr)
-
+        if (data === null || data === undefined)
+            dataPtr = "{}"
+        else
+            dataPtr = JSON.stringify(data)
         const errPtr = ref_char_ptr();
         const bodyPtr = library.Body_new_files(http_file, dataPtr, errPtr);
-        check_error(library, errPtr);
+        check_error(library, errPtr.deref());
         return bodyPtr;
     }
 

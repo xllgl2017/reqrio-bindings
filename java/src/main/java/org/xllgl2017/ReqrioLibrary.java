@@ -9,8 +9,6 @@ import com.sun.jna.ptr.PointerByReference;
 import java.io.IOException;
 
 public interface ReqrioLibrary extends Library {
-    // JNA maps java boolean to C int (4 bytes) while the native side declares C/Rust bool
-    // (1 byte), so a boolean arg always arrives as false. Use byte for all bool params.
     ReqrioLibrary REQRIO = ReqrioLibrary.loadLibrary();
 
     Pointer ScReq_new(byte ignore_hdr_sort);

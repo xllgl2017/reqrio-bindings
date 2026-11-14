@@ -92,6 +92,14 @@ uint64_t Session::send(const Method method, Url *url, Body *body) const {
     return sid;
 }
 
+uint64_t Session::send(const Method method, const QString& url, Body *body) const {
+    return this->send(method, new Url(url), body);
+}
+
+uint64_t Session::send(const Method method, const QString& url) const {
+    return this->send(method, new Url(url), new Body());
+}
+
 Response Session::request(Method method, Url *url, Body *body) const {
     char *err = nullptr;
     const auto resp = ScReq_do_http(this->req, method, url->take(), body->take(), &err);
@@ -104,6 +112,7 @@ Response Session::request(Method method, Url *url, Body *body) const {
 Response Session::recv(const uint64_t sid, const bool stream) const {
     char *err = nullptr;
     const auto ptr = ScReq_recv(this->req, sid, stream, &err);
+    util::check_err(err);
     return Response(ptr, this->req);
 }
 

@@ -11,7 +11,7 @@ except:
     TOKEN = os.environ.get("REQRIO_TOKEN", "")
 
 try:
-    with open("../../../AUTH", 'r', encoding="utf-8") as f:
+    with open("../../../AUTH1", 'r', encoding="utf-8") as f:
         AUTH = f.read()
 except:
     AUTH = os.environ.get("REQRIO_AUTH", "")

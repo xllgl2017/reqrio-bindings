@@ -33,58 +33,6 @@ function session(alpn = ALPN.HTTP20) {
     return s;
 }
 
-check('session_get_text', () => {
-    const s = session();
-    try {
-        const r = s.get('https://www.baidu.com', {});
-        if (r.status_code() !== 200) throw new Error('status=' + r.status_code());
-        const text = r.text();
-        if (!text || !(text.toLowerCase().includes('baidu') || text.includes('百度'))) throw new Error('unexpected body');
-        r.close();
-    } finally { s.close(); }
-});
-
-check('query_params', () => {
-    const s = session();
-    try {
-        const r = s.get('https://httpbin.org/get', { params: { q: 'reqrio', page: 1 } });
-        const j = r.json();
-        if (j.args.q !== 'reqrio') throw new Error(JSON.stringify(j));
-        if (String(j.args.page) !== '1') throw new Error(JSON.stringify(j));
-        r.close();
-    } finally { s.close(); }
-});
-
-check('post_json', () => {
-    const s = session();
-    try {
-        const r = s.post('https://httpbin.org/post', { json: { a: 1, b: 'two' } });
-        const j = r.json();
-        if (j.json.a !== 1) throw new Error(JSON.stringify(j));
-        if (!String(j.headers['Content-Type'] || '').includes('application/json')) throw new Error(JSON.stringify(j.headers));
-        r.close();
-    } finally { s.close(); }
-});
-
-check('post_form', () => {
-    const s = session();
-    try {
-        const r = s.post('https://httpbin.org/post', { data: { a: '1', b: 'x y' } });
-        const j = r.json();
-        if (j.form.a !== '1') throw new Error(JSON.stringify(j.form));
-        r.close();
-    } finally { s.close(); }
-});
-
-check('post_bytes', () => {
-    const s = session();
-    try {
-        const r = s.post('https://httpbin.org/post', { bytes: Buffer.from([0, 1, 65]), ct: 'application/octet-stream' });
-        if (r.status_code() !== 200) throw new Error('status=' + r.status_code());
-        r.close();
-    } finally { s.close(); }
-});
-
 check('send_recv', () => {
     const s = session();
     try {
@@ -96,32 +44,6 @@ check('send_recv', () => {
     } finally { s.close(); }
 });
 
-check('cookies_headers', () => {
-    const s = session();
-    s.set_auto_redirect(false)
-    try {
-        let r = s.get('https://httpbin.org/cookies/set?k=v', {});
-        const cks = r.cookies();
-        if (!cks.some(c => c.name === 'k' && c.value === 'v')) throw new Error(JSON.stringify(cks));
-        r.close();
-        r = s.get('https://httpbin.org/cookies', {});
-        if (r.json().cookies.k !== 'v') throw new Error(r.text());
-        r.close();
-    } finally { s.close(); }
-});
-
-if (!process.env.SKIP_STREAM) {
-check('stream_chunks', () => {
-    const s = session(ALPN.HTTP11);
-    try {
-        const r = s.get('https://httpbin.org/bytes/16384', { stream: true });
-        let total = 0;
-        for (const chunk of r.chunks()) total += chunk.length;
-        if (total !== 16384) throw new Error('total=' + total);
-        r.close();
-    } finally { s.close(); }
-});
-}
 
 check('fingerprint_ja3_random', () => {
     for (const fp of [

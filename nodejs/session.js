@@ -43,7 +43,7 @@ class Session {
         this.set_headers(headers)
     }
 
-    set_auto_redirect(auto_redirect){
+    set_auto_redirect(auto_redirect) {
         check_error(this.library, this.library.ScReq_set_redirect(this.req, auto_redirect), this.close);
     }
 
@@ -166,7 +166,7 @@ class Session {
      * @returns {number} Request session ID.
      */
     send(method, url, options = {}, call_func = undefined) {
-        const {data, json, files, bytes, ct, params, sni} = options;
+        const {data, json, files, bytes, text, ct, params, sni} = options;
         if (typeof url === "string") {
             url = new Url(this.library, url, params, sni)
         }
@@ -179,10 +179,12 @@ class Session {
                 body_ptr = Body.new(this.library, bytes, ct || "application/octet-stream");
             } else if (json !== undefined && json !== null) {
                 body_ptr = Body.new_json(this.library, json, ct || "application/json")
+            } else if (files !== undefined && files !== null) {
+                body_ptr = Body.new_files(this.library, files, data)
             } else if (data !== undefined && data !== null) {
                 body_ptr = Body.new_form(this.library, data, ct || "application/x-www-form-urlencoded");
-            } else if (files !== undefined && files !== null) {
-                body_ptr = Body.new_files(files, data)
+            } else if (text !== undefined && text !== null) {
+                body_ptr = Body.new_text(this.library, text, ct || "text/plain")
             } else {
                 body_ptr = Body.none(this.library);
             }
@@ -212,6 +214,7 @@ class Session {
         stream = stream === null || stream === undefined ? false : stream
         const errPtr = ref_char_ptr();
         let respPtr = this.library.ScReq_recv(this.req, sid, stream, errPtr);
+        check_error(this.library, errPtr.deref())
         return new Response(this.library, respPtr, this.req, stream);
     }
 

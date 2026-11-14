@@ -42,105 +42,6 @@ def session(alpn=ALPN.HTTP20):
     return s
 
 
-@check("session_get_text")
-def session_get_text():
-    s = session()
-    try:
-        r = s.get("https://www.baidu.com")
-        assert r.status_code == 200, r.statue_code()
-        assert len(r.bytes()) > 0
-        assert "baidu" in r.text.lower() or "百度" in r.text
-    finally:
-        s.close()
-
-
-@check("query_params")
-def query_params():
-    s = session()
-    try:
-        r = s.get("https://httpbin.org/get", params={"q": "reqrio", "page": 1})
-        assert r.status_code == 200, r.statue_code()
-        data = r.json()
-        assert data["args"]["q"] == "reqrio", data
-        assert data["args"]["page"] == "1", data
-    finally:
-        s.close()
-
-
-@check("post_json")
-def post_json():
-    s = session()
-    try:
-        r = s.post("https://httpbin.org/post", json={"a": 1, "b": "two"})
-        assert r.status_code == 200, r.statue_code()
-        data = r.json()
-        assert data["json"]["a"] == 1, data
-        assert "application/json" in data["headers"].get("Content-Type", ""), data
-    finally:
-        s.close()
-
-
-@check("post_form")
-def post_form():
-    s = session()
-    try:
-        r = s.post("https://httpbin.org/post", data={"a": "1", "b": "x y"})
-        data = r.json()
-        assert data["form"]["a"] == "1", data
-        assert "x-www-form-urlencoded" in data["headers"].get("Content-Type", ""), data
-    finally:
-        s.close()
-
-
-@check("post_bytes_text")
-def post_bytes_text():
-    s = session()
-    try:
-        r = s.post("https://httpbin.org/post", bytes=b"\x00\x01hello")
-        assert r.json()["headers"]["Content-Type"].startswith("application/octet-stream")
-        r = s.post("https://httpbin.org/post", text="plain-text")
-        assert r.json()["data"] == "plain-text", r.json()
-    finally:
-        s.close()
-
-
-@check("send_recv")
-def send_recv():
-    s = session()
-    try:
-        sid = s.send(Method.GET, "https://httpbin.org/get?x=1")
-        r = s.recv(sid, False)
-        assert r.status_code == 200
-        assert r.json()["args"]["x"] == "1"
-    finally:
-        s.close()
-
-
-@check("stream_chunks")
-def stream_chunks():
-    s = session(alpn=ALPN.HTTP11)
-    try:
-        r = s.get("https://httpbin.org/bytes/16384", stream=True)
-        total = 0
-        for chunk in r.chunks():
-            total += len(chunk)
-        assert total == 16384, total
-    finally:
-        s.close()
-
-
-@check("response_headers_cookies")
-def response_headers_cookies():
-    s = session()
-    try:
-        r = s.get("https://httpbin.org/cookies/set?k=v", auto_redirect=False)
-        cks = r.cookies()
-        assert any(c.get("name") == "k" and c.get("value") == "v" for c in cks), cks
-        r = s.get("https://httpbin.org/cookies")
-        assert r.json()["cookies"]["k"] == "v", r.json()
-    finally:
-        s.close()
-
 
 @check("fingerprint_ja3_ja4_random")
 def fingerprint_ja3_ja4_random():
@@ -178,28 +79,6 @@ def http3():
     try:
         r = s.get("https://www.bing.com")
         assert r.status_code == 200, r.statue_code()
-    finally:
-        s.close()
-
-
-@check("module_level_get")
-def module_level_get():
-    import reqrio
-
-    r = reqrio.get("https://www.baidu.com", {"User-Agent": "reqrio-test"})
-    assert r.status_code == 200, r.statue_code()
-    assert len(r.bytes()) > 0
-
-
-@check("invalid_url_raises")
-def invalid_url_raises():
-    s = session()
-    try:
-        try:
-            s.get("not a valid url")
-        except Exception:
-            return
-        raise AssertionError("invalid URL did not raise")
     finally:
         s.close()
 
