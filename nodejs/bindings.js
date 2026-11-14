@@ -53,7 +53,7 @@ function binding_library() {
         // === Fingerprint ===
         Fingerprint_new: [voidPtr, ['uint16', 'uint16', 'string']],
         Fingerprint_from_builtin: [voidPtr, ['string', 'bool', 'string', charPtrPtr]],
-        Fingerprint_from_idx: [voidPtr, ['size_t', 'string', 'bool', charPtrPtr]],
+        Fingerprint_from_idx: [voidPtr, ['size_t', 'string','string', 'bool', charPtrPtr]],
         Fingerprint_add_cipher_suite: ['void', [voidPtr, 'uint16']],
         Fingerprint_add_ext: ['void', [voidPtr, 'uint16']],
         Fingerprint_add_ext_alpn: ['void', [voidPtr, 'uint16', 'string']],

@@ -106,7 +106,7 @@ public interface ReqrioLibrary extends Library {
 
     Pointer Fingerprint_from_builtin(String name, byte sec_full, String token, PointerByReference err);
 
-    Pointer Fingerprint_from_idx(int idx, String auth, byte sec_full, PointerByReference err);
+    Pointer Fingerprint_from_idx(int idx, String auth, String path, byte sec_full, PointerByReference err);
 
     Pointer Fingerprint_from_ja3(String ja3, String token, PointerByReference err);
 

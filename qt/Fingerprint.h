@@ -16,7 +16,7 @@ struct FingerInner;
 
 FingerInner *Fingerprint_from_builtin(const char *name, bool sec_full, const char *token, char **err);
 
-FingerInner *Fingerprint_from_idx(size_t idx, const char *auth, bool sec_full, char **err);
+FingerInner *Fingerprint_from_idx(size_t idx, const char *auth, const char *path, bool sec_full, char **err);
 
 FingerInner *Fingerprint_from_ja3(const char *ja3, const char *token, char **err);
 
@@ -188,10 +188,19 @@ public:
 
     /// Build a fingerprint by index.
     /// @param idx: fingerprint index.
-    /// @param sec_full: use full security settings.
     /// @param auth: auth token.
+    /// @param path: fingerprint package dir or path
+    /// @param sec_full: use full security settings.
     /// @param parent: parent QObject.
-    static Fingerprint *fromIdx(size_t idx, bool sec_full, const QString &auth, QObject *parent = nullptr);
+    static Fingerprint *fromIdx(size_t idx, const QString &auth, const QString &path, bool sec_full,
+                                QObject *parent = nullptr);
+
+    /// Build a fingerprint by index.
+    /// @param idx: fingerprint index.
+    /// @param auth: auth token.
+    /// @param sec_full: use full security settings.
+    /// @param parent: parent QObject.
+    static Fingerprint *fromIdx(size_t idx, const QString &auth, bool sec_full, QObject *parent = nullptr);
 
     /// Build a fingerprint from a JA3 string.
     /// @param ja3: JA3 value.

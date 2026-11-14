@@ -109,15 +109,16 @@ class Fingerprint {
 
     /**
      * Create a fingerprint by index.
+     * @param {object} library Native library handle.
      * @param {number} idx Fingerprint index.
      * @param {string} auth Auth token.
+     * @param {string} path fingerprint package dir or path
      * @param {boolean} sec_full Whether to use the full sec-* header set.
-     * @param {object} library Native library handle.
      * @returns {Fingerprint} Fingerprint instance.
      */
-    static fromFingerIdx(idx, auth, sec_full, library) {
+    static fromFingerIdx(library, idx, auth, path = ".", sec_full = false) {
         const errPtr = ref_char_ptr();
-        let ptr = library.Fingerprint_from_idx(idx, auth, sec_full, errPtr)
+        let ptr = library.Fingerprint_from_idx(idx, auth, path, sec_full, errPtr)
         check_error(library, errPtr.deref())
         return new Fingerprint(ptr, library)
 

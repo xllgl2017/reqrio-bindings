@@ -11,7 +11,7 @@ package reqrio
 //-----------------[Fingerprint API]-----------------
 extern void *Fingerprint_new(uint16_t rv, uint16_t mv, const char *token);
 extern void *Fingerprint_from_builtin(const char *name, bool sec_full, const char *token, char **err);
-extern void *Fingerprint_from_idx(size_t idx, const char *auth, bool sec_full, char **err);
+extern void *Fingerprint_from_idx(size_t idx, const char *auth, const char *path, bool sec_full, char **err);
 extern void Fingerprint_add_cipher_suite(void *finger, uint16_t suite);
 extern void Fingerprint_add_ext(void *finger, uint16_t ext_typ);
 extern void Fingerprint_add_ext_alpn(void *finger, uint16_t ext_typ, const char *alpn);
@@ -266,12 +266,14 @@ func FromBuiltin(name string, secFull bool, token string) (Fingerprint, error) {
 // idx: fingerprint index.
 // secFull: whether to include full sec headers.
 // auth: auth token.
-func FromIdx(idx int, secFull bool, auth string) (Fingerprint, error) {
+func FromIdx(idx int, secFull bool, auth string, path string) (Fingerprint, error) {
 	var fingerprint Fingerprint
 	cAuth := C.CString(auth)
 	defer C.free(unsafe.Pointer(cAuth))
+	cPath := C.CString(path)
+	defer C.free(unsafe.Pointer(cPath))
 	var errPtr *C.char
-	fingerprint.rawPtr = C.Fingerprint_from_idx(C.size_t(idx), cAuth, C.bool(secFull), (**C.char)(unsafe.Pointer(&errPtr)))
+	fingerprint.rawPtr = C.Fingerprint_from_idx(C.size_t(idx), cAuth, cPath, C.bool(secFull), (**C.char)(unsafe.Pointer(&errPtr)))
 	if errPtr != nil {
 		defer C.char_free(errPtr)
 		return fingerprint, errors.New(C.GoString(errPtr))

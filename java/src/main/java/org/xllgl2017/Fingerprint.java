@@ -14,6 +14,7 @@ public class Fingerprint {
 
     /**
      * Create a fingerprint wrapper from a native pointer.
+     *
      * @param raw Native fingerprint pointer.
      */
     public Fingerprint(Pointer raw) {
@@ -22,8 +23,9 @@ public class Fingerprint {
 
     /**
      * Create a custom fingerprint.
-     * @param rv Record version.
-     * @param mv Message version.
+     *
+     * @param rv    Record version.
+     * @param mv    Message version.
      * @param token Auth token.
      */
     public Fingerprint(Version rv, Version mv, String token) {
@@ -32,6 +34,7 @@ public class Fingerprint {
 
     /**
      * Build a random TLS fingerprint.
+     *
      * @param token Auth token.
      * @return Fingerprint instance.
      */
@@ -45,7 +48,8 @@ public class Fingerprint {
 
     /**
      * Build a JA3 fingerprint.
-     * @param ja3 JA3 value.
+     *
+     * @param ja3   JA3 value.
      * @param token Auth token.
      * @return Fingerprint instance.
      */
@@ -59,7 +63,8 @@ public class Fingerprint {
 
     /**
      * Build a JA4 fingerprint.
-     * @param ja4 JA4 value.
+     *
+     * @param ja4   JA4 value.
      * @param token Auth token.
      * @return Fingerprint instance.
      */
@@ -73,8 +78,9 @@ public class Fingerprint {
 
     /**
      * Build a fingerprint from a raw ClientHello payload.
+     *
      * @param client_hello Raw ClientHello bytes.
-     * @param token Auth token.
+     * @param token        Auth token.
      * @return Fingerprint instance.
      */
     public static Fingerprint fromClientHello(byte[] client_hello, String token) throws Exception {
@@ -87,9 +93,10 @@ public class Fingerprint {
 
     /**
      * Use a built-in TLS fingerprint.
-     * @param name Fingerprint name.
+     *
+     * @param name     Fingerprint name.
      * @param sec_full Whether to include the full sec-* header set.
-     * @param token Auth token.
+     * @param token    Auth token.
      * @return Fingerprint instance.
      */
     public static Fingerprint fromBuiltin(String name, boolean sec_full, String token) throws Exception {
@@ -102,20 +109,38 @@ public class Fingerprint {
 
     /**
      * Use a fingerprint by index.
-     * @param idx Fingerprint index.
-     * @param auth Auth token.
+     *
+     * @param idx      Fingerprint index.
+     * @param auth     Auth token.
+     * @param path     package fingerprint package dir or path
+     * @param sec_full Whether to include the full sec-* header set.
+     * @return Fingerprint instance.
+     */
+    public static Fingerprint fromIdx(int idx, String auth, String path, boolean sec_full) throws Exception {
+        PointerByReference err = new PointerByReference();
+        Pointer pointer = REQRIO.Fingerprint_from_idx(idx, auth, path, (byte) (sec_full ? 1 : 0), err);
+        util.check_err_pointer(err);
+        return new Fingerprint(pointer);
+    }
+
+    /**
+     * Use a fingerprint by index.
+     *
+     * @param idx      Fingerprint index.
+     * @param auth     Auth token.
      * @param sec_full Whether to include the full sec-* header set.
      * @return Fingerprint instance.
      */
     public static Fingerprint fromIdx(int idx, String auth, boolean sec_full) throws Exception {
         PointerByReference err = new PointerByReference();
-        Pointer pointer = REQRIO.Fingerprint_from_idx(idx, auth, (byte) (sec_full ? 1 : 0), err);
+        Pointer pointer = REQRIO.Fingerprint_from_idx(idx, auth, ".", (byte) (sec_full ? 1 : 0), err);
         util.check_err_pointer(err);
         return new Fingerprint(pointer);
     }
 
     /**
      * Add a cipher suite.
+     *
      * @param suite Cipher suite value.
      */
     public void addSuite(CipherSuite suite) {
@@ -124,6 +149,7 @@ public class Fingerprint {
 
     /**
      * Add a cipher suite.
+     *
      * @param suite Cipher suite value.
      */
     public void addSuite(int suite) {
@@ -132,6 +158,7 @@ public class Fingerprint {
 
     /**
      * Add a supported group.
+     *
      * @param group Supported group value.
      */
     public void addSupportedGroup(SupportGroup group) {
@@ -140,6 +167,7 @@ public class Fingerprint {
 
     /**
      * Add a supported group.
+     *
      * @param group Supported group value.
      */
     public void addSupportedGroup(int group) {
@@ -148,6 +176,7 @@ public class Fingerprint {
 
     /**
      * Add a signature algorithm.
+     *
      * @param algorithm Algorithm value.
      */
     public void addAlgorithm(Algorithm algorithm) {
@@ -156,6 +185,7 @@ public class Fingerprint {
 
     /**
      * Add a signature algorithm.
+     *
      * @param algorithm Algorithm value.
      */
     public void addAlgorithm(int algorithm) {
@@ -164,6 +194,7 @@ public class Fingerprint {
 
     /**
      * Add a supported version.
+     *
      * @param version TLS version value.
      */
     public void addSupportedVersion(Version version) {
@@ -172,6 +203,7 @@ public class Fingerprint {
 
     /**
      * Add a supported version.
+     *
      * @param version TLS version value.
      */
     public void addSupportedVersion(int version) {
@@ -180,6 +212,7 @@ public class Fingerprint {
 
     /**
      * Add a key share group.
+     *
      * @param group Group value.
      */
     public void addKeyShare(SupportGroup group) {
@@ -188,6 +221,7 @@ public class Fingerprint {
 
     /**
      * Add a key share group.
+     *
      * @param group Group value.
      */
     public void addKeyShare(int group) {
@@ -196,6 +230,7 @@ public class Fingerprint {
 
     /**
      * Add an EC point format.
+     *
      * @param format Format value.
      */
     public void addEcPointFormat(EcPointFormat format) {
@@ -204,6 +239,7 @@ public class Fingerprint {
 
     /**
      * Add an EC point format.
+     *
      * @param format Format value.
      */
     public void addEcPointFormat(int format) {
@@ -212,6 +248,7 @@ public class Fingerprint {
 
     /**
      * Add a compression method.
+     *
      * @param method Compression value.
      */
     public void addCompressionCertificate(CompressionMethod method) {
@@ -220,6 +257,7 @@ public class Fingerprint {
 
     /**
      * Add a compression method.
+     *
      * @param method Compression value.
      */
     public void addCompressionCertificate(int method) {
@@ -228,6 +266,7 @@ public class Fingerprint {
 
     /**
      * Add an ALPN value.
+     *
      * @param alpn ALPN value.
      */
     public void addApplicationLayerProtocolNegotiation(ALPN alpn) {
@@ -236,6 +275,7 @@ public class Fingerprint {
 
     /**
      * Add an ALPN value.
+     *
      * @param alpn ALPN value.
      */
     public void addApplicationLayerProtocolNegotiation(String alpn) {
@@ -244,6 +284,7 @@ public class Fingerprint {
 
     /**
      * Add an application setting value.
+     *
      * @param alpn ALPN value.
      */
     public void addApplicationSetting(ALPN alpn) {
@@ -252,6 +293,7 @@ public class Fingerprint {
 
     /**
      * Add an application setting value.
+     *
      * @param alpn ALPN value.
      */
     public void addApplicationSetting(String alpn) {
@@ -260,6 +302,7 @@ public class Fingerprint {
 
     /**
      * Add an old application setting value.
+     *
      * @param alpn ALPN value.
      */
     public void addApplicationSettingOld(ALPN alpn) {
@@ -268,6 +311,7 @@ public class Fingerprint {
 
     /**
      * Add an old application setting value.
+     *
      * @param alpn ALPN value.
      */
     public void addApplicationSettingOld(String alpn) {
@@ -276,6 +320,7 @@ public class Fingerprint {
 
     /**
      * Add a PSK mode.
+     *
      * @param mode PSK mode value.
      */
     public void addPskMode(PskMode mode) {
@@ -284,6 +329,7 @@ public class Fingerprint {
 
     /**
      * Add a PSK mode.
+     *
      * @param mode PSK mode value.
      */
     public void addPskMode(int mode) {
@@ -292,6 +338,7 @@ public class Fingerprint {
 
     /**
      * Add padding bytes.
+     *
      * @param size Padding length.
      */
     public void addPadding(int size) {
@@ -300,6 +347,7 @@ public class Fingerprint {
 
     /**
      * Add a raw extension.
+     *
      * @param typ Extension type.
      */
     public void addExtension(ExtensionType typ) {
@@ -308,6 +356,7 @@ public class Fingerprint {
 
     /**
      * Add a raw extension.
+     *
      * @param typ Extension type.
      */
     public void addExtension(int typ) {
@@ -316,7 +365,8 @@ public class Fingerprint {
 
     /**
      * Add raw extension bytes.
-     * @param typ Extension type.
+     *
+     * @param typ  Extension type.
      * @param data Raw byte array.
      */
     public void addExtension(ExtensionType typ, byte[] data) {
@@ -325,7 +375,8 @@ public class Fingerprint {
 
     /**
      * Add raw extension bytes.
-     * @param typ Extension type.
+     *
+     * @param typ  Extension type.
      * @param data Raw byte array.
      */
     public void addExtension(int typ, byte[] data) {
@@ -334,7 +385,8 @@ public class Fingerprint {
 
     /**
      * Add an HTTP/2 setting.
-     * @param typ Setting type.
+     *
+     * @param typ   Setting type.
      * @param value Setting value.
      */
     public void addH2Setting(H2SettingType typ, int value) {
@@ -343,7 +395,8 @@ public class Fingerprint {
 
     /**
      * Add an HTTP/2 setting.
-     * @param typ Setting type.
+     *
+     * @param typ   Setting type.
      * @param value Setting value.
      */
     public void addH2Setting(int typ, int value) {
@@ -352,7 +405,8 @@ public class Fingerprint {
 
     /**
      * Add an HTTP/2 frame.
-     * @param typ Frame type.
+     *
+     * @param typ  Frame type.
      * @param data Raw frame bytes.
      */
     public void addH2Frame(H2FrameType typ, byte[] data) {
@@ -361,7 +415,8 @@ public class Fingerprint {
 
     /**
      * Add an HTTP/2 frame.
-     * @param typ Frame type.
+     *
+     * @param typ  Frame type.
      * @param data Raw frame bytes.
      */
     public void addH2Frame(int typ, byte[] data) {
@@ -377,6 +432,7 @@ public class Fingerprint {
 
     /**
      * Set the HTTP/2 window size.
+     *
      * @param size Window size.
      */
     public void setH2WindowSize(int size) {
@@ -385,8 +441,9 @@ public class Fingerprint {
 
     /**
      * Set the HTTP/2 priority weight.
+     *
      * @param priority Whether to set priority.
-     * @param weight Priority weight.
+     * @param weight   Priority weight.
      */
     public void setH2Priority(boolean priority, int weight) {
         REQRIO.Fingerprint_set_h2_priority(this.raw, (byte) (priority ? 1 : 0), weight);
@@ -401,7 +458,8 @@ public class Fingerprint {
 
     /**
      * Add an HTTP/3 setting.
-     * @param typ Setting type.
+     *
+     * @param typ   Setting type.
      * @param value Setting value.
      */
     public void addH3Setting(H3SettingType typ, int value) {
@@ -410,7 +468,8 @@ public class Fingerprint {
 
     /**
      * Add an HTTP/3 setting.
-     * @param typ Setting type.
+     *
+     * @param typ   Setting type.
      * @param value Setting value.
      */
     public void addH3Setting(int typ, int value) {
@@ -419,7 +478,8 @@ public class Fingerprint {
 
     /**
      * Add an HTTP/3 frame.
-     * @param typ Frame type.
+     *
+     * @param typ  Frame type.
      * @param data Raw frame bytes.
      */
     public void addH3Frame(H3FrameType typ, byte[] data) {
@@ -428,7 +488,8 @@ public class Fingerprint {
 
     /**
      * Add an HTTP/3 frame.
-     * @param typ Frame type.
+     *
+     * @param typ  Frame type.
      * @param data Raw frame bytes.
      */
     public void addH3Frame(int typ, byte[] data) {
@@ -437,6 +498,7 @@ public class Fingerprint {
 
     /**
      * Get the native fingerprint pointer.
+     *
      * @return Native pointer.
      */
     public Pointer getRaw() throws Exception {

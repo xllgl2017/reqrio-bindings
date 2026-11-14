@@ -22,11 +22,17 @@ Fingerprint *Fingerprint::fromBuiltin(const QString &name, const bool sec_full, 
     return new Fingerprint(raw, parent);
 }
 
-Fingerprint *Fingerprint::fromIdx(const size_t idx, const bool sec_full, const QString &auth, QObject *parent) {
+
+Fingerprint *Fingerprint::fromIdx(const size_t idx, const QString &auth, const QString &path, const bool sec_full,
+                                  QObject *parent) {
     char *err = nullptr;
-    const auto raw = Fingerprint_from_idx(idx, auth.toUtf8(), sec_full, &err);
+    const auto raw = Fingerprint_from_idx(idx, auth.toUtf8(), path.toUtf8(), sec_full, &err);
     util::check_err(err);
     return new Fingerprint(raw, parent);
+}
+
+Fingerprint *Fingerprint::fromIdx(const size_t idx, const QString &auth, const bool sec_full, QObject *parent) {
+    return fromIdx(idx, auth, ".", sec_full, parent);
 }
 
 

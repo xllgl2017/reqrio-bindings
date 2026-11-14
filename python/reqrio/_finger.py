@@ -14,7 +14,7 @@ DLL.Fingerprint_new.restype = c_void_p
 DLL.Fingerprint_from_builtin.argtypes = [c_char_p, c_bool, c_char_p, POINTER(c_char_p)]
 DLL.Fingerprint_from_builtin.restype = c_void_p
 
-DLL.Fingerprint_from_idx.argtypes = [c_size_t, c_char_p, c_bool, POINTER(c_char_p)]
+DLL.Fingerprint_from_idx.argtypes = [c_size_t, c_char_p, c_char_p, c_bool, POINTER(c_char_p)]
 DLL.Fingerprint_from_idx.restype = c_void_p
 
 DLL.Fingerprint_add_cipher_suite.argtypes = [c_void_p, c_uint16]
@@ -139,16 +139,17 @@ class Fingerprint:
         return Fingerprint(ptr)
 
     @staticmethod
-    def from_idx(idx: int, auth: str, sec_full=False):
+    def from_idx(idx: int, auth: str, path=".", sec_full=False):
         """Load a fingerprint by index.
 
         Args:
             idx: fingerprint index.
             auth: auth token.
+            path: fingerprint package dir or path
             sec_full: whether to include full sec headers.
         """
         err = c_char_p()
-        ptr = DLL.Fingerprint_from_idx(idx, auth.encode('utf-8'), sec_full, byref(err))
+        ptr = DLL.Fingerprint_from_idx(idx, auth.encode('utf-8'), path.encode("utf-8"), sec_full, byref(err))
         err, msg = util.check_char_err(err)
         if err: raise Exception(msg)
         return Fingerprint(ptr)
