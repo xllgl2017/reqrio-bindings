@@ -4,10 +4,6 @@
 name = "reqrio-bindings"
 version = "0.4.2"
 edition = "2024"
-#readme = "README.md"
-#description = "A lightweight, high-performance, fingerprint-based HTTP request library."
-#license-file = "../LICENSE-APACHE"
-#repository = "https://github.com/xllgl2017/reqrio/tree/main/reqrio"
 
 [lib]
 name = "reqrio"
@@ -15,8 +11,8 @@ crate-type = ['cdylib']
 
 
 [dependencies]
-#reqrio = { git = "https://github.com/xllgl2017/reqrio.git", branch = "main", features = ["quic", "serde"] }
-reqrio = { path = "../reqrio", features = ["quic", "serde"] }
+reqrio = { git = "https://github.com/xllgl2017/reqrio.git", branch = "main", features = ["quic", "serde"] }
+#reqrio = { path = "../reqrio", features = ["quic", "serde"] }
 
 
 [features]

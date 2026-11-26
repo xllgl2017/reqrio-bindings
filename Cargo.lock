@@ -75,6 +75,7 @@ dependencies = [
 [[package]]
 name = "reqrio"
 version = "0.4.2"
+source = "git+https://github.com/xllgl2017/reqrio.git?branch=main#1caaa9e78de51f1a603c6a4460c3559848ae8517"
 dependencies = [
  "reqrio-json",
  "reqtls",
@@ -91,6 +92,7 @@ dependencies = [
 [[package]]
 name = "reqrio-json"
 version = "0.1.13"
+source = "git+https://github.com/xllgl2017/reqrio.git?branch=main#1caaa9e78de51f1a603c6a4460c3559848ae8517"
 dependencies = [
  "serde",
  "serde_json",
@@ -99,6 +101,7 @@ dependencies = [
 [[package]]
 name = "reqtls"
 version = "0.4.2"
+source = "git+https://github.com/xllgl2017/reqrio.git?branch=main#1caaa9e78de51f1a603c6a4460c3559848ae8517"
 dependencies = [
  "bytemuck",
  "hex",
